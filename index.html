@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="tg">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ҳисобкунаки чоряк</title>
+    <link rel="stylesheet" href="files/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="header">
+        <div>
+          <h1>Design by Abdughafur Projects</h1>
+          <div class="subtitle">
+            - Баллҳоро дохил кунед система суммаи баллҳоро ба шумораи ададҳо
+            тақсим намуда чорякро ҳисоб мекунад!<br />
+            - Система санҷида шудааст ва ягон хатогӣ надорад!
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="panel">
+          <div class="blocks-card">
+            <div class="blocks-title">
+              Баллҳои дохилшуда:
+              <span
+                id="count"
+                style="color: rgba(255, 255, 255, 0.72); font-size: 12px"
+                >0 / 10</span
+              >
+            </div>
+            <div id="blocks"></div>
+            <div class="actions">
+              <button class="pill" id="clearBtn">Пок кардан</button>
+            </div>
+          </div>
+
+          <div class="nums-card">
+            <div class="btnRows">
+              <div class="btnRow" id="row1"></div>
+              <div class="btnRow" id="row2"></div>
+              <div class="btnRow" id="row3"></div>
+              <div class="btnRow last" id="row4"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="result">
+          <div class="left">
+            <div class="label">Натиҷа</div>
+            <div class="value" id="result">0.00</div>
+          </div>
+          <div class="meta" id="meta">
+            Суммаи баллҳо: 0<br />
+            Шумораи баллҳо: 0
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const blocksContainer = document.getElementById("blocks");
+      const resultEl = document.getElementById("result");
+      const metaEl = document.getElementById("meta");
+      const countEl = document.getElementById("count");
+      const clearBtn = document.getElementById("clearBtn");
+
+      const row1 = document.getElementById("row1");
+      const row2 = document.getElementById("row2");
+      const row3 = document.getElementById("row3");
+      const row4 = document.getElementById("row4");
+
+      const MAX_BLOCKS = 10;
+
+      let items = [];
+      let nextId = 1;
+
+      function makeNumButton(value) {
+        const btn = document.createElement("button");
+        btn.className = "num";
+        btn.type = "button";
+        btn.textContent = value;
+        btn.addEventListener("click", () => addNumber(value));
+        return btn;
+      }
+
+      [1, 2, 3].forEach((n) => row1.appendChild(makeNumButton(n)));
+      [4, 5, 6].forEach((n) => row2.appendChild(makeNumButton(n)));
+      [7, 8, 9].forEach((n) => row3.appendChild(makeNumButton(n)));
+      [10].forEach((n) => row4.appendChild(makeNumButton(n)));
+
+      function addNumber(value) {
+        if (items.length >= MAX_BLOCKS) return;
+
+        const id = nextId++;
+        items.push({ id, value });
+
+        const block = document.createElement("div");
+        block.className = "block";
+        block.textContent = value;
+        block.dataset.id = String(id);
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.textContent = "×";
+        removeBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          removeById(id);
+        });
+
+        block.appendChild(removeBtn);
+        blocksContainer.appendChild(block);
+        calculateResult();
+      }
+
+      function removeById(id) {
+        const idx = items.findIndex((it) => it.id === id);
+        if (idx === -1) return;
+        items.splice(idx, 1);
+
+        const el = blocksContainer.querySelector(`.block[data-id="${id}"]`);
+        if (el) el.remove();
+
+        calculateResult();
+      }
+
+      function clearAll() {
+        items = [];
+        blocksContainer.innerHTML = "";
+        calculateResult();
+      }
+
+      function calculateResult() {
+        const count = items.length;
+        countEl.textContent = `${count} / ${MAX_BLOCKS}`;
+
+        if (count === 0) {
+          resultEl.textContent = "0.00";
+          metaEl.innerHTML = `Суммаи баллҳо: 0<br>Шумораи баллҳо: 0`;
+          return;
+        }
+
+        const sum = items.reduce((acc, it) => acc + it.value, 0);
+        const avg = sum / count;
+
+        resultEl.textContent = avg.toFixed(2);
+        metaEl.innerHTML = `Суммаи баллҳо: ${sum}<br>Шумораи баллҳо: ${count}`;
+      }
+
+      clearBtn.addEventListener("click", clearAll);
+      calculateResult();
+    </script>
+  </body>
+</html>
