@@ -8,7 +8,7 @@ const notifBtn = document.getElementById("notifBtn");
 const notifClose = document.getElementById("notifClose");
 const calculatorCard = document.getElementById("calculatorCard");
 
-const MAX = 20;
+const MAX = 35;
 let items = [];
 let nextId = 0;
 
