@@ -135,7 +135,7 @@ const app = {
     }
 
     document.getElementById("avgDetail").textContent = this.grades.length
-      ? `Дарсҳо: ${avgReg.toFixed(2)} | анҷишӣ: ${avgEx.toFixed(2)}`
+      ? `Дарсҳо: ${avgReg.toFixed(2)} | Корҳои санҷишӣ: ${avgEx.toFixed(2)}`
       : "Баллҳоро ворид кунед";
     this.drawChart(dist);
     this.runAI(final, avgReg, avgEx, cReg, cEx);
