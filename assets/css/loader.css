@@ -1,0 +1,15 @@
+.ios-loader {
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--glass-border);
+  border-top: 3px solid var(--primary);
+  border-radius: 50%;
+  animation: iosSpin 0.9s linear infinite;
+  margin-left: 12px;
+  opacity: 1;
+}
+@keyframes iosSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
