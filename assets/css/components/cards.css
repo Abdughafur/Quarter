@@ -1,0 +1,134 @@
+/* cards.css */
+.card,
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  margin-bottom: 12px;
+}
+
+.card {
+  padding: 14px;
+}
+
+.hero {
+  padding: 18px;
+}
+
+.card::before,
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.4), transparent 38%),
+    radial-gradient(circle at 80% 0%, rgba(147, 51, 234, 0.12), transparent 34%);
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.mini-stat {
+  min-height: 58px;
+  border-radius: 18px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid var(--soft);
+  text-align: center;
+}
+
+.mini-stat span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mini-stat strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 1.04rem;
+  font-weight: 1000;
+}
+
+.app-info {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.big-app-icon {
+  width: 84px;
+  height: 84px;
+  border-radius: 26px;
+  font-size: 2.25rem;
+  flex: 0 0 auto;
+}
+
+.about {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.about strong {
+  color: var(--text);
+  font-weight: 950;
+}
+
+.info-box {
+  border-radius: 17px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--soft);
+}
+
+.info-box b {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.info-box span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.dev {
+  display: grid;
+  gap: 14px;
+  text-align: center;
+}
+
+.dev-avatar {
+  width: 128px;
+  height: 128px;
+  margin: 0 auto;
+  border-radius: 50%;
+  overflow: hidden;
+  font-size: 3rem;
+  border: 4px solid rgba(147, 51, 234, 0.56);
+}
+
+.dev-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}

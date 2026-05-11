@@ -1,0 +1,3 @@
+/* radius.css */
+.radius-app { border-radius: var(--radius) !important; }
+.radius-pill { border-radius: 999px !important; }

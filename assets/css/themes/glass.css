@@ -1,0 +1,7 @@
+/* glass.css */
+[data-theme="glass"] {
+  color-scheme: light;
+  --card: rgba(255, 255, 255, 0.58);
+  --card2: rgba(255, 255, 255, 0.82);
+  --border: rgba(255, 255, 255, 0.7);
+}

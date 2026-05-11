@@ -1,0 +1,22 @@
+/* inputs.css */
+.input-field {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--soft);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--text);
+  padding: 0 12px;
+  outline: none;
+  font-size: 0.92rem;
+  font-weight: 850;
+}
+
+.input-field::placeholder {
+  color: var(--muted);
+}
+
+.input-field:focus {
+  border-color: rgba(79, 70, 229, 0.45);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+}

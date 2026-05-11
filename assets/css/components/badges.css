@@ -1,0 +1,51 @@
+/* badges.css */
+.pill {
+  min-width: 42px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  background: rgba(79, 70, 229, 0.11);
+  border: 1px solid rgba(79, 70, 229, 0.13);
+  font-size: 0.86rem;
+  font-weight: 1000;
+  white-space: nowrap;
+}
+
+.loader-logo,
+.app-icon,
+.big-app-icon,
+.dev-avatar {
+  display: grid;
+  place-items: center;
+  color: white;
+  font-weight: 1000;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.34), transparent 45%),
+    linear-gradient(135deg, var(--primary), var(--accent));
+  box-shadow:
+    0 16px 34px rgba(79, 70, 229, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 1000;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  box-shadow: 0 12px 28px rgba(79, 70, 229, 0.28);
+}
+
+.ai-badge::before {
+  content: "✦";
+}

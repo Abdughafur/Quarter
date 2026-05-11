@@ -1,0 +1,8 @@
+/* ai.css */
+.msg {
+  margin-top: 14px;
+  color: var(--text);
+  font-size: 0.97rem;
+  line-height: 1.62;
+  font-weight: 850;
+}

@@ -1,0 +1,39 @@
+/* settings.css */
+.settings-title {
+  margin: 0 0 12px;
+  font-size: 1.18rem;
+  font-weight: 1000;
+  letter-spacing: -0.4px;
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--soft);
+  cursor: pointer;
+}
+
+.setting-row:last-child {
+  border-bottom: 0;
+}
+
+.setting-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.setting-text strong {
+  font-size: 0.96rem;
+  font-weight: 950;
+}
+
+.setting-text span {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 800;
+}
