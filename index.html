@@ -9,15 +9,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Чоряк" />
   <title>Чоряк</title>
-  <link rel="icon"
-    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop stop-color='%234f46e5'/%3E%3Cstop offset='1' stop-color='%239333ea'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='128' height='128' rx='32' fill='url(%23g)'/%3E%3Ctext x='64' y='80' text-anchor='middle' font-size='62' font-family='Arial,sans-serif' font-weight='900' fill='white'%3EЧ%3C/text%3E%3C/svg%3E" />
-  <link rel="apple-touch-icon"
-    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop stop-color='%234f46e5'/%3E%3Cstop offset='1' stop-color='%239333ea'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='180' height='180' rx='42' fill='url(%23g)'/%3E%3Ctext x='90' y='114' text-anchor='middle' font-size='86' font-family='Arial,sans-serif' font-weight='900' fill='white'%3EЧ%3C/text%3E%3C/svg%3E" />
+  <link rel="icon" href="assets/images/app-icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/images/app-icon.svg" />
+  <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="assets/css/main.css">
 
 </head>
 
-<body data-theme="light" data-performance="off" data-simple="off">
+<body data-theme="light" data-performance="on" data-simple="off">
   <div id="loader" class="loader">
     <div class="loader-logo">Ч</div>
   </div>
@@ -26,13 +25,17 @@
 
   <header>
     <div class="brand">
-      <div class="app-icon">Ч</div>
+      <div class="app-icon" id="headerIcon">
+        <img id="headerPhoto" src="" alt=""
+          style="display:none; width:100%; height:100%; object-fit:cover; object-position:center; border-radius:inherit;" />
+        <span id="headerFallback">Ч</span>
+      </div>
       <div>
-        <div class="eyebrow">Prime Edition</div>
-        <div class="logo">Чоряк</div>
+        <div class="eyebrow" id="headerEyebrow">Чоряк</div>
+        <div class="logo" id="headerTitle">Чоряк</div>
       </div>
     </div>
-    <div class="version">4.0</div>
+    <div class="version">v4.1</div>
   </header>
 
   <main class="container">
@@ -55,8 +58,8 @@
           <div id="avgDetail" class="detail">Баллҳоро ворид кунед</div>
         </div>
         <div class="mini two">
-          <div class="mini-stat"><span>Дарсӣ</span><strong id="regularAvgUI">0.00</strong></div>
-          <div class="mini-stat"><span>Корҳои санҷишӣ</span><strong id="examAvgUI">0.00</strong></div>
+          <div class="mini-stat"><span>Натиҷаи баллҳои дарсӣ</span><strong id="regularAvgUI">0.00</strong></div>
+          <div class="mini-stat"><span>Натиҷаи корҳои санҷишӣ</span><strong id="examAvgUI">0.00</strong></div>
         </div>
         <div class="actions"><button class="btn export-action" type="button"
             data-action="downloadResult">Экспорт</button></div>
@@ -68,9 +71,38 @@
       </div>
     </section>
 
+
+    <section id="tab-profile" class="tab">
+      <div class="card">
+        <h3 class="settings-title">Профил</h3>
+        <div class="profile-card" style="display:grid;gap:16px;">
+          <div class="profile-avatar-preview" style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+            <div id="profileAvatarView"
+              style="width:80px;height:80px;border-radius:24px;background:#f3f4f6;display:grid;place-items:center;overflow:hidden;font-size:32px;font-weight:900;color:#4f46e5;">
+              <img id="profileAvatarPreview" src="" alt=""
+                style="display:none;width:100%;height:100%;object-fit:cover;object-position:center;" />
+              <span id="profileAvatarPreviewFallback">Ч</span>
+            </div>
+            <label class="btn secondary"
+              style="padding:10px 16px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
+              Иваз кардан
+              <input id="profileAvatarInput" type="file" accept="image/*" style="display:none" />
+            </label>
+          </div>
+          <input id="profileNameInput" class="input-field" type="text" placeholder="Номи шумо" autocomplete="off"
+            inputmode="text" />
+          <input id="profileSurnameInput" class="input-field" type="text" placeholder="Насаби шумо" autocomplete="off"
+            inputmode="text" />
+          <input id="profileSchoolInput" class="input-field" type="text" placeholder="Рақами мактаб"
+            autocomplete="off" />
+          <button class="btn" type="button" data-action="saveProfile">Сабт кардан</button>
+        </div>
+      </div>
+    </section>
+
     <section id="tab-prosent" class="tab">
       <div class="card">
-        <h3 class="settings-title">Маҷмӯаи баллҳо</h3>
+        <h3 class="settings-title">Фоизҳо</h3>
         <div class="input-row" style="grid-template-columns:1fr">
           <input id="pupilCountInput" class="input-field" type="number" inputmode="numeric" min="0" max="100"
             placeholder="Шумораи умумии хонандагон, максимум 100" />
@@ -82,6 +114,9 @@
           <div class="mini-stat"><span>4–10</span><strong id="range4to10UI">0%</strong></div>
         </div>
       </div>
+      <button class="btn clear-percent-btn" type="button" data-action="clearAllPercentages">
+        Тоза кардани фоизҳо
+      </button>
     </section>
 
     <section id="tab-ai" class="tab">
@@ -94,83 +129,171 @@
     </section>
 
     <section id="tab-more" class="tab">
-      <div class="card">
-        <h3 class="settings-title">Дар бораи барнома</h3>
-        <div class="app-info">
-          <div class="big-app-icon">Ч</div>
-          <div class="about">
-            <p><strong>Чоряк</strong></p>
-            <p><strong>Version:</strong> 4.0</p>
-            <p><strong>Developer:</strong> Abdughafur</p>
+
+      <div id="more-menu-view" class="more-subview active">
+        <div class="card">
+          <h3 class="settings-title">Дар бораи барнома</h3>
+          <div class="app-info">
+            <div class="big-app-icon"
+              style="background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; display: grid; place-items: center; font-weight: 900; box-shadow: 0 8px 24px rgba(79, 70, 229, 0.25);">
+              Ч</div>
+            <div class="about">
+              <p><strong>Чоряк</strong></p>
+              <p><strong>Версия:</strong> 4.1 Prime Edition</p>
+              <p><strong>Таҳиягар:</strong> Abdughafur (Абдуғафур)</p>
+            </div>
+          </div>
+          <div class="more-actions-row">
+            <button class="btn" data-action="showDeveloper" type="button">Таҳиягар</button>
+            <button class="btn" data-action="showSettings" type="button">Танзимот</button>
           </div>
         </div>
-        <div class="info-grid">
-          <div class="info-box"><b>Мақсад</b><span>Роҳи осону дақиқ барои ҳисоб кардани чорякҳо дар мактабҳои миёна ва
-              нишон
-              додани маҳорати барномасозӣ. </span></div>
-          <div class="info-box"><b>MinAI</b><span>Зеҳни сунъӣ барои пешбинӣ, таҳлил ва огоҳ кардани сатҳи дониши
-              хонандагон мебошад. Эзоҳ: Агар
-              MinAI ягон хато ҳангоми таҳлил дошта бошад ё идея барои беҳтар кардани MinAI доред метавонед бо созандаи
-              барнома тамос
-              гиред!</span>
-          </div>
-          <div class="info-box"><b>Беҳтарин Performance</b><span>Барнома аниматсия ва блур дизайн дорад, агар браузери
-              дастгоҳи шумо ба ин хотир суст кор кунад ин ҳолатро фаъол кунед, чунки ин ҳолат аниматсия ва блурро гум
-              мекунад
-              ва боис мешавад ки барнома хуб кор кунад</span>
-          </div>
-          <div class="info-box"><b>Ҳолати оддӣ</b><span>Агар ба шумо танҳо чоряк ҳисоб кардан зарур бошад ва ба
-              навигариҳои барнома эҳтиёҷ надошта бошед метавонед ба ҳолати оддӣ гузаред. </span></div>
+        <button class="btn share-btn" data-action="shareApp" type="button">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"
+            style="margin-right: 8px; vertical-align: middle;">
+            <path
+              d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z" />
+          </svg>
+          Мубодилаи барнома (Share)
+        </button>
+        <a class="btn download-android-btn" href="download.html" rel="noopener">
 
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#fff">
+            <path d="m12 16 4-5h-3V4h-2v7H8z" />
+            <path d="M20 18H4v-7H2v7c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2v-7h-2v7z" />
+          </svg>
+          Зеркашии нусхаи Android
+        </a>
+        <button class="btn install-pwa-btn" type="button" id="installPwaBtn" data-action="installPwa">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="false">
+            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+          </svg>
+          Насб кардани PWA
+        </button>
+      </div>
+
+      <div id="more-developer-view" class="more-subview">
+        <div class="card">
+          <div class="back-nav">
+            <button class="btn-back" data-action="hideSubviews" type="button">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+              </svg>
+              Бозгашт
+            </button>
+          </div>
+
+          <div class="dev-profile-header">
+            <div class="dev-avatar-large">
+              <span>A</span>
+              <img src="assets/images/abdughafur.png" alt="Abdughafur"
+                onload="this.style.display='block'; this.previousElementSibling.style.display='none'" />
+            </div>
+            <h2 class="dev-name">Abdughafur Khujzoda</h2>
+            <p class="dev-title">Creator & Software Developer</p>
+          </div>
+
+          <div class="dev-bio">
+            Барномаи <b>Чоряк</b> ба мақсади осон ҳисоб кардани чорякҳо дар мактабҳои миёна мебошад. Барнома
+            махсусан барои омӯзгорон таҳия шудааст ва интерфейси муосиру содда барои истифодабарӣ дорад. Агар дар
+            системаи ҳисобкунӣ ё барнома хатогӣ ба чашм расад ва ҳамчунин агар тарзи ҳисоб
+            кардани баллҳо дар мактабҳои миёна тағйир ёбад бо ман тамос гиред.
+          </div>
+
+          <div class="contact-section">
+            <h4 class="contact-title">Тамос ва алоқа</h4>
+            <div class="contact-grid">
+              <a class="contact-btn" href="mailto:abdughafur.2010.khujzoda@gmail.com">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"
+                  style="margin-right: 5px; vertical-align: middle;">
+                  <path
+                    d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                </svg>
+                Email
+              </a>
+              <a class="contact-btn" href="tel:+992928024414">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"
+                  style="margin-right: 5px; vertical-align: middle;">
+                  <path
+                    d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                </svg>
+                Тамос
+              </a>
+              <a class="contact-btn" href="https://github.com/Abdughafur" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"
+                  style="margin-right: 5px; vertical-align: middle;">
+                  <path
+                    d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z" />
+                </svg>
+                GitHub
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 
-      </div>
-
-      <div class="card">
-        <h3 class="settings-title">Performance</h3>
-        <label class="setting-row"><span class="setting-text"><strong>Беҳтарин Performance</strong><span>Агар барнома
-              суст кор кунад ин қисматро фаъол кунед!</span></span><input type="checkbox" id="performanceToggle"
-            data-action="togglePerformance" /></label>
-        <label class="setting-row"><span class="setting-text"><strong>Ҳолати оддӣ</strong><span></span></span><input
-            type="checkbox" id="simpleToggle" data-action="toggleSimple" /></label>
-      </div>
-
-      <div class="card">
-        <h3 class="settings-title">Танзимот</h3>
-        <label class="setting-row"><span class="setting-text"><strong>Ҳолати торик</strong><span>Ҳолати
-              шабона</span></span><input type="checkbox" id="themeToggle" data-action="toggleTheme" /></label>
-        <label class="setting-row"><span class="setting-text"><strong>Садои тугмаҳо</strong><span>Садо ҳангоми пахшкунии
-              тугмаҳо</span></span><input type="checkbox" id="soundToggle" data-action="toggleSound" /></label>
-        <label class="setting-row"><span class="setting-text"><strong>Экрани
-              пурра</strong><span>Fullscreen</span></span><input type="checkbox" id="fsToggle"
-            data-action="toggleFS" /></label>
-      </div>
-
-      <div class="card">
-        <h3 class="settings-title">Созанда</h3>
-        <div class="dev">
-          <div class="dev-avatar" id="devAvatar"><span>A</span><img src="assets/images/abdughafur.png" alt="Abdughafur"
-              onload="this.style.display='block'; this.previousElementSibling.style.display='none'" /></div>
-          <div class="about">
-            <p><strong>Abdughafur</strong></p>
-            <p>Созандаи барномаи Чоряк.</p>
+      <div id="more-settings-view" class="more-subview">
+        <div class="card">
+          <div class="back-nav" style="margin-bottom: 12px;">
+            <button class="btn-back" data-action="hideSubviews" type="button">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+              </svg>
+              Бозгашт
+            </button>
           </div>
-          <div class="contact-grid"><a class="contact-btn" href="mailto:abdughafur.2010.khujzoda@gmail.com">Email</a><a
-              class="contact-btn" href="tel:+992928024414">Тамос</a><a class="contact-btn"
-              href="https://github.com/Abdughafur" target="_blank" rel="noopener">GitHub</a></div>
-        </div>
-      </div>
 
-      <div class="card">
-        <h3 class="settings-title">Keyboard shortcuts</h3>
-        <div class="mini" style="grid-template-columns:repeat(2,1fr)">
-          <div class="mini-stat"><span>1–9 / 0</span><strong>Балл</strong></div>
-          <div class="mini-stat"><span>Backspace</span><strong>←</strong></div>
-          <div class="mini-stat"><span>C</span><strong>Тоза кардан</strong></div>
-          <div class="mini-stat"><span>E</span><strong>Иваз кардани навъи балл</strong></div>
-          <div class="mini-stat"><span>H / S</span><strong>Гузаштан ба табҳои Асосӣ ва Бештар</strong></div>
-          <div class="mini-stat"><span>P / M</span><strong>Гузаштан ба табҳои Фоиз ва MinAI</strong></div>
+          <h3 class="settings-title" style="margin-top: 0;">Performance</h3>
+          <label class="setting-row">
+            <span class="setting-text">
+              <strong>Беҳтарин Performance</strong>
+              <span>Агар барнома суст кор кунад ин қисматро фаъол кунед!</span>
+            </span>
+            <input type="checkbox" id="performanceToggle" data-action="togglePerformance" />
+          </label>
+          <label class="setting-row">
+            <span class="setting-text">
+              <strong>Ҳолати оддӣ</strong>
+              <span>Танҳо имкониятҳои асосӣ</span>
+            </span>
+            <input type="checkbox" id="simpleToggle" data-action="toggleSimple" />
+          </label>
+        </div>
+
+        <div class="card">
+          <h3 class="settings-title">Танзимот</h3>
+          <label class="setting-row">
+            <span class="setting-text">
+              <strong>Ҳолати торик</strong>
+            </span>
+            <input type="checkbox" id="themeToggle" data-action="toggleTheme" />
+          </label>
+          <label class="setting-row">
+            <span class="setting-text">
+              <strong>Садои тугмаҳо</strong>
+              <span>Садо ҳангоми пахшкунии тугмаҳо</span>
+            </span>
+            <input type="checkbox" id="soundToggle" data-action="toggleSound" />
+          </label>
+          <label class="setting-row">
+            <span class="setting-text">
+              <strong>Экрани пурра</strong>
+              <span>Fullscreen</span>
+            </span>
+            <input type="checkbox" id="fsToggle" data-action="toggleFS" />
+        </div>
+
+        <div class="card">
+          <h3 class="settings-title">Keyboard shortcuts</h3>
+          <div class="mini" style="grid-template-columns:repeat(2,1fr)">
+            <div class="mini-stat"><span>1–9 / 0</span><strong>Балл</strong></div>
+            <div class="mini-stat"><span>Backspace</span><strong>←</strong></div>
+            <div class="mini-stat"><span>C</span><strong>Тоза кардан</strong></div>
+            <div class="mini-stat"><span>E</span><strong>Иваз кардани навъи балл</strong></div>
+            <div class="mini-stat"><span>H / S</span><strong>Гузаштан ба табҳои Асосӣ ва Бештар</strong></div>
+            <div class="mini-stat"><span>P / M</span><strong>Гузаштан ба табҳои Фоиз ва MinAI</strong></div>
+            <div class="mini-stat"><span>I</span><strong>Гузаштан ба таби Профил</strong></div>
+          </div>
         </div>
       </div>
     </section>
@@ -183,18 +306,26 @@
       <div class="input-row" style="grid-template-columns:1fr; margin-top:14px">
         <input id="modalPupilInput" class="input-field" placeholder="Номи хонанда" autocomplete="off" />
         <input id="modalSubjectInput" class="input-field" placeholder="Номи фан" autocomplete="off" />
+        <input id="modalGradeInput" class="input-field" type="number" inputmode="numeric" min="1" max="11" step="1"
+          placeholder="Синф (1–11)" autocomplete="off" />
       </div>
       <div class="modal-actions"><button class="btn secondary" type="button"
-          data-action="closeModal">Лағв</button><button class="btn" type="button"
+          data-action="closeModal">Лағв</button><button id="modalSaveButton" class="btn" type="button"
           data-action="saveModalInfo">Экспорт</button></div>
     </div>
   </div>
 
+  <div class="tiny-screen-warning" aria-hidden="true">
+    <div class="tiny-screen-icon">📱</div>
+    <p>Барнома барои дастгоҳҳое таҳия шудааст, ки экрани калонтар доранд (Минимум 280px).</p>
+    <p style="font-size:0.75rem;opacity:0.7;">Minimum 280px wide screen required.</p>
+  </div>
+
   <div id="toast"></div>
+
   <nav>
     <button class="nav-btn active" data-tab="tab-home" aria-label="Асосӣ"><svg viewBox="0 0 24 24">
-        <path
-          d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 4v3h10V6H7Zm1 6a1.2 1.2 0 1 0 0 2.4A1.2 1.2 0 0 0 8 12Zm4 0a1.2 1.2 0 1 0 0 2.4A1.2 1.2 0 0 0 12 12Zm4 0a1.2 1.2 0 1 0 0 2.4A1.2 1.2 0 0 0 16 12Z" />
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
       </svg>Асосӣ</button>
     <button class="nav-btn advanced-tab" data-tab="tab-prosent" aria-label="Prosent"><svg viewBox="0 0 24 24">
         <path
@@ -202,14 +333,19 @@
       </svg>Фоиз</button>
     <button class="nav-btn advanced-tab" data-tab="tab-ai" aria-label="MinAI"><svg viewBox="0 0 24 24">
         <path
-          d="M9 2a3 3 0 0 0-3 3v.3A3.7 3.7 0 0 0 3.5 9c0 .9.3 1.7.8 2.4A4 4 0 0 0 6 19h1a3 3 0 0 0 5 2.2A3 3 0 0 0 17 19h1a4 4 0 0 0 1.7-7.6c.5-.7.8-1.5.8-2.4A3.7 3.7 0 0 0 18 5.3V5a3 3 0 0 0-5.2-2A3 3 0 0 0 9 2Zm1 5h2v3h3v2h-3v3h-2v-3H7v-2h3V7Z" />
+          d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5 5.5-2.5-5.5-2.5zm7.5 5l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 14.5z" />
       </svg>MinAI</button>
     <button class="nav-btn" data-tab="tab-more" aria-label="Бештар"><svg viewBox="0 0 24 24">
         <path
           d="M4 7h9.2a3 3 0 0 0 5.6 0H20a1 1 0 1 0 0-2h-1.2a3 3 0 0 0-5.6 0H4a1 1 0 0 0 0 2Zm0 6h1.2a3 3 0 0 0 5.6 0H20a1 1 0 1 0 0-2h-9.2a3 3 0 0 0-5.6 0H4a1 1 0 1 0 0 2Zm0 6h9.2a3 3 0 0 0 5.6 0H20a1 1 0 1 0 0-2h-1.2a3 3 0 0 0-5.6 0H4a1 1 0 1 0 0 2Z" />
       </svg>Бештар</button>
+    <button class="nav-btn" data-tab="tab-profile" aria-label="Профил"><svg viewBox="0 0 24 24">
+        <path
+          d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+      </svg>Профил</button>
   </nav>
 
+  <script type="module" src="assets/js/core/pwa.js"></script>
   <script type="module" src="assets/js/core/app.js"></script>
   <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516"
     integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg=="
@@ -225,9 +361,9 @@
 
 <!--
 
-Чоряк - v4.0 Prime Edition
+Чоряк - v4.1 Prime Edition
 Developer: Abdughafur Khujzoda
 :)
 
-The End 4.0 Version
+The End 4.1 Version
 -->
