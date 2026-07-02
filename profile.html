@@ -1,0 +1,80 @@
+﻿<!doctype html>
+<html lang="tg">
+<!-- Copyright 2026 - Abdughafur Khujzoda -->
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#4f46e5" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Чоряк" />
+    <title>Чоряк — Профил</title>
+    <link rel="icon" href="assets/images/app-icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="assets/images/app-icon.svg" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+</head>
+
+<body class="profile-page" data-theme="light" data-performance="on" data-simple="off">
+    <div class="orb one"></div>
+    <div class="orb two"></div>
+
+    <div class="profile-page-shell">
+        <div class="profile-setup-orb one"></div>
+        <div class="profile-setup-orb two"></div>
+
+        <div class="profile-setup-modal profile-page-modal">
+            <div class="profile-setup-header">
+                <div class="profile-setup-logo">Ч</div>
+                <div class="profile-setup-title">Чоряк</div>
+                <span class="profile-setup-version">v4.1</span>
+            </div>
+
+            <p class="profile-setup-welcome">Ба барнома хуш омадед! Барои идома лутфан аввал профили худро созед.</p>
+
+            <div class="profile-setup-notice profile-page-badge">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+                </svg>
+                Дохил кардани ному насаб ва рақами мактаб ҳатмист!
+            </div>
+
+            <div id="profileNotice" class="profile-notice" aria-live="polite"></div>
+
+            <div class="profile-setup-form">
+                <label class="profile-setup-avatar-label profile-page-avatar-label" for="profileAvatarInput">
+                    <div id="profileAvatarView" class="profile-setup-avatar-preview profile-page-avatar">
+                        <img id="profileAvatarPreview" src="" alt="Avatar" />
+                        <span id="profileAvatarPreviewFallback">Ч</span>
+                    </div>
+                    <div class="profile-page-avatar-copy">
+                        <span class="profile-setup-upload-text">Акси профил</span>
+                        <span class="profile-page-avatar-hint">Барои дохил кардани акс логои барномаро пахш
+                            кунед.</span>
+                    </div>
+                    <input id="profileAvatarInput" type="file" accept="image/*" />
+                </label>
+
+                <input id="profileNameInput" class="input-field profile-setup-input" type="text" placeholder="Номи шумо"
+                    autocomplete="given-name" inputmode="text" />
+                <input id="profileSurnameInput" class="input-field profile-setup-input" type="text"
+                    placeholder="Насаби шумо" autocomplete="family-name" inputmode="text" />
+                <input id="profileSchoolInput" class="input-field profile-setup-input" type="number"
+                    placeholder="Рақами мактаб" autocomplete="off" inputmode="numeric" min="0" step="1"
+                    pattern="[0-9]*" />
+
+                <p class="profile-setup-rule">Пас аз сабт кардан, шумо дохили барнома мешавед 😊.</p>
+
+                <button class="btn profile-setup-btn" type="button" id="saveProfileButton">Сабт кардан</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="assets/js/core/pwa.js"></script>
+    <script type="module" src="assets/js/core/profile.js"></script>
+</body>
+
+</html>
+
+<!-- by Abdughafur -->

@@ -1,0 +1,7 @@
+/* shadows.css */
+.shadow-app {
+  box-shadow: var(--shadow) !important;
+}
+.shadow-none {
+  box-shadow: none !important;
+}

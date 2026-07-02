@@ -1,0 +1,7 @@
+/* footer.css */
+.footer,
+footer {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+}

@@ -1,0 +1,1173 @@
+/* app.js */
+import { renderMinAI } from "../ai/minai.js";
+import { calculateStats, gradeLabel, GRADE_LABELS } from "./stats.js";
+import { loadState, saveState } from "./storage.js";
+import { promptInstallPwa } from "./pwa.js";
+import {
+  buildKeypad,
+  buildPercentRows,
+  renderGradeBlocks,
+  renderGradeChart,
+} from "../ui/chart.js";
+import { closeInfoModal, openInfoModal } from "../ui/modal.js";
+import { Toast } from "../ui/toast.js";
+import {
+  clean,
+  clamp,
+  qs,
+  roundRect,
+  setChecked,
+  setInputValue,
+  setText,
+  toInt,
+  uid,
+  whenReady,
+} from "../utils/helpers.js";
+
+export const app = {
+  grades: [],
+  pct: { total: 0, counts: {} },
+  settings: {},
+  audioCtx: null,
+  toast: new Toast(),
+  updateFrame: null,
+  shouldBump: false,
+  initialized: false,
+  profile: {
+    name: "",
+    surname: "",
+    school: "",
+    avatar: "",
+  },
+
+  init() {
+    if (this.initialized) return;
+    this.initialized = true;
+
+    const state = loadState();
+    this.grades = state.grades;
+    this.pct = state.pct;
+    this.settings = state.settings;
+
+    this.bind(state.info);
+    this.profile = state.profile || this.profile;
+    if (this.checkFirstRun()) return;
+    this.bindProfile();
+    this.updateProfileUI(this.profile);
+    this.buildKeypad();
+    this.buildPercentRows();
+    this.applySettings();
+    this.updateAll();
+
+    setTimeout(() => qs("loader")?.classList.add("hide"), 250);
+  },
+
+  bind(info = {}) {
+    setInputValue("modalPupilInput", info.pupil || "");
+    setInputValue("modalSubjectInput", info.subject || "");
+    setInputValue("modalGradeInput", info.grade || "");
+
+    ["modalPupilInput", "modalSubjectInput"].forEach((fieldId) => {
+      qs(fieldId)?.addEventListener("input", (event) =>
+        this.sanitizeTextInput(event),
+      );
+    });
+
+    qs("modalGradeInput")?.addEventListener("input", (event) => {
+      const input = event.target;
+      const value = String(input.value || "")
+        .replace(/\D/g, "")
+        .replace(/^0+(?=\d)/, "");
+
+      if (!value) {
+        input.value = "";
+        return;
+      }
+
+      if (Number(value) > 11) {
+        input.value = "";
+        return;
+      }
+
+      input.value = value;
+    });
+
+    document.addEventListener("click", (event) => {
+      const actionButton = event.target.closest("[data-action]");
+      if (actionButton) this.action(actionButton.dataset.action);
+
+      const tabButton = event.target.closest("[data-tab]");
+      if (tabButton) this.nav(tabButton.dataset.tab, tabButton);
+    });
+
+    if (this.settings.fs) {
+      document.addEventListener(
+        "pointerdown",
+        () => {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen?.().catch(() => {
+              this.settings.fs = false;
+              this.applySettings();
+            });
+          }
+        },
+        { once: true },
+      );
+    }
+
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement && this.settings.fs) {
+        this.settings.fs = false;
+        this.applySettings();
+        this.save();
+      }
+    });
+
+    qs("pupilCountInput")?.addEventListener("input", () =>
+      this.setPupilTotal(),
+    );
+    document.addEventListener("keydown", (event) => this.keyboard(event));
+  },
+
+  bindProfile() {
+    setInputValue("profileNameInput", this.profile.name || "");
+    setInputValue("profileSurnameInput", this.profile.surname || "");
+    setInputValue("profileSchoolInput", this.profile.school || "");
+
+    ["profileNameInput", "profileSurnameInput"].forEach((fieldId) => {
+      qs(fieldId)?.addEventListener("input", (event) =>
+        this.sanitizeLettersOnly(event),
+      );
+    });
+
+    qs("profileAvatarInput")?.addEventListener("change", (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        this.toast.show("Лутфан як Акс интихоб кунед.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.profile.avatar = reader.result || "";
+        this.updateProfileUI(this.profile);
+        this.save();
+      };
+      reader.readAsDataURL(file);
+    });
+  },
+
+  bindSetupOverlay() {
+    ["setupNameInput", "setupSurnameInput"].forEach((fieldId) => {
+      qs(fieldId)?.addEventListener("input", (event) =>
+        this.sanitizeLettersOnly(event),
+      );
+    });
+
+    qs("setupAvatarInput")?.addEventListener("change", (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        this.toast.show("Лутфан як Акс интихоб кунед.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = qs("setupAvatarImg");
+        const fallback = qs("setupAvatarFallback");
+        if (img) {
+          img.src = reader.result || "";
+          img.style.display = "block";
+        }
+        if (fallback) fallback.style.display = "none";
+        this._setupAvatarData = reader.result || "";
+      };
+      reader.readAsDataURL(file);
+    });
+  },
+
+  checkFirstRun() {
+    const { name, surname, school } = this.profile;
+    if (!name || !surname || !school) {
+      window.location.replace("profile.html");
+      return true;
+    }
+    return false;
+  },
+
+  sanitizeLettersOnly(event) {
+    const input = event.target;
+    if (!input) return;
+    const value = String(input.value || "")
+      .replace(/[^\p{L}\p{M}\s'\-]/gu, "")
+      .replace(/\s{2,}/g, " ")
+      .trimStart();
+    input.value = value;
+  },
+
+  sanitizeTextInput(event) {
+    const input = event.target;
+    if (!input) return;
+
+    const value = String(input.value || "")
+      .replace(/[^\p{L}\p{M}\s'-]/gu, "")
+      .replace(/\s{2,}/g, " ")
+      .trimStart();
+
+    input.value = value;
+  },
+
+  action(name) {
+    const actions = {
+      deleteLast: () => this.deleteLast(),
+      clearAll: () => this.clearAll(),
+      clearAllPercentages: () => this.clearAllPercentages(),
+      downloadResult: () => this.ensureInfo(),
+      closeModal: () => this.closeModal(),
+      saveModalInfo: () => this.saveModalInfo(),
+      toggleTheme: () => this.toggleTheme(),
+      toggleSound: () => this.toggleSound(),
+      toggleFS: () => this.toggleFS(),
+      togglePerformance: () => this.togglePerformance(),
+      toggleSimple: () => this.toggleSimple(),
+      editProfile: () => this.nav("tab-profile"),
+      saveProfile: () => this.saveProfile(),
+      goToProfile: () => this.nav("tab-profile"),
+      saveSetupProfile: () => this.saveSetupProfile(),
+      showSettings: () => this.showSubView("more-settings-view"),
+      showDeveloper: () => this.showSubView("more-developer-view"),
+      hideSubviews: () => this.showSubView("more-menu-view"),
+      shareApp: () => this.shareApp(),
+      installPwa: () => this.installPwa(),
+    };
+
+    actions[name]?.();
+  },
+
+  keyboard(event) {
+    const isInput = ["INPUT", "TEXTAREA"].includes(
+      document.activeElement?.tagName,
+    );
+    const key = event.key.toLowerCase();
+
+    if (isInput && key !== "escape") return;
+
+    if (/^[1-9]$/.test(key)) {
+      event.preventDefault();
+      this.add(Number(key));
+    } else if (key === "0") {
+      event.preventDefault();
+      this.add(10);
+    } else if (key === "backspace") {
+      event.preventDefault();
+      this.deleteLast();
+      /* English */
+    } else if (key === "c") {
+      event.preventDefault();
+      this.clearAll();
+    } else if (key === "e") {
+      event.preventDefault();
+      this.toggleLast();
+    } else if (key === "h") {
+      this.nav("tab-home");
+    } else if (key === "s") {
+      this.nav("tab-more");
+    } else if (!this.settings.simple && key === "p") {
+      this.nav("tab-prosent");
+    } else if (!this.settings.simple && key === "m") {
+      this.nav("tab-ai");
+    } else if (key === "i") {
+      this.nav("tab-profile");
+      /* Русский */
+    } else if (key === "с") {
+      event.preventDefault();
+      this.clearAll();
+    } else if (key === "у") {
+      event.preventDefault();
+      this.toggleLast();
+    } else if (key === "р") {
+      this.nav("tab-home");
+    } else if (key === "ы") {
+      this.nav("tab-more");
+    } else if (!this.settings.simple && key === "з") {
+      this.nav("tab-prosent");
+    } else if (!this.settings.simple && key === "ь") {
+      this.nav("tab-ai");
+    } else if (key === "ш") {
+      this.nav("tab-profile");
+      /* Тоҷикӣ */
+    } else if (key === "с") {
+      event.preventDefault();
+      this.clearAll();
+    } else if (key === "у") {
+      event.preventDefault();
+      this.toggleLast();
+    } else if (key === "р") {
+      this.nav("tab-home");
+    } else if (key === "ҷ") {
+      this.nav("tab-more");
+    } else if (!this.settings.simple && key === "з") {
+      this.nav("tab-prosent");
+    } else if (!this.settings.simple && key === "ӣ") {
+      this.nav("tab-ai");
+    } else if (key === "ш") {
+      this.nav("tab-profile");
+    } else if (key === "escape") {
+      this.closeModal();
+    }
+  },
+
+  buildKeypad() {
+    buildKeypad(qs("keypad"), {
+      onAdd: (value) => this.add(value),
+      onDelete: () => this.deleteLast(),
+      onClear: () => this.clearAll(),
+    });
+  },
+
+  buildPercentRows() {
+    buildPercentRows(qs("percentRows"), GRADE_LABELS, (input) =>
+      this.setGradeCount(input),
+    );
+  },
+
+  add(value) {
+    if (this.grades.length >= 100) {
+      this.toast.show("Максимум 100 балл.");
+      return;
+    }
+
+    this.grades.push({
+      val: clamp(value, 1, 10),
+      type: "regular",
+      id: uid(),
+    });
+
+    this.tone(450 + value * 30);
+    this.scheduleUpdate(true);
+  },
+
+  deleteLast() {
+    if (!this.grades.length) {
+      this.toast.show("Ҳоло ягон балл нест.");
+      return;
+    }
+
+    this.grades.pop();
+    this.scheduleUpdate(true);
+  },
+
+  clearAll() {
+    if (!this.grades.length) {
+      this.toast.show("Ҳоло ягон балл нест.");
+      return;
+    }
+
+    this.grades = [];
+    this.scheduleUpdate(true);
+    this.toast.show("Ҳама баллҳо тоза шуд.");
+  },
+
+  clearAllPercentages() {
+    this.grades = [];
+    this.pct = { total: 0, counts: {} };
+
+    const pupilInput = qs("pupilCountInput");
+    if (pupilInput) pupilInput.value = "";
+
+    for (let grade = 10; grade >= 1; grade -= 1) {
+      const input = qs(`gradeCount${grade}`);
+      if (input) input.value = "";
+    }
+
+    this.scheduleUpdate(true);
+    this.toast.show("Ҳама баллҳо ва фоизҳо тоза шуд.");
+  },
+
+  toggleLast() {
+    if (!this.grades.length) {
+      this.toast.show("Аввал балл илова кунед.");
+      return;
+    }
+
+    this.toggleGrade(this.grades[this.grades.length - 1].id);
+  },
+
+  toggleGrade(id) {
+    const grade = this.grades.find((item) => item.id === id);
+    if (!grade) return;
+
+    grade.type = grade.type === "exam" ? "regular" : "exam";
+    this.scheduleUpdate(true);
+    this.toast.show(
+      grade.type === "exam"
+        ? "Навъи балл ба балли корҳои санҷишӣ тағйир ёфт."
+        : "Навъи балл ба балли дарсӣ тағйир ёфт.",
+    );
+  },
+
+  scheduleUpdate(anim = false) {
+    this.shouldBump = this.shouldBump || anim;
+
+    if (this.updateFrame) return;
+
+    this.updateFrame = requestAnimationFrame(() => {
+      this.updateFrame = null;
+      const shouldBump = this.shouldBump;
+      this.shouldBump = false;
+      this.updateAll(shouldBump);
+    });
+  },
+
+  updateAll(anim = false) {
+    this.save();
+
+    const stats = calculateStats(this.grades);
+
+    setText("countUI", this.grades.length);
+    setText("regularAvgUI", stats.avgR.toFixed(2));
+    setText("examAvgUI", stats.avgE.toFixed(2));
+    setText("chartHint", `${stats.final.toFixed(1)} / 10`);
+
+    const avgLarge = qs("avgLarge");
+    if (avgLarge) {
+      avgLarge.textContent = stats.final.toFixed(2);
+      avgLarge.className = "large gradient-text";
+      if (anim) this.bump(avgLarge);
+    }
+
+    setText(
+      "avgDetail",
+      this.grades.length
+        ? `Сатҳ: ${gradeLabel(stats.final)}`
+        : "Баллҳоро ворид кунед",
+    );
+
+    renderGradeBlocks(qs("blocksContainer"), this.grades, GRADE_LABELS, (id) =>
+      this.toggleGrade(id),
+    );
+    renderGradeChart(qs("gradeChart"), this.grades);
+    this.percentUpdate();
+
+    renderMinAI({
+      box: qs("aiAnalysisBox"),
+      text: qs("aiText"),
+      grades: this.grades,
+    });
+  },
+
+  bump(element) {
+    element.classList.add("bump");
+    setTimeout(() => element.classList.remove("bump"), 220);
+  },
+
+  setPupilTotal() {
+    const input = qs("pupilCountInput");
+    let total = clamp(toInt(input?.value, 0), 0, 100);
+
+    if (input && Number(input.value) > 100) {
+      input.value = "100";
+      this.toast.show("Шумораи хонандагон максимум 100 хонанда.");
+    }
+
+    const previousTotal = this.pct.total;
+    this.pct.total = total;
+
+    if (total < previousTotal) {
+      let used = 0;
+      for (let g = 1; g <= 10; g += 1) {
+        used += toInt(this.pct.counts[g], 0);
+      }
+
+      if (used > total) {
+        let excess = used - total;
+        for (let g = 10; g >= 1 && excess > 0; g -= 1) {
+          const current = toInt(this.pct.counts[g], 0);
+          const reduce = Math.min(current, excess);
+          this.pct.counts[g] = current - reduce;
+          excess -= reduce;
+        }
+        this.toast.show(
+          "Шумораи баллҳо бояд баробар ё камтар аз шумораи хонандагон бошад.",
+        );
+      }
+    }
+
+    this.percentUpdate();
+    this.save();
+  },
+
+  setGradeCount(input) {
+    const grade = Number(input.dataset.grade);
+    const total = this.pct.total;
+
+    if (total <= 0) {
+      input.value = "";
+      this.toast.show("Аввал шумораи умумии хонандагонро нависед.");
+      return;
+    }
+
+    let otherSum = 0;
+    for (let g = 1; g <= 10; g += 1) {
+      if (g === grade) continue;
+      otherSum += toInt(this.pct.counts[g], 0);
+    }
+
+    const maxValue = Math.max(0, total - otherSum);
+    let value = clamp(toInt(input.value, 0), 0, maxValue);
+
+    if (Number(input.value) > maxValue) {
+      input.value = String(value);
+      this.toast.show(
+        "Шумораи баллҳо наметавонад аз шумораи умумии хонандагон зиёд бошад.",
+      );
+    }
+
+    this.pct.counts[grade] = value;
+    this.percentUpdate();
+    this.save();
+  },
+
+  buildPercentDistribution(total) {
+    const distribution = [];
+    let floorSum = 0;
+
+    for (let grade = 10; grade >= 1; grade -= 1) {
+      const count = toInt(this.pct.counts[grade], 0);
+      const exactPct = total ? (count / total) * 100 : 0;
+      const floorPct = Math.floor(exactPct);
+      distribution.push({
+        grade,
+        count,
+        exactPct,
+        floorPct,
+        remainder: exactPct - floorPct,
+      });
+      floorSum += floorPct;
+    }
+
+    let remainder = 100 - floorSum;
+    const byRemainder = distribution
+      .slice()
+      .filter((item) => item.count > 0)
+      .sort((a, b) => {
+        if (b.remainder !== a.remainder) return b.remainder - a.remainder;
+        if (b.count !== a.count) return b.count - a.count;
+        return b.grade - a.grade;
+      });
+
+    const percentMap = {};
+    for (const item of distribution) {
+      percentMap[item.grade] = item.floorPct;
+    }
+
+    for (const item of byRemainder) {
+      if (remainder <= 0) break;
+      percentMap[item.grade] += 1;
+      remainder -= 1;
+    }
+
+    return percentMap;
+  },
+
+  percentUpdate() {
+    const total = this.pct.total || 0;
+    setInputValue("pupilCountInput", total || "");
+
+    let used = 0;
+    let range7to10 = 0;
+    let range4to10 = 0;
+    let weighted = 0;
+
+    for (let grade = 10; grade >= 1; grade -= 1) {
+      const value = toInt(this.pct.counts[grade], 0);
+      used += value;
+      if (grade >= 7) range7to10 += value;
+      if (grade >= 4) range4to10 += value;
+      weighted += grade * value;
+      setInputValue(`gradeCount${grade}`, value || "");
+    }
+
+    const percentMap =
+      total && used === total ? this.buildPercentDistribution(total) : null;
+    const average = total && used === total ? weighted / used : 0;
+    const left = Math.max(0, total - used);
+
+    for (let grade = 10; grade >= 1; grade -= 1) {
+      setText(`gradePct${grade}`, percentMap ? `${percentMap[grade]}%` : "-");
+    }
+
+    setText(
+      "range7to10UI",
+      percentMap ? `${Math.round((range7to10 / total) * 100)}%` : "-",
+    );
+    setText(
+      "range4to10UI",
+      percentMap ? `${Math.round((range4to10 / total) * 100)}%` : "-",
+    );
+    setText("percentAverageUI", percentMap ? average.toFixed(2) : "-");
+    setText("percentUsedUI", used);
+    setText("percentLeftUI", left);
+  },
+
+  ensureInfo() {
+    if (this.settings.simple) {
+      this.toast.show("Дар Ҳолати оддӣ экспорт кардан номумкин аст.");
+      return;
+    }
+
+    if (!this.grades.length) {
+      this.toast.show("Аввал балл ворид кунед.");
+      return;
+    }
+
+    openInfoModal(
+      qs("infoModal"),
+      qs("modalPupilInput"),
+      qs("modalSubjectInput"),
+    );
+  },
+
+  closeModal() {
+    closeInfoModal(qs("infoModal"));
+  },
+
+  saveProfile() {
+    const name = clean(qs("profileNameInput")?.value || "");
+    const surname = clean(qs("profileSurnameInput")?.value || "");
+    const school = clean(qs("profileSchoolInput")?.value || "");
+
+    if (!name || !surname || !school) {
+      this.toast.show(
+        "Лутфан ному насаб ва рақами мактабро пурра ворид кунед.",
+      );
+      return;
+    }
+
+    this.profile = {
+      ...this.profile,
+      name,
+      surname,
+      school,
+    };
+    this.save();
+    this.updateProfileUI(this.profile);
+    this.toast.show("Профил сабт шуд.");
+  },
+
+  saveSetupProfile() {
+    const name = clean(qs("setupNameInput")?.value || "");
+    const surname = clean(qs("setupSurnameInput")?.value || "");
+    const school = clean(qs("setupSchoolInput")?.value || "");
+
+    if (!name || !surname || !school) {
+      this.toast.show(
+        "Лутфан ному насаб ва рақами мактабро пурра ворид кунед.",
+      );
+      return;
+    }
+
+    this.profile = {
+      ...this.profile,
+      name,
+      surname,
+      school,
+      avatar: this._setupAvatarData || this.profile.avatar || "",
+    };
+    this._setupAvatarData = null;
+
+    setInputValue("profileNameInput", name);
+    setInputValue("profileSurnameInput", surname);
+    setInputValue("profileSchoolInput", school);
+
+    this.save();
+    this.updateProfileUI(this.profile);
+
+    const overlay = qs("profileSetupOverlay");
+    if (overlay) {
+      overlay.classList.add("profile-setup-overlay--exit");
+      setTimeout(() => {
+        overlay.style.display = "none";
+        overlay.classList.remove("profile-setup-overlay--exit");
+      }, 380);
+    }
+
+    this.toast.show("Профил сохта шуд! Ба барнома хуш омадед 🎉");
+  },
+
+  saveModalInfo() {
+    const pupil = clean(qs("modalPupilInput")?.value || "");
+    const subject = clean(qs("modalSubjectInput")?.value || "");
+    const gradeValue = clean(qs("modalGradeInput")?.value || "");
+    const grade = Number(gradeValue);
+
+    if (!pupil || !subject || !gradeValue) {
+      this.toast.show("Ном, фан ва синфро пур кунед.");
+      return;
+    }
+
+    if (!Number.isInteger(grade) || grade < 1 || grade > 11) {
+      this.toast.show("Синф бояд байни 1 ва 11 бошад.");
+      return;
+    }
+
+    this.closeModal();
+    this.save();
+    this.exportResult();
+  },
+
+  async exportResult() {
+    const canvas = this.resultCanvas();
+    const blob = await new Promise((resolve) =>
+      canvas.toBlob(resolve, "image/png", 0.96),
+    );
+
+    if (!blob) {
+      this.toast.show("Экспорт иҷро нашуд. Бори дигар кӯшиш кунед.");
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "Чоряк-by-Abdughafur.png";
+    document.body.append(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    this.toast.show("Натиҷа экспорт шуд.");
+  },
+
+  resultCanvas() {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1290;
+    canvas.height = 1330;
+
+    const ctx = canvas.getContext("2d");
+    const stats = calculateStats(this.grades);
+    const pupil = clean(qs("modalPupilInput")?.value || "");
+    const subject = clean(qs("modalSubjectInput")?.value || "");
+    const gradeValue = clean(qs("modalGradeInput")?.value || "");
+    const exportStamp = new Date().toLocaleString("tg-TJ");
+
+    const primary = "#4f46e5";
+    const primary2 = "#6366f1";
+    const accent = "#9333ea";
+
+    const bgGrad = ctx.createLinearGradient(0, 0, 1290, 1330);
+    bgGrad.addColorStop(0, "#090514");
+    bgGrad.addColorStop(0.5, "#0b0b1e");
+    bgGrad.addColorStop(1, "#05070f");
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, 1290, 1330);
+
+    const borderGrad = ctx.createLinearGradient(90, 90, 1200, 1240);
+    borderGrad.addColorStop(0, "rgba(79, 70, 229, 0.4)");
+    borderGrad.addColorStop(0.5, "rgba(99, 102, 241, 0.3)");
+    borderGrad.addColorStop(1, "rgba(147, 51, 234, 0.4)");
+    ctx.strokeStyle = borderGrad;
+    ctx.lineWidth = 4;
+    roundRect(ctx, 90, 90, 1110, 1150, 48);
+    ctx.stroke();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "900 70px Arial";
+    ctx.fillText("Чоряк", 150, 180);
+
+    ctx.fillStyle = "rgba(147, 51, 234, 0.25)";
+    roundRect(ctx, 395, 125, 120, 52, 14);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(147, 51, 234, 0.4)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = "#c084fc";
+    ctx.font = "800 24px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("v4.1", 395 + 60, 125 + 34);
+    ctx.textAlign = "left";
+
+    ctx.fillStyle = "rgba(255,255,255,0.64)";
+    ctx.font = "700 26px Arial";
+    ctx.fillText(`Вақт: ${exportStamp}`, 800, 170);
+
+    const lineGrad = ctx.createLinearGradient(120, 240, 1170, 240);
+    lineGrad.addColorStop(0, "rgba(79, 70, 229, 0.1)");
+    lineGrad.addColorStop(0.5, "rgba(147, 51, 234, 0.8)");
+    lineGrad.addColorStop(1, "rgba(79, 70, 229, 0.1)");
+    ctx.strokeStyle = lineGrad;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(120, 240);
+    ctx.lineTo(1170, 240);
+    ctx.stroke();
+
+    roundRect(ctx, 120, 280, 1050, 360, 32);
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.08)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = "#c084fc";
+    ctx.font = "900 24px Arial";
+    ctx.fillText("МАЪЛУМОТИ ХОНАНДА", 170, 340);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "700 32px Arial";
+    ctx.fillText(`Ному насаб: ${pupil || "—"}`, 170, 405);
+    ctx.fillText(`Фан: ${subject || "—"}`, 170, 470);
+    ctx.fillText(`Синф: ${gradeValue || "—"}`, 170, 535);
+
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "900 24px Arial";
+    ctx.fillText("НАТИҶАИ ЧОРЯК", 740, 340);
+
+    const avgScoreGrad = ctx.createLinearGradient(740, 370, 740, 500);
+    avgScoreGrad.addColorStop(0, "#818cf8");
+    avgScoreGrad.addColorStop(1, "#c084fc");
+    ctx.fillStyle = avgScoreGrad;
+    ctx.font = "900 130px Arial";
+    ctx.fillText(stats.final.toFixed(2), 740, 480);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "700 32px Arial";
+    ctx.fillText(`Сатҳ: ${gradeLabel(stats.final)}`, 740, 535);
+
+    const summaryCards = [
+      { title: "Натиҷаи баллҳои дарсӣ", value: stats.avgR.toFixed(2) },
+      { title: "Натиҷаи баллҳои корҳои санҷишӣ", value: stats.avgE.toFixed(2) },
+    ];
+
+    summaryCards.forEach((card, index) => {
+      const x = 120 + index * 550;
+      const y = 670;
+
+      roundRect(ctx, x, y, 500, 150, 24);
+      ctx.fillStyle = "rgba(255,255,255,0.06)";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,0.08)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = "#94a3b8"; // Slate 400
+      ctx.font = "800 24px Arial";
+      ctx.fillText(card.title, x + 35, y + 48);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "900 50px Arial";
+      ctx.fillText(card.value, x + 35, y + 112);
+    });
+
+    roundRect(ctx, 120, 850, 1050, 390, 32);
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.08)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "900 24px Arial";
+    ctx.fillText("МИҚДОРИ БАЛЛҲОИ ГИРИФТАШУДА", 170, 905);
+
+    const gradeCounts = {};
+    for (let g = 1; g <= 10; g++) gradeCounts[g] = 0;
+    this.grades.forEach((g) => {
+      if (gradeCounts[g.val] !== undefined) {
+        gradeCounts[g.val]++;
+      }
+    });
+
+    for (let r = 0; r < 4; r++) {
+      const yStart = 955 + r * 65;
+
+      const grade1 = 10 - r;
+      const count1 = gradeCounts[grade1] || 0;
+
+      roundRect(ctx, 170, yStart, 80, 46, 12);
+      ctx.fillStyle = "rgba(255,255,255,0.12)";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,0.15)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "900 26px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(String(grade1), 170 + 40, yStart + 32);
+      ctx.textAlign = "left";
+
+      ctx.fillStyle = "#e2e8f0";
+      ctx.font = "700 28px Arial";
+      ctx.fillText(`—  ${count1} то`, 170 + 100, yStart + 32);
+
+      const grade2 = 6 - r;
+      const count2 = gradeCounts[grade2] || 0;
+
+      roundRect(ctx, 670, yStart, 80, 46, 12);
+      ctx.fillStyle = "rgba(255,255,255,0.12)";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,0.15)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "900 26px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(String(grade2), 670 + 40, yStart + 32);
+      ctx.textAlign = "left";
+
+      ctx.fillStyle = "#e2e8f0";
+      ctx.font = "700 28px Arial";
+      ctx.fillText(`—  ${count2} то`, 670 + 100, yStart + 32);
+    }
+
+    return canvas;
+  },
+
+  nav(id, button) {
+    if (this.settings.simple && (id === "tab-prosent" || id === "tab-ai")) {
+      this.toast.show(
+        "Дар Ҳолати оддӣ танҳо Табҳои Асосӣ ва Бештар фаъол аст.",
+      );
+      return;
+    }
+
+    document
+      .querySelectorAll(".tab")
+      .forEach((tab) => tab.classList.remove("active"));
+    document
+      .querySelectorAll(".nav-btn")
+      .forEach((navButton) => navButton.classList.remove("active"));
+
+    qs(id)?.classList.add("active");
+    (button || document.querySelector(`[data-tab="${id}"]`))?.classList.add(
+      "active",
+    );
+
+    this.tone(600, "sine", 0.04);
+  },
+
+  showSubView(viewId) {
+    document.querySelectorAll(".more-subview").forEach((view) => {
+      view.classList.remove("active");
+    });
+    qs(viewId)?.classList.add("active");
+    this.tone(550, "sine", 0.05);
+  },
+
+  async shareApp() {
+    const shareData = {
+      title: "Чоряк - Ҳисобкунаки Чорякҳо",
+      text: "Барномаи муосири Чоряк барои ҳисоб кардани натиҷаи баллҳои хонандагон.",
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        this.toast.show("Ба дигарон фиристода шуд!");
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        this.toast.show(
+          "Пайванд (ссылка) ба нусхабардорӣ шуд! Барои мубодила пайвандро ба дигарон фиристед",
+        );
+      }
+    } catch (err) {
+      if (err.name !== "AbortError") {
+        await navigator.clipboard.writeText(window.location.href);
+        this.toast.show("Пайванд (ссылка) нусхабардорӣ шуд!");
+      }
+    }
+  },
+
+  async installPwa() {
+    const installed = await promptInstallPwa();
+    if (installed) {
+      this.toast.show("Барнома насб шуд!");
+      return;
+    }
+    this.toast.show("Насб дар ин браузер ё дар ин ҳолат дастрас нест.");
+  },
+
+  toggleTheme() {
+    const toggle = qs("themeToggle");
+    this.settings.theme = toggle
+      ? toggle.checked
+        ? "dark"
+        : "light"
+      : this.settings.theme === "dark"
+        ? "light"
+        : "dark";
+    this.applySettings();
+    this.save();
+  },
+
+  toggleSound() {
+    const toggle = qs("soundToggle");
+    this.settings.sound = toggle ? toggle.checked : !this.settings.sound;
+    this.save();
+    this.tone(680, "sine", 0.06, true);
+  },
+
+  togglePerformance() {
+    const toggle = qs("performanceToggle");
+    this.settings.performance = toggle
+      ? toggle.checked
+      : !this.settings.performance;
+    this.applySettings();
+    this.save();
+
+    this.toast.show(
+      this.settings.performance
+        ? "Беҳтарин Performance фаъол шуд."
+        : "Беҳтарин Performance хомӯш шуд.",
+    );
+  },
+
+  toggleSimple() {
+    const toggle = qs("simpleToggle");
+    this.settings.simple = toggle ? toggle.checked : !this.settings.simple;
+    this.applySettings();
+    this.save();
+
+    if (
+      this.settings.simple &&
+      (qs("tab-prosent")?.classList.contains("active") ||
+        qs("tab-ai")?.classList.contains("active"))
+    ) {
+      this.nav("tab-home");
+    }
+
+    this.toast.show(
+      this.settings.simple
+        ? "Ҳолати оддӣ фаъол шуд."
+        : "Ҳолати оддӣ хомӯш шуд.",
+    );
+  },
+
+  toggleFS() {
+    const toggle = qs("fsToggle");
+    this.settings.fs = toggle ? toggle.checked : !this.settings.fs;
+    this.save();
+
+    const root = document.documentElement;
+
+    if (this.settings.fs) {
+      root.requestFullscreen?.().catch(() => {
+        this.settings.fs = false;
+        this.applySettings();
+      });
+    } else if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+    }
+  },
+
+  applySettings() {
+    if (document.body) {
+      document.body.dataset.theme = this.settings.theme;
+      document.body.dataset.performance = this.settings.performance
+        ? "on"
+        : "off";
+      document.body.dataset.simple = this.settings.simple ? "on" : "off";
+    }
+
+    setChecked("themeToggle", this.settings.theme === "dark");
+    setChecked("soundToggle", this.settings.sound);
+    setChecked("fsToggle", this.settings.fs);
+    setChecked("performanceToggle", this.settings.performance);
+    setChecked("simpleToggle", this.settings.simple);
+
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute(
+        "content",
+        this.settings.theme === "dark" ? "#030712" : "#f8fafc",
+      );
+  },
+
+  updateProfileUI(info = {}) {
+    const name = clean(info.name || "");
+    const surname = clean(info.surname || "");
+    const school = clean(info.school || "");
+    const avatar = String(info.avatar || "");
+    const fullName = `${name}${surname ? ` ${surname}` : ""}`.trim();
+    const fallback = fullName ? fullName.trim()[0].toUpperCase() : "Ч";
+
+    setText("headerTitle", name || "Чоряк");
+    setText("headerEyebrow", school || "by Abdughafur");
+    setText("headerFallback", fallback);
+
+    const headerPhoto = qs("headerPhoto");
+    const headerFallbackEl = qs("headerFallback");
+    if (avatar && headerPhoto) {
+      headerPhoto.src = avatar;
+      headerPhoto.style.display = "block";
+      if (headerFallbackEl) headerFallbackEl.style.display = "none";
+    } else if (headerPhoto) {
+      headerPhoto.style.display = "none";
+      if (headerFallbackEl) headerFallbackEl.style.display = "block";
+    }
+
+    const avatarImg = qs("profileAvatarPreview");
+    const avatarFallback = qs("profileAvatarPreviewFallback");
+    if (avatar && avatarImg) {
+      avatarImg.src = avatar;
+      avatarImg.style.display = "block";
+      if (avatarFallback) avatarFallback.style.display = "none";
+    } else if (avatarImg) {
+      avatarImg.style.display = "none";
+      if (avatarFallback) avatarFallback.style.display = "block";
+    }
+  },
+
+  save() {
+    saveState({
+      grades: this.grades,
+      settings: this.settings,
+      pct: this.pct,
+      info: {
+        pupil: clean(qs("modalPupilInput")?.value || ""),
+        subject: clean(qs("modalSubjectInput")?.value || ""),
+        grade: clean(qs("modalGradeInput")?.value || ""),
+      },
+      profile: this.profile,
+    });
+    this.updateProfileUI(this.profile);
+  },
+
+  tone(freq, type = "sine", duration = 0.08, force = false) {
+    if (!this.settings.sound && !force) return;
+
+    try {
+      const AudioContextClass =
+        window.AudioContext || window.webkitAudioContext;
+      this.audioCtx = this.audioCtx || new AudioContextClass();
+
+      const oscillator = this.audioCtx.createOscillator();
+      const gain = this.audioCtx.createGain();
+
+      oscillator.type = type;
+      oscillator.frequency.value = freq;
+      gain.gain.value = 0.045;
+      gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        this.audioCtx.currentTime + duration,
+      );
+
+      oscillator.connect(gain);
+      gain.connect(this.audioCtx.destination);
+      oscillator.start();
+      oscillator.stop(this.audioCtx.currentTime + duration);
+    } catch {}
+  },
+};
+
+whenReady(() => app.init());
+
+/*
+  Сopyright (c) 2026 Abdughafur Khujzoda. All rights reserved.
+  :) 
+*/

@@ -1,0 +1,25 @@
+/* loader.css */
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, var(--bg), var(--bg2));
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s ease;
+}
+
+.loader.hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-logo {
+  width: 86px;
+  height: 86px;
+  border-radius: 26px;
+  font-size: 2.35rem;
+}

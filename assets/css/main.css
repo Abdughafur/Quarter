@@ -1,0 +1,37 @@
+/* main.css - Чоряк v4.1 
+ Copyright (c) 2026 Abdughafur. All rights reserved.
+*/
+@import url("./core/reset.css");
+@import url("./core/variables.css");
+@import url("./themes/light.css");
+@import url("./themes/dark.css");
+@import url("./themes/glass.css");
+@import url("./core/base.css");
+@import url("./core/typography.css");
+@import url("./core/animations.css");
+@import url("./layout/grid.css");
+@import url("./layout/container.css");
+@import url("./layout/header.css");
+@import url("./layout/footer.css");
+@import url("./layout/navigation.css");
+@import url("./components/buttons.css");
+@import url("./components/cards.css");
+@import url("./components/inputs.css");
+@import url("./components/switches.css");
+@import url("./components/modal.css");
+@import url("./components/toast.css");
+@import url("./components/charts.css");
+@import url("./components/keypad.css");
+@import url("./components/loader.css");
+@import url("./components/badges.css");
+@import url("./pages/home.css");
+@import url("./pages/stats.css");
+@import url("./pages/percent.css");
+@import url("./pages/ai.css");
+@import url("./pages/settings.css");
+@import url("./pages/profile.css");
+@import url("./utilities/spacing.css");
+@import url("./utilities/colors.css");
+@import url("./utilities/shadows.css");
+@import url("./utilities/radius.css");
+@import url("./utilities/helpers.css");

@@ -1,0 +1,63 @@
+/* keypad.css */
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.key {
+  height: 58px;
+  border-radius: 21px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.54), rgba(255, 255, 255, 0.14)),
+    var(--card2);
+  font-size: 1.22rem;
+  font-weight: 1000;
+  box-shadow:
+    0 10px 22px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+  transition:
+    transform 0.14s var(--ease),
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.key:active {
+  transform: scale(0.92) translateY(2px);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+}
+
+.key.clear {
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.11);
+  border-color: rgba(239, 68, 68, 0.18);
+  font-size: 0.9rem;
+}
+
+/* Premium Dark Theme Keypad Override */
+[data-theme="dark"] .key {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)), rgba(17, 24, 39, 0.7);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .key:active {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.35);
+}
+
+[data-theme="dark"] .key.clear {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
