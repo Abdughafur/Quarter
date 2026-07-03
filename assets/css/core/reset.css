@@ -4,6 +4,9 @@
 *::after {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+
 }
 
 html {
