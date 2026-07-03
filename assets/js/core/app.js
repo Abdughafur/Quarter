@@ -881,7 +881,7 @@ export const app = {
       }
     });
 
-    for (let r = 0; r < 4; r++) {
+    for (let r = 0; r < 5; r++) {
       const yStart = 955 + r * 65;
 
       const grade1 = 10 - r;
@@ -904,7 +904,7 @@ export const app = {
       ctx.font = "700 28px Arial";
       ctx.fillText(`—  ${count1} то`, 170 + 100, yStart + 32);
 
-      const grade2 = 6 - r;
+      const grade2 = 5 - r;
       const count2 = gradeCounts[grade2] || 0;
 
       roundRect(ctx, 670, yStart, 80, 46, 12);
@@ -960,24 +960,25 @@ export const app = {
   },
 
   async shareApp() {
+    const shareUrl = "https://abdughafur.github.io/Quarter/";
     const shareData = {
       title: "Чоряк - Ҳисобкунаки Чорякҳо",
       text: "Барномаи муосири Чоряк барои ҳисоб кардани натиҷаи баллҳои хонандагон.",
-      url: window.location.href,
+      url: shareUrl,
     };
     try {
       if (navigator.share) {
         await navigator.share(shareData);
         this.toast.show("Ба дигарон фиристода шуд!");
       } else {
-        await navigator.clipboard.writeText(window.location.href);
+        await navigator.clipboard.writeText(shareUrl);
         this.toast.show(
           "Пайванд (ссылка) ба нусхабардорӣ шуд! Барои мубодила пайвандро ба дигарон фиристед",
         );
       }
     } catch (err) {
       if (err.name !== "AbortError") {
-        await navigator.clipboard.writeText(window.location.href);
+        await navigator.clipboard.writeText(shareUrl);
         this.toast.show("Пайванд (ссылка) нусхабардорӣ шуд!");
       }
     }
