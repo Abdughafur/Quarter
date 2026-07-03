@@ -764,15 +764,6 @@ export const app = {
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, 1290, 1330);
 
-    const borderGrad = ctx.createLinearGradient(90, 90, 1200, 1240);
-    borderGrad.addColorStop(0, "rgba(79, 70, 229, 0.4)");
-    borderGrad.addColorStop(0.5, "rgba(99, 102, 241, 0.3)");
-    borderGrad.addColorStop(1, "rgba(147, 51, 234, 0.4)");
-    ctx.strokeStyle = borderGrad;
-    ctx.lineWidth = 4;
-    roundRect(ctx, 90, 90, 1110, 1150, 48);
-    ctx.stroke();
-
     ctx.fillStyle = "#ffffff";
     ctx.font = "900 70px Arial";
     ctx.fillText("Чоряк", 150, 180);
@@ -853,7 +844,7 @@ export const app = {
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      ctx.fillStyle = "#94a3b8"; // Slate 400
+      ctx.fillStyle = "#94a3b8";
       ctx.font = "800 24px Arial";
       ctx.fillText(card.title, x + 35, y + 48);
 
@@ -862,7 +853,7 @@ export const app = {
       ctx.fillText(card.value, x + 35, y + 112);
     });
 
-    roundRect(ctx, 120, 850, 1050, 390, 32);
+    roundRect(ctx, 120, 890, 1050, 400, 32);
     ctx.fillStyle = "rgba(255,255,255,0.06)";
     ctx.fill();
     ctx.strokeStyle = "rgba(255,255,255,0.08)";
@@ -907,7 +898,7 @@ export const app = {
       const grade2 = 5 - r;
       const count2 = gradeCounts[grade2] || 0;
 
-      roundRect(ctx, 670, yStart, 80, 46, 12);
+      roundRect(ctx, 560, yStart, 80, 46, 12);
       ctx.fillStyle = "rgba(255,255,255,0.12)";
       ctx.fill();
       ctx.strokeStyle = "rgba(255,255,255,0.15)";
@@ -917,12 +908,12 @@ export const app = {
       ctx.fillStyle = "#ffffff";
       ctx.font = "900 26px Arial";
       ctx.textAlign = "center";
-      ctx.fillText(String(grade2), 670 + 40, yStart + 32);
+      ctx.fillText(String(grade2), 560 + 40, yStart + 32);
       ctx.textAlign = "left";
 
       ctx.fillStyle = "#e2e8f0";
       ctx.font = "700 28px Arial";
-      ctx.fillText(`—  ${count2} то`, 670 + 100, yStart + 32);
+      ctx.fillText(`—  ${count2} то`, 560 + 100, yStart + 32);
     }
 
     return canvas;
@@ -1172,3 +1163,5 @@ whenReady(() => app.init());
   Сopyright (c) 2026 Abdughafur Khujzoda. All rights reserved.
   :) 
 */
+
+// THE END
