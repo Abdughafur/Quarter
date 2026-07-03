@@ -26,7 +26,7 @@ export function renderMinAI({ box, text, grades }) {
   const high = grades.filter((grade) => grade.val >= 8).length;
 
   let advice =
-    "Натиҷа устувор аст. Барои беҳтар кардан хонанда бояд баллҳои аз 8 боло гирад.";
+    "-----------------";
 
   if (final < 6.5) {
     advice =
