@@ -26,7 +26,7 @@ export function renderMinAI({ box, text, grades }) {
   const high = grades.filter((grade) => grade.val >= 8).length;
 
   let advice =
-    "-----------------";
+    "-------------------";
 
   if (final < 6.5) {
     advice =
@@ -39,3 +39,5 @@ export function renderMinAI({ box, text, grades }) {
   box.style.display = "block";
   text.innerHTML = `<b>MinAI:</b><br>Натиҷаи ҳозира <b>${final.toFixed(2)}</b> — <b>${gradeLabel(final)}</b>.<br>Сатҳи таҳсил: <b>${trend}</b>.<br>${balance}<br>${advice}<br><br>${needed}`;
 }
+
+// MinAI v1.0
