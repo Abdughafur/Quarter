@@ -1,8 +1,11 @@
 /* storage.js */
 import { clamp, safeParseStorage, toInt, uid } from "../utils/helpers.js";
 
-const CURRENT = "chorak_v4.1";
-const LEGACY = "chorak_v4.0";
+const DB_NAME = "ChoryakDB";
+const DB_VERSION = 1;
+const STORE_NAME = "state";
+const FALLBACK_STORAGE_KEY = "chorak_state";
+const LEGACY_PREFIXES = ["chorak_v4.1", "chorak_v4.0"];
 
 export const DEFAULT_SETTINGS = Object.freeze({
   theme: "light",
@@ -23,17 +26,6 @@ export const DEFAULT_PROFILE = Object.freeze({
   school: "",
   avatar: "",
 });
-
-function key(version, name) {
-  return `${version}_${name}`;
-}
-
-function loadWithFallback(name, fallback) {
-  return safeParseStorage(
-    key(CURRENT, name),
-    safeParseStorage(key(LEGACY, name), fallback),
-  );
-}
 
 function normalizeGrades(value) {
   if (!Array.isArray(value)) return [];
@@ -93,22 +85,133 @@ function normalizePct(value) {
   };
 }
 
-export function loadState() {
+function normalizeState(value) {
+  const payload = value && typeof value === "object" ? value : {};
+
   return {
-    grades: normalizeGrades(loadWithFallback("grades", [])),
-    settings: normalizeSettings(loadWithFallback("settings", null)),
-    pct: normalizePct(loadWithFallback("pct", null)),
-    info: loadWithFallback("info", {}),
-    profile: normalizeProfile(loadWithFallback("profile", null)),
+    grades: normalizeGrades(payload.grades ?? []),
+    settings: normalizeSettings(payload.settings ?? null),
+    pct: normalizePct(payload.pct ?? null),
+    info: payload.info && typeof payload.info === "object" ? payload.info : {},
+    profile: normalizeProfile(payload.profile ?? null),
   };
 }
 
-export function saveState({ grades, settings, pct, info, profile }) {
+function readLegacyState() {
+  for (const prefix of LEGACY_PREFIXES) {
+    const candidate = {
+      grades: safeParseStorage(`${prefix}_grades`, null),
+      settings: safeParseStorage(`${prefix}_settings`, null),
+      pct: safeParseStorage(`${prefix}_pct`, null),
+      info: safeParseStorage(`${prefix}_info`, null),
+      profile: safeParseStorage(`${prefix}_profile`, null),
+    };
+
+    const hasData = Object.values(candidate).some((value) => value != null);
+    if (hasData) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
+function readFallbackState() {
+  const stored = safeParseStorage(FALLBACK_STORAGE_KEY, null);
+  if (stored && typeof stored === "object") {
+    return stored;
+  }
+
+  return readLegacyState();
+}
+
+function openDb() {
+  return new Promise((resolve, reject) => {
+    if (!("indexedDB" in window)) {
+      reject(new Error("IndexedDB is not supported"));
+      return;
+    }
+
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: "id" });
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function loadFromIndexedDb() {
+  return new Promise((resolve) => {
+    openDb()
+      .then((db) => {
+        const transaction = db.transaction(STORE_NAME, "readonly");
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.get("state");
+
+        request.onsuccess = () => {
+          db.close();
+          resolve(request.result || null);
+        };
+
+        request.onerror = () => {
+          db.close();
+          resolve(null);
+        };
+      })
+      .catch(() => resolve(null));
+  });
+}
+
+function saveToIndexedDb(payload) {
+  return new Promise((resolve) => {
+    openDb()
+      .then((db) => {
+        const transaction = db.transaction(STORE_NAME, "readwrite");
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.put({ id: "state", ...payload });
+
+        request.onsuccess = () => {
+          db.close();
+          resolve();
+        };
+
+        request.onerror = () => {
+          db.close();
+          resolve();
+        };
+      })
+      .catch(() => resolve());
+  });
+}
+
+export async function loadState() {
+  const indexedState = await loadFromIndexedDb();
+  if (indexedState && typeof indexedState === "object") {
+    return normalizeState(indexedState);
+  }
+
+  const fallbackState = readFallbackState();
+  const normalized = normalizeState(fallbackState ?? {});
+
+  if (fallbackState) {
+    await saveState(normalized);
+  }
+
+  return normalized;
+}
+
+export async function saveState({ grades, settings, pct, info, profile }) {
+  const payload = normalizeState({ grades, settings, pct, info, profile });
+
   try {
-    localStorage.setItem(key(CURRENT, "grades"), JSON.stringify(grades));
-    localStorage.setItem(key(CURRENT, "settings"), JSON.stringify(settings));
-    localStorage.setItem(key(CURRENT, "pct"), JSON.stringify(pct));
-    localStorage.setItem(key(CURRENT, "info"), JSON.stringify(info));
-    localStorage.setItem(key(CURRENT, "profile"), JSON.stringify(profile));
+    localStorage.setItem(FALLBACK_STORAGE_KEY, JSON.stringify(payload));
   } catch {}
+
+  await saveToIndexedDb(payload);
 }

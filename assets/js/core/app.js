@@ -40,11 +40,11 @@ export const app = {
     avatar: "",
   },
 
-  init() {
+  async init() {
     if (this.initialized) return;
     this.initialized = true;
 
-    const state = loadState();
+    const state = await loadState();
     this.grades = state.grades;
     this.pct = state.pct;
     this.settings = state.settings;
@@ -425,15 +425,17 @@ export const app = {
 
     const stats = calculateStats(this.grades);
 
-    setText("countUI", this.grades.length);
     setText("regularAvgUI", stats.avgR.toFixed(2));
     setText("examAvgUI", stats.avgE.toFixed(2));
-    setText("chartHint", `${stats.final.toFixed(1)} / 10`);
+    setText("preciseAvgUI", stats.final.toFixed(2));
+    // countUI and chartHint removed — keep UI minimal
 
     const avgLarge = qs("avgLarge");
     if (avgLarge) {
-      avgLarge.textContent = stats.final.toFixed(2);
-      avgLarge.className = "large gradient-text";
+      const num = avgLarge.querySelector?.(".large-number");
+      if (num) num.textContent = String(Math.round(stats.final));
+      else avgLarge.textContent = String(Math.round(stats.final));
+      avgLarge.className = "large";
       if (anim) this.bump(avgLarge);
     }
 
@@ -1088,8 +1090,9 @@ export const app = {
     const fullName = `${name}${surname ? ` ${surname}` : ""}`.trim();
     const fallback = fullName ? fullName.trim()[0].toUpperCase() : "Ч";
 
-    setText("headerTitle", name || "Чоряк");
-    setText("headerEyebrow", school || "by Abdughafur");
+    setText("headerTitle", fullName || "Чоряк");
+    // eyebrow shows fixed label; put school number into headerSchoolNumber
+    setText("headerSchoolNumber", school ? `№${school}` : "");
     setText("headerFallback", fallback);
 
     const headerPhoto = qs("headerPhoto");
@@ -1116,7 +1119,7 @@ export const app = {
   },
 
   save() {
-    saveState({
+    void saveState({
       grades: this.grades,
       settings: this.settings,
       pct: this.pct,
@@ -1157,7 +1160,9 @@ export const app = {
   },
 };
 
-whenReady(() => app.init());
+whenReady(() => {
+  void app.init();
+});
 
 /*
   Сopyright (c) 2026 Abdughafur Khujzoda. All rights reserved.

@@ -1,5 +1,6 @@
 /* pwa.js */
 let deferredPrompt = null;
+let hasReloadedForUpdate = false;
 
 export function canInstallPwa() {
   return Boolean(deferredPrompt);
@@ -43,12 +44,23 @@ window.addEventListener("appinstalled", () => {
 });
 
 if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (hasReloadedForUpdate) return;
+    hasReloadedForUpdate = true;
+    window.location.reload();
+  });
   window.addEventListener("load", () => {
     const swUrl = new URL("sw.js", window.location.href).href;
     const swScope = new URL(".", window.location.href).pathname;
 
     navigator.serviceWorker
       .register(swUrl, { scope: swScope })
+      .then((registration) => {
+        registration.update();
+        if (registration.waiting) {
+          registration.waiting.postMessage({ type: "SKIP_WAITING" });
+        }
+      })
       .catch((error) => {
         console.warn("Service worker registration failed:", error);
       });

@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="assets/images/app-icon.svg" />
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="assets/css/main.css">
-  
+
 
 </head>
 
@@ -32,11 +32,13 @@
         <span id="headerFallback">Ч</span>
       </div>
       <div>
-        <div class="eyebrow" id="headerEyebrow">Чоряк</div>
+        <div class="eyebrow">
+          <span class="eyebrow-label">Мактаби</span>
+          <span id="headerSchoolNumber" class="eyebrow-number"></span>
+        </div>
         <div class="logo" id="headerTitle">Чоряк</div>
       </div>
     </div>
-    <div class="version">v4.1</div>
   </header>
 
   <main class="container">
@@ -53,21 +55,60 @@
       </div>
 
       <div class="hero">
-        <div class="top"><span class="small">Натиҷаи чоряк</span><span id="countUI" class="pill">0</span></div>
-        <div class="result">
-          <div id="avgLarge" class="large">0.00</div>
-          <div id="avgDetail" class="detail">Баллҳоро ворид кунед</div>
+        <div class="top"><span class="small">Натиҷаи чоряк</span></div>
+
+        <div class="hero-inner">
+          <div class="score-tile">
+            <div id="avgLarge" class="large">
+              <div class="large-number">0</div>
+              <div class="label-small">АЪЛО</div>
+            </div>
+          </div>
+
+          <div class="stats-stack">
+            <div class="stat-row">
+              <div class="stat-icon book">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6 3h9a2 2 0 0 1 2 2v14a1 1 0 0 1-1.4.91L12 18l-4.6 2.91A1 1 0 0 1 6 20V5a2 2 0 0 1 0-2z"
+                    fill="currentColor" />
+                </svg>
+              </div>
+              <div class="stat-text">Натиҷаи баллҳои дарсӣ</div>
+              <div class="stat-value"><strong id="regularAvgUI">0.00</strong></div>
+            </div>
+
+            <div class="stat-row">
+              <div class="stat-icon pencil">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                    fill="currentColor" />
+                </svg>
+              </div>
+              <div class="stat-text">Натиҷаи корҳои санҷишӣ</div>
+              <div class="stat-value"><strong id="examAvgUI">0.00</strong></div>
+            </div>
+
+            <div class="stat-row">
+              <div class="stat-icon target">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12zm0 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"
+                    fill="currentColor" />
+                </svg>
+              </div>
+              <div class="stat-text">Натиҷаи дақиқи чоряк</div>
+              <div class="stat-value"><strong id="preciseAvgUI">0.00</strong></div>
+            </div>
+
+            <div class="actions"><button class="btn export-action" type="button"
+                data-action="downloadResult">Экспорт</button></div>
+          </div>
         </div>
-        <div class="mini two">
-          <div class="mini-stat"><span>Натиҷаи баллҳои дарсӣ</span><strong id="regularAvgUI">0.00</strong></div>
-          <div class="mini-stat"><span>Натиҷаи корҳои санҷишӣ</span><strong id="examAvgUI">0.00</strong></div>
-        </div>
-        <div class="actions"><button class="btn export-action" type="button"
-            data-action="downloadResult">Экспорт</button></div>
       </div>
 
       <div class="card compact-card diagram-card">
-        <div class="top"><span class="small">Диаграмма</span><span id="chartHint" class="small">0 / 10</span></div>
+        <div class="top"><span class="small">Диаграмма</span></div>
         <div class="chart" id="gradeChart"></div>
       </div>
     </section>
@@ -286,14 +327,43 @@
 
         <div class="card">
           <h3 class="settings-title">Keyboard shortcuts</h3>
-          <div class="mini" style="grid-template-columns:repeat(2,1fr)">
-            <div class="mini-stat"><span>1–9 / 0</span><strong>Балл</strong></div>
-            <div class="mini-stat"><span>Backspace</span><strong>←</strong></div>
-            <div class="mini-stat"><span>C</span><strong>Тоза кардан</strong></div>
-            <div class="mini-stat"><span>E</span><strong>Иваз кардани навъи балл</strong></div>
-            <div class="mini-stat"><span>H / S</span><strong>Гузаштан ба табҳои Асосӣ ва Бештар</strong></div>
-            <div class="mini-stat"><span>P / M</span><strong>Гузаштан ба табҳои Фоиз ва MinAI</strong></div>
-            <div class="mini-stat"><span>I</span><strong>Гузаштан ба таби Профил</strong></div>
+          <div class="shortcuts-grid">
+            <div class="shortcut-card">
+              <kbd>1–9 / 0</kbd>
+              <div class="shortcut-desc">Балл</div>
+            </div>
+            <div class="shortcut-card">
+              <kbd>Backspace</kbd>
+              <div class="shortcut-desc">Тоза кардани балл</div>
+            </div>
+            <div class="shortcut-card">
+              <kbd>C</kbd>
+              <div class="shortcut-desc">Тоза кардани ҳамаи баллҳо</div>
+            </div>
+            <div class="shortcut-card">
+              <kbd>E</kbd>
+              <div class="shortcut-desc">Иваз кардани навъи балл</div>
+            </div>
+            <div class="shortcut-card">
+              <kbd>H</kbd>
+              <div class="shortcut-desc">Таб: Асосӣ</div>
+            </div>
+            <div class="shortcut-card">
+              <kbd>S</kbd>
+              <div class="shortcut-desc">Таб: Бештар</div>
+            </div>
+            <div class="shortcut-card">
+              <kbd>P</kbd>
+              <div class="shortcut-desc">Таб: Фоиз</div>
+            </div>
+            <div class="shortcut-card">
+              <kbd>M</kbd>
+              <div class="shortcut-desc">Таб: MinAI</div>
+            </div>
+            <div class="shortcut-card">
+              <kbd>I</kbd>
+              <div class="shortcut-desc">Таб: Профил</div>
+            </div>
           </div>
         </div>
       </div>

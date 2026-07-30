@@ -17,10 +17,10 @@ header {
 }
 
 .app-icon {
-  width: 52px;
-  height: 52px;
-  min-width: 52px;
-  min-height: 52px;
+  width: 72px;
+  height: 72px;
+  min-width: 72px;
+  min-height: 72px;
   border-radius: 50px;
   flex: 0 0 auto;
   overflow: hidden;
@@ -34,16 +34,16 @@ header {
 }
 
 .version {
-  min-height: 40px;
-  padding: 0 14px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--primary);
+  display: none;
+}
+
+.brand .logo {
+  font-size: 1.35rem;
   font-weight: 1000;
-  background: var(--card);
-  border: 1px solid var(--border);
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
-  backdrop-filter: blur(30px) saturate(180%);
+}
+
+.brand .eyebrow {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-weight: 800;
 }

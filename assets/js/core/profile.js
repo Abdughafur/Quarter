@@ -3,14 +3,14 @@
 import { clean, qs, setInputValue } from "../utils/helpers.js";
 import { saveState, loadState, DEFAULT_PROFILE } from "./storage.js";
 
-function loadProfile() {
-  const state = loadState();
+async function loadProfile() {
+  const state = await loadState();
   return state.profile || DEFAULT_PROFILE;
 }
 
-function saveProfile(profile) {
-  const state = loadState();
-  saveState({
+async function saveProfile(profile) {
+  const state = await loadState();
+  await saveState({
     grades: state.grades,
     settings: state.settings,
     pct: state.pct,
@@ -29,8 +29,8 @@ function sanitizeLettersOnly(event) {
   input.value = value;
 }
 
-function init() {
-  const profile = loadProfile();
+async function init() {
+  const profile = await loadProfile();
   setInputValue("profileNameInput", profile.name || "");
   setInputValue("profileSurnameInput", profile.surname || "");
   setInputValue("profileSchoolInput", profile.school || "");
@@ -86,7 +86,7 @@ function init() {
     reader.readAsDataURL(file);
   });
 
-  qs("saveProfileButton")?.addEventListener("click", () => {
+  qs("saveProfileButton")?.addEventListener("click", async () => {
     const name = clean(qs("profileNameInput")?.value || "");
     const surname = clean(qs("profileSurnameInput")?.value || "");
     const school = clean(qs("profileSchoolInput")?.value || "");
@@ -106,12 +106,12 @@ function init() {
       school,
     };
 
-    saveProfile(updatedProfile);
+    await saveProfile(updatedProfile);
     showNotice("Профил сабт шуд.", "success");
     setTimeout(() => window.location.replace("index.html"), 900);
   });
 }
 
-init();
+void init();
 
 /* Created by Abdughafur - ЧОРЯК v4.1 */
