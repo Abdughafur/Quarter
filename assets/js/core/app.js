@@ -1060,15 +1060,27 @@ export const app = {
   },
 
   applySettings() {
-    if (document.body) {
-      document.body.dataset.theme = this.settings.theme;
-      document.body.dataset.performance = this.settings.performance
-        ? "on"
-        : "off";
-      document.body.dataset.simple = this.settings.simple ? "on" : "off";
+    const root = document.documentElement;
+    const body = document.body;
+    const theme = this.settings?.theme === "dark" ? "dark" : "light";
+    const performance = this.settings?.performance ? "on" : "off";
+    const simple = this.settings?.simple ? "on" : "off";
+
+    if (body) {
+      body.dataset.theme = theme;
+      body.dataset.performance = performance;
+      body.dataset.simple = simple;
+      body.style.colorScheme = theme;
     }
 
-    setChecked("themeToggle", this.settings.theme === "dark");
+    if (root) {
+      root.dataset.theme = theme;
+      root.dataset.performance = performance;
+      root.dataset.simple = simple;
+      root.style.colorScheme = theme;
+    }
+
+    setChecked("themeToggle", theme === "dark");
     setChecked("soundToggle", this.settings.sound);
     setChecked("fsToggle", this.settings.fs);
     setChecked("performanceToggle", this.settings.performance);
@@ -1076,10 +1088,7 @@ export const app = {
 
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute(
-        "content",
-        this.settings.theme === "dark" ? "#030712" : "#f8fafc",
-      );
+      ?.setAttribute("content", theme === "dark" ? "#030712" : "#f8fafc");
   },
 
   updateProfileUI(info = {}) {

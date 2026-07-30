@@ -18,9 +18,9 @@
 
 .btn.secondary {
   background: rgba(79, 70, 229, 0.12);
-  color: var(--primary);
+  color: var(--text);
   box-shadow: none;
-  border: 1px solid rgba(79, 70, 229, 0.12);
+  border: 1px solid var(--border);
 }
 
 .contact-btn {

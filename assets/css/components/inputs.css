@@ -2,9 +2,9 @@
 .input-field {
   width: 100%;
   min-height: 44px;
-  border: 1px solid var(--soft);
+  border: 1px solid var(--border);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(180deg, var(--card), var(--card2));
   color: var(--text);
   padding: 0 12px;
   outline: none;

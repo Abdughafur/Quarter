@@ -17,8 +17,8 @@
   color: var(--muted);
   font-size: 0.84rem;
   font-weight: 900;
-  background: rgba(148, 163, 184, 0.1);
-  border: 1px dashed var(--soft);
+  background: linear-gradient(180deg, var(--card), var(--card2));
+  border: 1px dashed var(--border);
   text-align: center;
   padding: 10px;
 }
@@ -58,7 +58,7 @@
   border-radius: 999px;
   display: grid;
   place-items: center;
-  background: white;
+  background: var(--card2);
   color: #f97316;
   font-size: 0.58rem;
   font-weight: 1000;
@@ -88,7 +88,6 @@
   -webkit-text-fill-color: transparent;
   animation: gradient 3s linear infinite;
 }
-
 
 .actions {
   display: grid;

@@ -19,8 +19,8 @@
 .ios-modal {
   width: min(520px, 100%);
   border-radius: 34px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: linear-gradient(180deg, var(--card), var(--card2));
+  border: 1px solid var(--border);
   box-shadow: 0 30px 90px rgba(2, 6, 23, 0.36);
   padding: 22px;
   color: #0f172a;

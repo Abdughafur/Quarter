@@ -1,45 +1,72 @@
 /* pwa.js */
 let deferredPrompt = null;
 let hasReloadedForUpdate = false;
+let isPwaSupported = false;
 
-export function canInstallPwa() {
-  return Boolean(deferredPrompt);
+function isStandaloneMode() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true ||
+    window.matchMedia("(display-mode: fullscreen)").matches
+  );
 }
 
-export async function promptInstallPwa() {
-  if (!deferredPrompt) return false;
+function isIOS() {
+  return /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
+}
 
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  deferredPrompt = null;
-  updateInstallButton();
-  return outcome === "accepted";
+function isSafari() {
+  return (
+    /Safari/i.test(window.navigator.userAgent) &&
+    !/Chrome|CriOS|FxiOS|EdgiOS/i.test(window.navigator.userAgent)
+  );
 }
 
 function updateInstallButton() {
   const button = document.getElementById("installPwaBtn");
   if (!button) return;
 
-  const isStandalone =
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.navigator.standalone === true;
+  const shouldShow =
+    !isStandaloneMode() && (deferredPrompt || isIOS() || isSafari());
+  button.classList.toggle("is-visible", shouldShow);
+  button.style.display = shouldShow ? "flex" : "none";
+}
 
-  if (isStandalone || !deferredPrompt) {
-    button.classList.remove("is-visible");
-    return;
+export function canInstallPwa() {
+  return Boolean(deferredPrompt);
+}
+
+export async function promptInstallPwa() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    updateInstallButton();
+    return outcome === "accepted";
   }
 
-  button.classList.add("is-visible");
+  if (isIOS() && isSafari()) {
+    window.open(
+      "https://developer.apple.com/documentation/webkit/promoting-progressive-web-apps-to-the-home-screen",
+      "_blank",
+      "noopener",
+    );
+    return false;
+  }
+
+  return false;
 }
 
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
   deferredPrompt = event;
+  isPwaSupported = false;
   updateInstallButton();
 });
 
 window.addEventListener("appinstalled", () => {
   deferredPrompt = null;
+  isPwaSupported = true;
   updateInstallButton();
 });
 
@@ -49,6 +76,7 @@ if ("serviceWorker" in navigator) {
     hasReloadedForUpdate = true;
     window.location.reload();
   });
+
   window.addEventListener("load", () => {
     const swUrl = new URL("sw.js", window.location.href).href;
     const swScope = new URL(".", window.location.href).pathname;
@@ -56,10 +84,10 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker
       .register(swUrl, { scope: swScope })
       .then((registration) => {
-        registration.update();
         if (registration.waiting) {
           registration.waiting.postMessage({ type: "SKIP_WAITING" });
         }
+        return registration.update();
       })
       .catch((error) => {
         console.warn("Service worker registration failed:", error);

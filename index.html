@@ -18,8 +18,18 @@
 </head>
 
 <body data-theme="light" data-performance="on" data-simple="off">
-  <div id="loader" class="loader">
-    <div class="loader-logo">Ч</div>
+  <div id="loader" class="loader" aria-hidden="true">
+    <div class="loader-card">
+      <div class="loader-operator plus">+</div>
+      <div class="loader-math">
+        <span class="loader-number">/</span>
+        <span class="loader-symbol">×</span>
+        <span class="loader-number">*</span>
+        <span class="loader-symbol">÷</span>
+        <span class="loader-number">,</span>
+      </div>
+      <div class="loader-operator minus">−</div>
+    </div>
   </div>
   <div class="orb one"></div>
   <div class="orb two"></div>
@@ -181,7 +191,7 @@
               Ч</div>
             <div class="about">
               <p><strong>Чоряк</strong></p>
-              <p><strong>Версия:</strong> 4.1 Prime Edition</p>
+              <p><strong>Версия:</strong> 4.1.1 Prime Edition</p>
               <p><strong>Таҳиягар:</strong> Abdughafur (Абдуғафур)</p>
             </div>
           </div>
@@ -206,7 +216,8 @@
           </svg>
           Зеркашии нусхаи Android
         </a>
-        <button class="btn install-pwa-btn" type="button" id="installPwaBtn" data-action="installPwa">
+        <button class="btn install-pwa-btn" type="button" id="installPwaBtn" data-action="installPwa"
+          style="display:none;">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="false">
             <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
           </svg>
@@ -323,50 +334,50 @@
               <span>Fullscreen</span>
             </span>
             <input type="checkbox" id="fsToggle" data-action="toggleFS" />
-        </div>
+          </label>
 
-        <div class="card">
-          <h3 class="settings-title">Keyboard shortcuts</h3>
-          <div class="shortcuts-grid">
-            <div class="shortcut-card">
-              <kbd>1–9 / 0</kbd>
-              <div class="shortcut-desc">Балл</div>
-            </div>
-            <div class="shortcut-card">
-              <kbd>Backspace</kbd>
-              <div class="shortcut-desc">Тоза кардани балл</div>
-            </div>
-            <div class="shortcut-card">
-              <kbd>C</kbd>
-              <div class="shortcut-desc">Тоза кардани ҳамаи баллҳо</div>
-            </div>
-            <div class="shortcut-card">
-              <kbd>E</kbd>
-              <div class="shortcut-desc">Иваз кардани навъи балл</div>
-            </div>
-            <div class="shortcut-card">
-              <kbd>H</kbd>
-              <div class="shortcut-desc">Таб: Асосӣ</div>
-            </div>
-            <div class="shortcut-card">
-              <kbd>S</kbd>
-              <div class="shortcut-desc">Таб: Бештар</div>
-            </div>
-            <div class="shortcut-card">
-              <kbd>P</kbd>
-              <div class="shortcut-desc">Таб: Фоиз</div>
-            </div>
-            <div class="shortcut-card">
-              <kbd>M</kbd>
-              <div class="shortcut-desc">Таб: MinAI</div>
-            </div>
-            <div class="shortcut-card">
-              <kbd>I</kbd>
-              <div class="shortcut-desc">Таб: Профил</div>
+          <div class="card">
+            <h3 class="settings-title">Keyboard shortcuts</h3>
+            <div class="shortcuts-grid">
+              <div class="shortcut-card">
+                <kbd>1–9 / 0</kbd>
+                <div class="shortcut-desc">Балл</div>
+              </div>
+              <div class="shortcut-card">
+                <kbd>Backspace</kbd>
+                <div class="shortcut-desc">Тоза кардани балл</div>
+              </div>
+              <div class="shortcut-card">
+                <kbd>C</kbd>
+                <div class="shortcut-desc">Тоза кардани ҳамаи баллҳо</div>
+              </div>
+              <div class="shortcut-card">
+                <kbd>E</kbd>
+                <div class="shortcut-desc">Иваз кардани навъи балл</div>
+              </div>
+              <div class="shortcut-card">
+                <kbd>H</kbd>
+                <div class="shortcut-desc">Таб: Асосӣ</div>
+              </div>
+              <div class="shortcut-card">
+                <kbd>S</kbd>
+                <div class="shortcut-desc">Таб: Бештар</div>
+              </div>
+              <div class="shortcut-card">
+                <kbd>P</kbd>
+                <div class="shortcut-desc">Таб: Фоиз</div>
+              </div>
+              <div class="shortcut-card">
+                <kbd>M</kbd>
+                <div class="shortcut-desc">Таб: MinAI</div>
+              </div>
+              <div class="shortcut-card">
+                <kbd>I</kbd>
+                <div class="shortcut-desc">Таб: Профил</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
     </section>
   </main>
 

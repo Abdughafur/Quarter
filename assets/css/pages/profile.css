@@ -2,15 +2,8 @@
 
 .profile-info-card {
   cursor: pointer;
-  transition:
-    transform 0.18s var(--ease),
-    box-shadow 0.18s ease;
+  transition: transform 0.18s var(--ease);
   user-select: none;
-}
-
-.profile-info-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 22px 50px rgba(79, 70, 229, 0.18);
 }
 
 .profile-info-card:active {
@@ -139,8 +132,8 @@
   position: relative;
   width: 100%;
   max-width: 420px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  background: linear-gradient(180deg, var(--card), var(--card2));
+  border: 1.5px solid var(--border);
   border-radius: 32px;
   backdrop-filter: blur(48px) saturate(180%);
   -webkit-backdrop-filter: blur(48px) saturate(180%);
@@ -247,16 +240,9 @@
   cursor: pointer;
   padding: 12px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.5);
-  border: 1.5px dashed rgba(79, 70, 229, 0.3);
-  transition:
-    background 0.18s ease,
-    border-color 0.18s ease;
-}
-
-.profile-setup-avatar-label:hover {
-  background: rgba(79, 70, 229, 0.06);
-  border-color: rgba(79, 70, 229, 0.5);
+  background: rgba(79, 70, 229, 0.08);
+  border: 1.5px dashed var(--border);
+  transition: background 0.18s ease;
 }
 
 [data-theme="dark"] .profile-setup-avatar-label {
@@ -288,7 +274,7 @@
 }
 
 .profile-setup-input {
-  /* Inherits .input-field styles */
+  width: 100%;
 }
 
 .profile-setup-rule {
@@ -518,14 +504,9 @@
   display: flex;
 }
 
-.install-pwa-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 32px rgba(79, 70, 229, 0.38);
-  opacity: 0.95;
-}
-
 .install-pwa-btn:active {
   transform: scale(0.97);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.24);
 }
 
 .install-pwa-btn:disabled {
@@ -557,14 +538,9 @@
   cursor: pointer;
 }
 
-.download-android-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 32px rgba(61, 220, 132, 0.38);
-  opacity: 0.95;
-}
-
 .download-android-btn:active {
   transform: scale(0.97);
+  box-shadow: 0 6px 16px rgba(61, 220, 132, 0.24);
 }
 
 .tiny-screen-warning {

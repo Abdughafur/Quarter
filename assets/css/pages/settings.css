@@ -86,8 +86,8 @@
   border-radius: 8px;
   transition: background 0.2s ease;
 }
-.btn-back:hover {
-  background: rgba(79, 70, 229, 0.08);
+.btn-back:active {
+  background: rgba(79, 70, 229, 0.12);
 }
 .btn-back svg {
   width: 20px;
@@ -149,8 +149,8 @@
   margin-bottom: 24px;
 }
 .dev-stat-box {
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid var(--soft);
+  background: linear-gradient(180deg, var(--card), var(--card2));
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 10px 6px;
   text-align: center;
@@ -178,4 +178,3 @@
   margin: 0 0 12px;
   text-align: center;
 }
-

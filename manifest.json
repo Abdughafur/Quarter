@@ -2,13 +2,17 @@
   "name": "Чоряк",
   "short_name": "Чоряк",
   "description": "Барномаи ҳисобкунии чоряк",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
   "orientation": "portrait",
   "background_color": "#f8fafc",
   "theme_color": "#4f46e5",
   "lang": "tg",
+  "id": "./",
+  "categories": ["productivity", "education"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "assets/images/app-icon.svg",

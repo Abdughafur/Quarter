@@ -12,7 +12,7 @@ nav {
   gap: 6px;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255, 255, 255, 0.56);
+  background: linear-gradient(180deg, var(--card), var(--card2));
   border: 1px solid var(--border);
   border-radius: 30px;
   backdrop-filter: blur(34px) saturate(180%);
