@@ -34,7 +34,7 @@
     linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 45%),
     linear-gradient(135deg, var(--primary), var(--accent));
   color: white;
-  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.24);
+  box-shadow: 0 10px 20px rgba(14, 165, 233, 0.24);
   position: relative;
   font-size: 1.25rem;
   line-height: 1;
@@ -74,15 +74,34 @@
   line-height: 0.96;
   font-weight: 1000;
   letter-spacing: -5px;
-  transition: transform 0.25s var(--ease);
 }
 
-.large.bump {
-  transform: scale(1.055) rotate(-1deg);
+.large-number {
+  display: inline-block;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.large-number.scrolling {
+  animation: fast-scroll 180ms ease forwards;
+}
+
+@keyframes fast-scroll {
+  0% {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+  80% {
+    transform: translateY(-6px);
+    opacity: 0.75;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .gradient-text {
-  background: linear-gradient(90deg, #a855f7, #3b82f6, #10b981, #a855f7);
+  background: linear-gradient(90deg, var(--accent), var(--primary), var(--cyan), var(--accent));
   background-size: 260% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

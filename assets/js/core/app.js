@@ -60,6 +60,139 @@ export const app = {
     this.updateAll();
 
     setTimeout(() => qs("loader")?.classList.add("hide"), 250);
+    // initialize nav highlight and draggable behavior
+    this.setupNavDrag();
+  },
+
+  setupNavDrag() {
+    try {
+      // enable draggable highlight only on phone-sized screens
+      const isMobile = typeof window !== 'undefined'
+        && ((window.matchMedia && window.matchMedia('(max-width: 760px)').matches) || window.innerWidth <= 760);
+      if (!isMobile) return;
+      const nav = document.querySelector("nav");
+      if (!nav) return;
+
+      const highlight = nav.querySelector(".nav-highlight") || (() => {
+        const el = document.createElement("div");
+        el.className = "nav-highlight";
+        nav.insertBefore(el, nav.firstChild);
+        return el;
+      })();
+
+      const buttons = Array.from(nav.querySelectorAll(".nav-btn"));
+      if (!buttons.length) return;
+
+      const updatePosition = (btn, animate = true) => {
+        const rect = nav.getBoundingClientRect();
+        const brect = btn.getBoundingClientRect();
+        // compute button background area (account for padding) and inset small gutter
+        const cs = window.getComputedStyle(btn);
+        const padLeft = parseFloat(cs.paddingLeft) || 0;
+        const padRight = parseFloat(cs.paddingRight) || 0;
+        const bgWidth = Math.max(24, brect.width - (padLeft + padRight));
+        const gutter = Math.min(12, Math.round(bgWidth * 0.06));
+        const targetW = Math.round(bgWidth - gutter);
+        const targetH = Math.max(28, Math.round(brect.height - 8));
+        highlight.style.width = `${targetW}px`;
+        highlight.style.height = `${targetH}px`;
+        const x = Math.round(brect.left - rect.left + (brect.width - targetW) / 2);
+        if (!animate) highlight.style.transition = "none";
+        requestAnimationFrame(() => {
+          highlight.style.transform = `translateX(${x}px)`;
+          // mark the target button so we can visually emphasise it
+          buttons.forEach((b) => b.classList.remove('highlighted'));
+          btn.classList.add('highlighted');
+          if (!animate) {
+            // force reflow then restore
+            // eslint-disable-next-line no-unused-expressions
+            highlight.offsetHeight;
+            highlight.style.transition = "transform 220ms cubic-bezier(.2,.9,.2,1), width 180ms ease, height 180ms ease";
+          }
+        });
+      };
+
+      // initial position to active and size highlight
+      const active = nav.querySelector('.nav-btn.active') || buttons[0];
+      updatePosition(active, false);
+
+      // when nav is changed programmatically
+      this.updateNavHighlight = (button) => {
+        const btn = button || nav.querySelector('.nav-btn.active') || buttons[0];
+        if (btn) updatePosition(btn, true);
+      };
+
+      // pointer drag
+      let dragging = false;
+      let pointerId = null;
+
+      const onPointerDown = (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        dragging = true;
+        pointerId = e.pointerId;
+        nav.setPointerCapture && nav.setPointerCapture(pointerId);
+      };
+
+      const onPointerMove = (e) => {
+        if (!dragging || e.pointerId !== pointerId) return;
+        const rect = nav.getBoundingClientRect();
+        const first = buttons[0].getBoundingClientRect();
+        const last = buttons[buttons.length - 1].getBoundingClientRect();
+        const minX = Math.round(first.left - rect.left + (first.width - highlight.offsetWidth) / 2);
+        const maxX = Math.round(last.left - rect.left + (last.width - highlight.offsetWidth) / 2);
+        const xCenter = e.clientX - rect.left - highlight.offsetWidth / 2;
+        const clamped = Math.max(minX, Math.min(maxX, Math.round(xCenter)));
+        highlight.style.transition = "none";
+        highlight.style.transform = `translateX(${clamped}px)`;
+
+        // while dragging, highlight nearest button visually
+        let nearest = buttons[0];
+        let nearestDist = Infinity;
+        buttons.forEach((btn) => {
+          const brect = btn.getBoundingClientRect();
+          const bx = brect.left - rect.left + brect.width / 2;
+          const dist = Math.abs(bx - (e.clientX - rect.left));
+          if (dist < nearestDist) {
+            nearestDist = dist;
+            nearest = btn;
+          }
+        });
+        buttons.forEach((b) => b.classList.remove('highlighted'));
+        nearest.classList.add('highlighted');
+      };
+
+      const onPointerUp = (e) => {
+        if (!dragging || e.pointerId !== pointerId) return;
+        dragging = false;
+        try { nav.releasePointerCapture && nav.releasePointerCapture(pointerId); } catch (_) {}
+        // choose nearest button
+        const rect = nav.getBoundingClientRect();
+        const centerX = e.clientX - rect.left;
+        let nearest = buttons[0];
+        let nearestDist = Infinity;
+        buttons.forEach((btn) => {
+          const brect = btn.getBoundingClientRect();
+          const bx = brect.left - rect.left + brect.width / 2;
+          const dist = Math.abs(bx - centerX);
+          if (dist < nearestDist) {
+            nearestDist = dist;
+            nearest = btn;
+          }
+        });
+        // activate that tab
+        const tab = nearest.dataset.tab;
+        if (tab) this.nav(tab, nearest);
+        updatePosition(nearest, true);
+        highlight.style.transition = "transform 220ms cubic-bezier(.2,.9,.2,1), width 180ms ease, height 180ms ease";
+      };
+
+      nav.addEventListener('pointerdown', onPointerDown);
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', onPointerUp);
+      window.addEventListener('pointercancel', onPointerUp);
+    } catch (err) {
+      // silent
+    }
   },
 
   bind(info = {}) {
@@ -231,6 +364,7 @@ export const app = {
       toggleFS: () => this.toggleFS(),
       togglePerformance: () => this.togglePerformance(),
       toggleSimple: () => this.toggleSimple(),
+      toggleDiagram: () => this.toggleDiagram(),
       editProfile: () => this.nav("tab-profile"),
       saveProfile: () => this.saveProfile(),
       goToProfile: () => this.nav("tab-profile"),
@@ -435,6 +569,8 @@ export const app = {
       const num = avgLarge.querySelector?.(".large-number");
       if (num) num.textContent = String(Math.round(stats.final));
       else avgLarge.textContent = String(Math.round(stats.final));
+      const labelEl = avgLarge.querySelector?.('.label-small');
+      if (labelEl) labelEl.textContent = this.grades.length ? gradeLabel(stats.final) : "";
       avgLarge.className = "large";
       if (anim) this.bump(avgLarge);
     }
@@ -460,6 +596,13 @@ export const app = {
   },
 
   bump(element) {
+    const number = element.querySelector?.(".large-number");
+    if (number) {
+      number.classList.add("scrolling");
+      setTimeout(() => number.classList.remove("scrolling"), 220);
+      return;
+    }
+
     element.classList.add("bump");
     setTimeout(() => element.classList.remove("bump"), 220);
   },
@@ -941,6 +1084,11 @@ export const app = {
       "active",
     );
 
+    // update draggable highlight if present
+    try {
+      this.updateNavHighlight && this.updateNavHighlight(button || document.querySelector(`[data-tab="${id}"]`));
+    } catch (e) {}
+
     this.tone(600, "sine", 0.04);
   },
 
@@ -1042,6 +1190,17 @@ export const app = {
     );
   },
 
+  toggleDiagram() {
+    const toggle = qs("diagramToggle");
+    this.settings.diagram = toggle ? toggle.checked : !this.settings.diagram;
+    this.applySettings();
+    this.save();
+
+    this.toast.show(
+      this.settings.diagram ? "Диаграмма фаъол шуд." : "Диаграмма хомӯш шуд.",
+    );
+  },
+
   toggleFS() {
     const toggle = qs("fsToggle");
     this.settings.fs = toggle ? toggle.checked : !this.settings.fs;
@@ -1065,6 +1224,7 @@ export const app = {
     const theme = this.settings?.theme === "dark" ? "dark" : "light";
     const performance = this.settings?.performance ? "on" : "off";
     const simple = this.settings?.simple ? "on" : "off";
+    const diagram = this.settings?.diagram === false ? "off" : "on";
 
     if (body) {
       body.dataset.theme = theme;
@@ -1077,6 +1237,7 @@ export const app = {
       root.dataset.theme = theme;
       root.dataset.performance = performance;
       root.dataset.simple = simple;
+      root.dataset.diagram = diagram;
       root.style.colorScheme = theme;
     }
 
@@ -1085,6 +1246,7 @@ export const app = {
     setChecked("fsToggle", this.settings.fs);
     setChecked("performanceToggle", this.settings.performance);
     setChecked("simpleToggle", this.settings.simple);
+    setChecked("diagramToggle", this.settings.diagram);
 
     document
       .querySelector('meta[name="theme-color"]')

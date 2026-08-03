@@ -30,6 +30,12 @@
   margin-top: 4px;
 }
 
+@media (max-width: 600px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .modal-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;

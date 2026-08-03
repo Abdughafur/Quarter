@@ -52,7 +52,7 @@
   background: linear-gradient(135deg, var(--primary), var(--accent));
   color: white;
   font-size: 1rem;
-  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.2);
+  box-shadow: 0 8px 18px rgba(14, 165, 233, 0.2);
 }
 
 .loader-symbol {

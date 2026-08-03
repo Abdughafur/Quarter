@@ -13,6 +13,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   fs: true,
   performance: true,
   simple: false,
+  diagram: true,
 });
 
 export const DEFAULT_PCT = Object.freeze({
@@ -57,6 +58,10 @@ function normalizeSettings(value) {
       settings.simple === undefined
         ? DEFAULT_SETTINGS.simple
         : Boolean(settings.simple),
+    diagram:
+      settings.diagram === undefined
+        ? DEFAULT_SETTINGS.diagram
+        : Boolean(settings.diagram),
   };
 }
 

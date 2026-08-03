@@ -6,7 +6,7 @@
   background: linear-gradient(135deg, var(--primary), var(--accent));
   color: white;
   font-weight: 1000;
-  box-shadow: 0 12px 28px rgba(79, 70, 229, 0.24);
+  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.24);
   transition:
     transform 0.16s var(--ease),
     filter 0.16s ease;
@@ -17,7 +17,7 @@
 }
 
 .btn.secondary {
-  background: rgba(79, 70, 229, 0.12);
+  background: rgba(14, 165, 233, 0.12);
   color: var(--text);
   box-shadow: none;
   border: 1px solid var(--border);
@@ -33,5 +33,5 @@
   place-items: center;
   font-size: 0.82rem;
   font-weight: 1000;
-  box-shadow: 0 12px 28px rgba(79, 70, 229, 0.24);
+  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.24);
 }

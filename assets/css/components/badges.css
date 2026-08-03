@@ -8,8 +8,8 @@
   align-items: center;
   justify-content: center;
   color: var(--primary);
-  background: rgba(79, 70, 229, 0.11);
-  border: 1px solid rgba(79, 70, 229, 0.13);
+  background: rgba(14, 165, 233, 0.11);
+  border: 1px solid rgba(14, 165, 233, 0.13);
   font-size: 0.86rem;
   font-weight: 1000;
   white-space: nowrap;
@@ -27,7 +27,7 @@
     linear-gradient(145deg, rgba(255, 255, 255, 0.34), transparent 45%),
     linear-gradient(135deg, var(--primary), var(--accent));
   box-shadow:
-    0 16px 34px rgba(79, 70, 229, 0.34),
+    0 16px 34px rgba(14, 165, 233, 0.34),
     inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
@@ -43,7 +43,7 @@
   font-weight: 1000;
   letter-spacing: 0.6px;
   text-transform: uppercase;
-  box-shadow: 0 12px 28px rgba(79, 70, 229, 0.28);
+  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.28);
 }
 
 .ai-badge::before {

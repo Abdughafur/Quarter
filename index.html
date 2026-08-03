@@ -14,7 +14,6 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="assets/css/main.css">
 
-
 </head>
 
 <body data-theme="light" data-performance="on" data-simple="off">
@@ -71,7 +70,7 @@
           <div class="score-tile">
             <div id="avgLarge" class="large">
               <div class="large-number">0</div>
-              <div class="label-small">АЪЛО</div>
+              <div class="label-small">-</div>
             </div>
           </div>
 
@@ -118,7 +117,9 @@
       </div>
 
       <div class="card compact-card diagram-card">
-        <div class="top"><span class="small">Диаграмма</span></div>
+        <div class="top">
+          <span class="small">Диаграмма</span>
+        </div>
         <div class="chart" id="gradeChart"></div>
       </div>
     </section>
@@ -335,46 +336,52 @@
             </span>
             <input type="checkbox" id="fsToggle" data-action="toggleFS" />
           </label>
-
-          <div class="card">
-            <h3 class="settings-title">Keyboard shortcuts</h3>
-            <div class="shortcuts-grid">
-              <div class="shortcut-card">
-                <kbd>1–9 / 0</kbd>
-                <div class="shortcut-desc">Балл</div>
-              </div>
-              <div class="shortcut-card">
-                <kbd>Backspace</kbd>
-                <div class="shortcut-desc">Тоза кардани балл</div>
-              </div>
-              <div class="shortcut-card">
-                <kbd>C</kbd>
-                <div class="shortcut-desc">Тоза кардани ҳамаи баллҳо</div>
-              </div>
-              <div class="shortcut-card">
-                <kbd>E</kbd>
-                <div class="shortcut-desc">Иваз кардани навъи балл</div>
-              </div>
-              <div class="shortcut-card">
-                <kbd>H</kbd>
-                <div class="shortcut-desc">Таб: Асосӣ</div>
-              </div>
-              <div class="shortcut-card">
-                <kbd>S</kbd>
-                <div class="shortcut-desc">Таб: Бештар</div>
-              </div>
-              <div class="shortcut-card">
-                <kbd>P</kbd>
-                <div class="shortcut-desc">Таб: Фоиз</div>
-              </div>
-              <div class="shortcut-card">
-                <kbd>M</kbd>
-                <div class="shortcut-desc">Таб: MinAI</div>
-              </div>
-              <div class="shortcut-card">
-                <kbd>I</kbd>
-                <div class="shortcut-desc">Таб: Профил</div>
-              </div>
+          <label class="setting-row">
+            <span class="setting-text">
+              <strong>Диаграмма</strong>
+              <span>Намоиш ё пинҳон кардани диаграмма</span>
+            </span>
+            <input type="checkbox" id="diagramToggle" data-action="toggleDiagram" />
+          </label>
+        </div>
+        <div class="card">
+          <h3 class="settings-title">Keyboard shortcuts</h3>
+          <div class="shortcuts-grid">
+            <div class="shortcut-card">
+              <kbd>1–9 / 0</kbd>
+              <div class="shortcut-desc">Балл</div>
+            </div>
+            <div class="shortcut-card">
+              <kbd>Backspace</kbd>
+              <div class="shortcut-desc">Тоза кардани балл</div>
+            </div>
+            <div class="shortcut-card">
+              <kbd>C</kbd>
+              <div class="shortcut-desc">Тоза кардани ҳамаи баллҳо</div>
+            </div>
+            <div class="shortcut-card">
+              <kbd>E</kbd>
+              <div class="shortcut-desc">Иваз кардани навъи балл</div>
+            </div>
+            <div class="shortcut-card">
+              <kbd>H</kbd>
+              <div class="shortcut-desc">Таб: Асосӣ</div>
+            </div>
+            <div class="shortcut-card">
+              <kbd>S</kbd>
+              <div class="shortcut-desc">Таб: Бештар</div>
+            </div>
+            <div class="shortcut-card">
+              <kbd>P</kbd>
+              <div class="shortcut-desc">Таб: Фоиз</div>
+            </div>
+            <div class="shortcut-card">
+              <kbd>M</kbd>
+              <div class="shortcut-desc">Таб: MinAI</div>
+            </div>
+            <div class="shortcut-card">
+              <kbd>I</kbd>
+              <div class="shortcut-desc">Таб: Профил</div>
             </div>
           </div>
         </div>
@@ -406,6 +413,7 @@
   <div id="toast"></div>
 
   <nav>
+    <div class="nav-highlight" aria-hidden="true"></div>
     <button class="nav-btn active" data-tab="tab-home" aria-label="Асосӣ"><svg viewBox="0 0 24 24">
         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
       </svg>Асосӣ</button>

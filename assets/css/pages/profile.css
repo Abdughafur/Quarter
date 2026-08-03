@@ -111,7 +111,7 @@
 .profile-setup-orb.one {
   width: 420px;
   height: 420px;
-  background: radial-gradient(circle, rgba(79, 70, 229, 0.55), transparent 70%);
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.55), transparent 70%);
   top: -120px;
   left: -100px;
 }
@@ -121,7 +121,7 @@
   height: 380px;
   background: radial-gradient(
     circle,
-    rgba(147, 51, 234, 0.48),
+    rgba(34, 211, 238, 0.48),
     transparent 70%
   );
   bottom: -100px;
@@ -139,7 +139,7 @@
   -webkit-backdrop-filter: blur(48px) saturate(180%);
   box-shadow:
     0 32px 80px rgba(15, 23, 42, 0.22),
-    0 0 0 1px rgba(79, 70, 229, 0.08);
+    0 0 0 1px rgba(14, 165, 233, 0.08);
   padding: 28px 24px 32px;
   animation: setupModalIn 0.44s var(--ease) 0.06s both;
 }
@@ -196,8 +196,8 @@
   font-size: 0.72rem;
   font-weight: 1000;
   color: var(--primary);
-  background: rgba(79, 70, 229, 0.1);
-  border: 1px solid rgba(79, 70, 229, 0.18);
+  background: rgba(14, 165, 233, 0.1);
+  border: 1px solid rgba(14, 165, 233, 0.12);
 }
 
 .profile-setup-welcome {
@@ -211,8 +211,8 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  background: rgba(79, 70, 229, 0.08);
-  border: 1px solid rgba(79, 70, 229, 0.18);
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(14, 165, 233, 0.18);
   border-radius: 14px;
   padding: 11px 14px;
   font-size: 0.84rem;
@@ -240,7 +240,7 @@
   cursor: pointer;
   padding: 12px;
   border-radius: 18px;
-  background: rgba(79, 70, 229, 0.08);
+  background: rgba(14, 165, 233, 0.08);
   border: 1.5px dashed var(--border);
   transition: background 0.18s ease;
 }
@@ -255,8 +255,8 @@
   border-radius: 50%;
   background: linear-gradient(
     135deg,
-    rgba(79, 70, 229, 0.15),
-    rgba(147, 51, 234, 0.15)
+    rgba(14, 165, 233, 0.15),
+    rgba(34, 211, 238, 0.15)
   );
   display: flex;
   align-items: center;
@@ -264,7 +264,7 @@
   font-size: 1.6rem;
   flex: 0 0 auto;
   overflow: hidden;
-  border: 2px solid rgba(79, 70, 229, 0.25);
+  border: 2px solid rgba(14, 165, 233, 0.25);
 }
 
 .profile-setup-upload-text {
@@ -302,7 +302,7 @@
   gap: 24px;
   padding: 32px 28px;
   border-radius: 30px;
-  border: 1px solid rgba(79, 70, 229, 0.12);
+  border: 1px solid rgba(14, 165, 233, 0.12);
   box-shadow: 0 28px 70px rgba(15, 23, 42, 0.08);
 }
 
@@ -324,8 +324,8 @@
   border-radius: 18px;
   font-weight: 900;
   color: var(--text);
-  background: rgba(79, 70, 229, 0.08);
-  border: 1px solid rgba(79, 70, 229, 0.15);
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(14, 165, 233, 0.18);
 }
 
 .profile-notice--error {
@@ -357,7 +357,7 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-  border: 1px solid rgba(79, 70, 229, 0.14);
+  border: 1px solid rgba(14, 165, 233, 0.14);
 }
 
 .profile-avatar-box img {
@@ -376,8 +376,8 @@
 .profile-avatar-upload {
   padding: 14px 18px;
   border-radius: 18px;
-  border: 1px solid rgba(79, 70, 229, 0.16);
-  background: rgba(79, 70, 229, 0.06);
+  border: 1px solid rgba(14, 165, 233, 0.16);
+  background: rgba(14, 165, 233, 0.06);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -389,7 +389,7 @@
   background: linear-gradient(135deg, var(--primary), var(--accent));
   color: #ffffff;
   border: none;
-  box-shadow: 0 18px 32px rgba(79, 70, 229, 0.18);
+  box-shadow: 0 18px 32px rgba(14, 165, 233, 0.18);
 }
 
 .profile-builder-fields {
@@ -475,7 +475,7 @@
   background: linear-gradient(135deg, var(--primary), var(--accent));
   color: #fff;
   border: none;
-  box-shadow: 0 18px 36px rgba(79, 70, 229, 0.28);
+  box-shadow: 0 18px 36px rgba(14, 165, 233, 0.28);
 }
 
 .install-pwa-btn {
@@ -491,7 +491,7 @@
   background: linear-gradient(135deg, var(--primary), var(--accent));
   color: #fff;
   font-weight: 1000;
-  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.28);
+  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.28);
   transition:
     transform 0.18s var(--ease),
     box-shadow 0.18s ease,
@@ -506,7 +506,7 @@
 
 .install-pwa-btn:active {
   transform: scale(0.97);
-  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.24);
+  box-shadow: 0 6px 16px rgba(14, 165, 233, 0.24);
 }
 
 .install-pwa-btn:disabled {

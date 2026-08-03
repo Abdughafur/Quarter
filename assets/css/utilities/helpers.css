@@ -23,6 +23,11 @@
   display: none !important;
 }
 
+/* allow toggling diagram visibility via settings */
+[data-diagram="off"] .diagram-card {
+  display: none !important;
+}
+
 @media (min-width: 761px) {
   body {
     padding-bottom: 24px;

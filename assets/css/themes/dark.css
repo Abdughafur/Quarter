@@ -2,15 +2,22 @@
 :root,
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg: #030712;
-  --bg2: #111827;
-  --card: rgba(17, 24, 39, 0.78);
-  --card2: rgba(17, 24, 39, 0.94);
-  --border: rgba(255, 255, 255, 0.12);
-  --soft: rgba(255, 255, 255, 0.1);
-  --text: #f8fafc;
-  --muted: #cbd5e1;
-  --shadow: 0 22px 58px rgba(0, 0, 0, 0.42);
+  --bg: #031626;
+  --bg2: #07233d;
+  --bg-radial-1: rgba(14, 165, 233, 0.18);
+  --bg-radial-2: rgba(14, 165, 233, 0.10);
+  --bg-radial-3: rgba(59, 130, 246, 0.08);
+  --card: rgba(8, 19, 38, 0.90);
+  --card2: rgba(12, 24, 48, 0.98);
+  --border: rgba(56, 189, 248, 0.14);
+  --soft: rgba(14, 165, 233, 0.08);
+  --primary: #22d3ee;
+  --primary2: #38bdf8;
+  --accent: #0ea5e9;
+  --cyan: #67e8f9;
+  --text: #e4f7ff;
+  --muted: #9bbed3;
+  --shadow: 0 28px 84px rgba(0, 0, 0, 0.42);
 }
 
 [data-theme="dark"] body {
@@ -18,8 +25,9 @@
 }
 
 [data-theme="dark"] nav {
-  background: rgba(17, 24, 39, 0.74);
-  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.38);
+  background: rgba(5, 13, 28, 0.92);
+  border: 1px solid rgba(56, 189, 248, 0.14);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
 }
 
 [data-theme="dark"] .ios-modal,
@@ -28,7 +36,7 @@
 }
 
 [data-theme="dark"] .ios-modal {
-  background: rgba(17, 24, 39, 0.9);
+  background: rgba(6, 14, 28, 0.96);
   border-color: var(--border);
 }
 
@@ -50,8 +58,8 @@
 }
 
 [data-theme="dark"] .input-field {
-  background: rgba(15, 23, 42, 0.68);
-  border-color: var(--border);
+  background: rgba(10, 18, 30, 0.78);
+  border-color: rgba(56, 189, 248, 0.12);
   color: var(--text);
 }
 
@@ -60,22 +68,64 @@
 }
 
 [data-theme="dark"] .btn.secondary {
-  background: rgba(96, 165, 250, 0.12);
+  background: rgba(34, 211, 238, 0.12);
   color: var(--text);
-  border-color: var(--border);
+  border-color: rgba(56, 189, 248, 0.14);
+}
+
+[data-theme="dark"] .stat-row {
+  background: rgba(10, 18, 30, 0.82);
+  border-color: rgba(56, 189, 248, 0.1);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+}
+
+[data-theme="dark"] .mini-stat,
+[data-theme="dark"] .shortcut-card {
+  background: rgba(10, 18, 30, 0.78);
+  border-color: rgba(56, 189, 248, 0.1);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
 }
 
 [data-theme="dark"] .stat-icon {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.08),
-    rgba(255, 255, 255, 0.02)
-  );
+  background: rgba(255, 255, 255, 0.06);
   color: var(--text);
-  border-color: var(--border);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.24);
+}
+
+[data-theme="dark"] .card::before,
+[data-theme="dark"] .hero::before {
+  background:
+    linear-gradient(135deg, rgba(34, 211, 238, 0.04), transparent 42%),
+    radial-gradient(circle at 80% 8%, rgba(56, 189, 248, 0.08), transparent 35%);
+}
+
+[data-theme="dark"] .large {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.96), rgba(56, 189, 248, 0.92));
+  box-shadow: 0 18px 40px rgba(1, 17, 45, 0.45);
+}
+
+[data-theme="dark"] .large-number {
+  color: #f8fcff;
+}
+
+[data-theme="dark"] .large .label-small {
+  color: rgba(234, 247, 255, 0.9);
+}
+
+[data-theme="dark"] .stat-text,
+[data-theme="dark"] .shortcut-desc,
+[data-theme="dark"] .about,
+[data-theme="dark"] .dev-name,
+[data-theme="dark"] .dev-title {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .app-info {
+  color: var(--muted);
 }
 
 [data-theme="dark"] .block.exam::after {
-  background: var(--card2);
-  color: var(--danger);
+  background: rgba(56, 189, 248, 0.08);
+  color: var(--text);
 }

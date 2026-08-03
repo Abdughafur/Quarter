@@ -13,9 +13,9 @@ body {
     sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at 16% 0%, rgba(147, 51, 234, 0.22), transparent 32%),
-    radial-gradient(circle at 90% 10%, rgba(79, 70, 229, 0.2), transparent 32%),
-    radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.11), transparent 30%),
+    radial-gradient(circle at 16% 0%, var(--bg-radial-1, rgba(14, 165, 233, 0.22)), transparent 32%),
+    radial-gradient(circle at 90% 10%, var(--bg-radial-2, rgba(14, 165, 233, 0.2)), transparent 32%),
+    radial-gradient(circle at 50% 100%, var(--bg-radial-3, rgba(16, 185, 129, 0.11)), transparent 30%),
     linear-gradient(145deg, var(--bg), var(--bg2));
   transition:
     background 0.25s ease,
@@ -57,6 +57,6 @@ body::before {
 .orb.two {
   right: -105px;
   bottom: 150px;
-  background: linear-gradient(135deg, #22c55e, #38bdf8);
+  background: linear-gradient(135deg, var(--cyan), var(--primary2));
   animation-delay: -4s;
 }

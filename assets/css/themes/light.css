@@ -1,13 +1,20 @@
 /* light.css */
 [data-theme="light"] {
   color-scheme: light;
-  --bg: #f2f8ff;
-  --bg2: #eaf6ff;
-  --card: rgba(255, 255, 255, 0.96);
-  --card2: rgba(255, 255, 255, 0.995);
-  --border: rgba(255, 255, 255, 0.85);
-  --soft: rgba(14, 43, 77, 0.06);
-  --text: #06273b;
-  --muted: #5b6b87;
-  --shadow: 0 18px 46px rgba(14, 43, 77, 0.06);
+  --bg: #eaf9ff;
+  --bg2: #d7f1ff;
+  --bg-radial-1: rgba(14, 165, 233, 0.18);
+  --bg-radial-2: rgba(14, 165, 233, 0.12);
+  --bg-radial-3: rgba(14, 165, 233, 0.10);
+  --card: rgba(255, 255, 255, 0.98);
+  --card2: rgba(239, 250, 255, 0.94);
+  --border: rgba(14, 165, 233, 0.18);
+  --soft: rgba(14, 165, 233, 0.08);
+  --primary: #0ea5e9;
+  --primary2: #38bdf8;
+  --accent: #22d3ee;
+  --cyan: #67e8f9;
+  --text: #0f172a;
+  --muted: #475569;
+  --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
 }

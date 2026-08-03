@@ -87,7 +87,7 @@
   transition: background 0.2s ease;
 }
 .btn-back:active {
-  background: rgba(79, 70, 229, 0.12);
+  background: rgba(14, 165, 233, 0.12);
 }
 .btn-back svg {
   width: 20px;
@@ -111,7 +111,7 @@
   align-items: center;
   justify-content: center;
   border: 4px solid var(--primary2);
-  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.3);
 }
 .dev-avatar-large img {
   width: 100%;
