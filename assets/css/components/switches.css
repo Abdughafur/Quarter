@@ -14,6 +14,9 @@ input[type="checkbox"] {
   transition:
     background 0.2s ease,
     transform 0.14s ease;
+  touch-action: pan-y;
+  user-select: none;
+  --switch-thumb-x: 0px;
 }
 
 input[type="checkbox"]::before {
@@ -27,12 +30,10 @@ input[type="checkbox"]::before {
   background: linear-gradient(145deg, #fff, #eef2ff);
   box-shadow: 0 5px 14px rgba(0, 0, 0, 0.24);
   transition: transform 0.22s var(--ease);
+  transform: translateX(var(--switch-thumb-x, 0px));
 }
 
 input[type="checkbox"]:checked {
+  --switch-thumb-x: 26px;
   background: linear-gradient(135deg, var(--primary), var(--accent));
-}
-
-input[type="checkbox"]:checked::before {
-  transform: translateX(24px);
 }

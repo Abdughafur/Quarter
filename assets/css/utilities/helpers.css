@@ -17,12 +17,6 @@
   transition: none;
 }
 
-[data-simple="on"] .diagram-card,
-[data-simple="on"] .export-action,
-[data-simple="on"] .advanced-tab {
-  display: none !important;
-}
-
 /* allow toggling diagram visibility via settings */
 [data-diagram="off"] .diagram-card {
   display: none !important;

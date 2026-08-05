@@ -14,6 +14,7 @@ Modern web application for quarterly grade calculation, percentage analytics, an
 
 ### ✨ Имкониятҳо
 
+<<<<<<< HEAD
 * 📊 Ҳисоби автоматии чоряк
 * 🧠 Таҳлили AI (MinAI)
 * 📈 Диаграммаҳо
@@ -22,6 +23,16 @@ Modern web application for quarterly grade calculation, percentage analytics, an
 * 📤 Share Image
 * 💾 LocalStorage
 * 📱 Responsive Design
+=======
+- 📊 Ҳисоби автоматии чоряк
+- 🧠 Таҳлили AI (MinAI)
+- 📈 Диаграммаҳо
+- 🌙 Dark / Light Mode
+- 🖼 PNG Export
+- 📤 Share Image
+- 💾 LocalStorage
+- 📱 Responsive Design
+>>>>>>> def90ae (v4.2 Changes)
 
 ### ⚠ Литсензия
 
@@ -37,6 +48,7 @@ Modern web application for quarterly grade calculation, percentage analytics, an
 
 ### ✨ Features
 
+<<<<<<< HEAD
 * 📊 Automatic grade calculation
 * 🧠 MinAI analysis
 * 📈 Charts
@@ -45,6 +57,16 @@ Modern web application for quarterly grade calculation, percentage analytics, an
 * 📤 Share Image
 * 💾 LocalStorage
 * 📱 Responsive Design
+=======
+- 📊 Automatic grade calculation
+- 🧠 MinAI analysis
+- 📈 Charts
+- 🌙 Dark / Light Mode
+- 🖼 PNG Export
+- 📤 Share Image
+- 💾 LocalStorage
+- 📱 Responsive Design
+>>>>>>> def90ae (v4.2 Changes)
 
 ### ⚠ License
 
@@ -60,6 +82,7 @@ Modern web application for quarterly grade calculation, percentage analytics, an
 
 ### ✨ Возможности
 
+<<<<<<< HEAD
 * 📊 Автоматический расчёт
 * 🧠 AI-анализ MinAI
 * 📈 Графики
@@ -68,6 +91,16 @@ Modern web application for quarterly grade calculation, percentage analytics, an
 * 📤 Поделиться изображением
 * 💾 LocalStorage
 * 📱 Адаптивный дизайн
+=======
+- 📊 Автоматический расчёт
+- 🧠 AI-анализ MinAI
+- 📈 Графики
+- 🌙 Тёмная / светлая тема
+- 🖼 Экспорт PNG
+- 📤 Поделиться изображением
+- 💾 LocalStorage
+- 📱 Адаптивный дизайн
+>>>>>>> def90ae (v4.2 Changes)
 
 ### ⚠ Лицензия
 

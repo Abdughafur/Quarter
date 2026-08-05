@@ -1,7 +1,7 @@
 /* app.js */
 import { renderMinAI } from "../ai/minai.js";
 import { calculateStats, gradeLabel, GRADE_LABELS } from "./stats.js";
-import { loadState, saveState } from "./storage.js";
+import { loadState, saveState, clearState } from "./storage.js";
 import { promptInstallPwa } from "./pwa.js";
 import {
   buildKeypad,
@@ -227,7 +227,7 @@ export const app = {
 
     document.addEventListener("click", (event) => {
       const actionButton = event.target.closest("[data-action]");
-      if (actionButton) this.action(actionButton.dataset.action);
+      if (actionButton) this.action(actionButton.dataset.action, actionButton.dataset);
 
       const tabButton = event.target.closest("[data-tab]");
       if (tabButton) this.nav(tabButton.dataset.tab, tabButton);
@@ -260,6 +260,129 @@ export const app = {
       this.setPupilTotal(),
     );
     document.addEventListener("keydown", (event) => this.keyboard(event));
+    this.bindSwitches();
+  },
+
+  bindSwitches() {
+    const switches = Array.from(document.querySelectorAll(
+      "#themeToggle, #soundToggle, #fsToggle, #diagramToggle, #performanceToggle",
+    ));
+
+    switches.forEach((input) => {
+      let dragging = false;
+      let pointerId = null;
+      let startX = 0;
+      let startChecked = false;
+      let moved = false;
+      let ignoreChange = false;
+      let suppressClick = false;
+
+      const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+      const updateThumb = (x) => {
+        input.style.setProperty("--switch-thumb-x", `${clamp(x, 0, 26)}px`);
+      };
+
+      const onPointerDown = (event) => {
+        if (event.pointerType === "mouse" && event.button !== 0) return;
+        dragging = true;
+        pointerId = event.pointerId;
+        startX = event.clientX;
+        startChecked = input.checked;
+        moved = false;
+        suppressClick = false;
+        ignoreChange = false;
+        input.setPointerCapture?.(pointerId);
+      };
+
+      let lastThumbX = 0;
+
+      const onPointerMove = (event) => {
+        if (!dragging || event.pointerId !== pointerId) return;
+        const delta = event.clientX - startX;
+        if (Math.abs(delta) < 10) return;
+        moved = true;
+        suppressClick = true;
+        const base = startChecked ? 26 : 0;
+        lastThumbX = clamp(base + delta, 0, 26);
+        updateThumb(lastThumbX);
+      };
+
+      const onPointerUp = (event) => {
+        if (!dragging || event.pointerId !== pointerId) return;
+        dragging = false;
+        input.releasePointerCapture?.(pointerId);
+        input.style.removeProperty("--switch-thumb-x");
+
+        if (!moved) {
+          suppressClick = false;
+          return;
+        }
+
+        event.preventDefault();
+        moved = false;
+
+        const trackMidpoint = 13; // half of the thumb movement range (0..26)
+        const nextChecked = lastThumbX >= trackMidpoint;
+
+        if (nextChecked !== input.checked) {
+          ignoreChange = true;
+          input.checked = nextChecked;
+          const actionName = input.dataset.action;
+          if (actionName) this.action(actionName, nextChecked);
+        }
+      };
+
+      input.addEventListener("click", (event) => {
+        if (suppressClick) {
+          event.preventDefault();
+          event.stopPropagation();
+          suppressClick = false;
+        }
+      });
+
+      input.addEventListener("change", () => {
+        if (dragging || moved || ignoreChange) {
+          moved = false;
+          ignoreChange = false;
+          return;
+        }
+        const actionName = input.dataset.action;
+        if (actionName) this.action(actionName, input.checked);
+      });
+
+      input.addEventListener("pointerdown", onPointerDown);
+      input.addEventListener("pointermove", onPointerMove);
+      input.addEventListener("pointerup", onPointerUp);
+      input.addEventListener("pointercancel", onPointerUp);
+      input.addEventListener("lostpointercapture", onPointerUp);
+    });
+  },
+
+  showLogoutConfirm() {
+    qs("logoutModal")?.classList.add("open");
+    this.tone(450, "sine", 0.06);
+  },
+
+  showLogoutFinalConfirm() {
+    qs("logoutModal")?.classList.remove("open");
+    qs("logoutFinalModal")?.classList.add("open");
+    this.tone(450, "sine", 0.06);
+  },
+
+  closeLogoutModal() {
+    qs("logoutModal")?.classList.remove("open");
+    this.tone(300, "sine", 0.04);
+  },
+
+  closeLogoutFinalModal() {
+    qs("logoutFinalModal")?.classList.remove("open");
+    this.tone(300, "sine", 0.04);
+  },
+
+  async confirmLogoutFinal() {
+    this.toast.show("Баромадан ва тоза кардани маълумот...", { duration: 1800 });
+    await clearState();
+    window.location.reload();
   },
 
   bindProfile() {
@@ -351,7 +474,7 @@ export const app = {
     input.value = value;
   },
 
-  action(name) {
+  action(name, payload) {
     const actions = {
       deleteLast: () => this.deleteLast(),
       clearAll: () => this.clearAll(),
@@ -359,19 +482,29 @@ export const app = {
       downloadResult: () => this.ensureInfo(),
       closeModal: () => this.closeModal(),
       saveModalInfo: () => this.saveModalInfo(),
-      toggleTheme: () => this.toggleTheme(),
-      toggleSound: () => this.toggleSound(),
-      toggleFS: () => this.toggleFS(),
-      togglePerformance: () => this.togglePerformance(),
-      toggleSimple: () => this.toggleSimple(),
-      toggleDiagram: () => this.toggleDiagram(),
-      editProfile: () => this.nav("tab-profile"),
+      toggleTheme: () => this.toggleTheme(payload),
+      toggleSound: () => this.toggleSound(payload),
+      toggleFS: () => this.toggleFS(payload),
+      togglePerformance: () => this.togglePerformance(payload),
+      toggleDiagram: () => this.toggleDiagram(payload),
+      editProfile: () => this.showSubView("more-profile-view"),
       saveProfile: () => this.saveProfile(),
-      goToProfile: () => this.nav("tab-profile"),
+      goToProfile: () => this.showSubView("more-profile-view"),
       saveSetupProfile: () => this.saveSetupProfile(),
       showSettings: () => this.showSubView("more-settings-view"),
       showDeveloper: () => this.showSubView("more-developer-view"),
-      hideSubviews: () => this.showSubView("more-menu-view"),
+      showMoreProfile: () => this.showSubView("more-profile-view"),
+      showMorePerformance: () => this.showSubView("more-performance-view"),
+      showMoreShortcuts: () => this.showSubView("more-shortcuts-view"),
+      showMoreAbout: () => this.showSubView("more-about-view"),
+      hideSubviews: () => this.showSubView("more-home-view"),
+      showLogoutConfirm: () => this.showLogoutConfirm(),
+      showLogoutFinalConfirm: () => this.showLogoutFinalConfirm(),
+      cancelLogout: () => this.closeLogoutModal(),
+      cancelLogoutFinal: () => this.closeLogoutFinalModal(),
+      confirmLogout: () => this.confirmLogoutFinal(),
+      scrollToPerformance: () => this.showSubView("more-performance-view"),
+      scrollToShortcuts: () => this.showSubView("more-shortcuts-view"),
       shareApp: () => this.shareApp(),
       installPwa: () => this.installPwa(),
     };
@@ -407,12 +540,12 @@ export const app = {
       this.nav("tab-home");
     } else if (key === "s") {
       this.nav("tab-more");
-    } else if (!this.settings.simple && key === "p") {
+    } else if (key === "p") {
       this.nav("tab-prosent");
-    } else if (!this.settings.simple && key === "m") {
-      this.nav("tab-ai");
-    } else if (key === "i") {
-      this.nav("tab-profile");
+    } else if (key === "n") {
+      this.nav("tab-notes");
+    } else if (key === "j") {
+      this.nav("tab-journal");
       /* Русский */
     } else if (key === "с") {
       event.preventDefault();
@@ -424,12 +557,10 @@ export const app = {
       this.nav("tab-home");
     } else if (key === "ы") {
       this.nav("tab-more");
-    } else if (!this.settings.simple && key === "з") {
+    } else if (key === "з") {
       this.nav("tab-prosent");
-    } else if (!this.settings.simple && key === "ь") {
-      this.nav("tab-ai");
-    } else if (key === "ш") {
-      this.nav("tab-profile");
+    } else if (key === "ь") {
+      this.nav("tab-journal");
       /* Тоҷикӣ */
     } else if (key === "с") {
       event.preventDefault();
@@ -441,12 +572,12 @@ export const app = {
       this.nav("tab-home");
     } else if (key === "ҷ") {
       this.nav("tab-more");
-    } else if (!this.settings.simple && key === "з") {
+    } else if (key === "з") {
       this.nav("tab-prosent");
-    } else if (!this.settings.simple && key === "ӣ") {
-      this.nav("tab-ai");
-    } else if (key === "ш") {
-      this.nav("tab-profile");
+    } else if (key === "ӣ") {
+      this.nav("tab-journal");
+    } else if (key === "н") {
+      this.nav("tab-notes");
     } else if (key === "escape") {
       this.closeModal();
     }
@@ -757,11 +888,6 @@ export const app = {
   },
 
   ensureInfo() {
-    if (this.settings.simple) {
-      this.toast.show("Дар Ҳолати оддӣ экспорт кардан номумкин аст.");
-      return;
-    }
-
     if (!this.grades.length) {
       this.toast.show("Аввал балл ворид кунед.");
       return;
@@ -923,7 +1049,7 @@ export const app = {
     ctx.fillStyle = "#c084fc";
     ctx.font = "800 24px Arial";
     ctx.textAlign = "center";
-    ctx.fillText("v4.1", 395 + 60, 125 + 34);
+    ctx.fillText("v4.2", 395 + 60, 125 + 34);
     ctx.textAlign = "left";
 
     ctx.fillStyle = "rgba(255,255,255,0.64)";
@@ -1065,12 +1191,6 @@ export const app = {
   },
 
   nav(id, button) {
-    if (this.settings.simple && (id === "tab-prosent" || id === "tab-ai")) {
-      this.toast.show(
-        "Дар Ҳолати оддӣ танҳо Табҳои Асосӣ ва Бештар фаъол аст.",
-      );
-      return;
-    }
 
     document
       .querySelectorAll(".tab")
@@ -1098,6 +1218,32 @@ export const app = {
     });
     qs(viewId)?.classList.add("active");
     this.tone(550, "sine", 0.05);
+  },
+
+  showLogoutConfirm() {
+    qs("logoutModal")?.classList.add("open");
+    this.tone(450, "sine", 0.06);
+  },
+
+  closeLogoutModal() {
+    qs("logoutModal")?.classList.remove("open");
+    this.tone(300, "sine", 0.04);
+  },
+
+  async confirmLogout() {
+    this.toast.show("Баромадан ва тоза кардани маълумот...", { duration: 1800 });
+    await clearState();
+    window.location.reload();
+  },
+
+  openMoreSettingsSection(sectionId) {
+    this.showSubView("more-settings-view");
+    setTimeout(() => {
+      const element = qs(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 80);
   },
 
   async shareApp() {
@@ -1134,31 +1280,43 @@ export const app = {
     this.toast.show("Насб дар ин браузер ё дар ин ҳолат дастрас нест.");
   },
 
-  toggleTheme() {
-    const toggle = qs("themeToggle");
-    this.settings.theme = toggle
-      ? toggle.checked
-        ? "dark"
-        : "light"
-      : this.settings.theme === "dark"
-        ? "light"
-        : "dark";
+  toggleTheme(value) {
+    if (typeof value === "boolean") {
+      this.settings.theme = value ? "dark" : "light";
+    } else {
+      const toggle = qs("themeToggle");
+      this.settings.theme = toggle
+        ? toggle.checked
+          ? "dark"
+          : "light"
+        : this.settings.theme === "dark"
+          ? "light"
+          : "dark";
+    }
     this.applySettings();
     this.save();
   },
 
-  toggleSound() {
-    const toggle = qs("soundToggle");
-    this.settings.sound = toggle ? toggle.checked : !this.settings.sound;
+  toggleSound(value) {
+    if (typeof value === "boolean") {
+      this.settings.sound = value;
+    } else {
+      const toggle = qs("soundToggle");
+      this.settings.sound = toggle ? toggle.checked : !this.settings.sound;
+    }
     this.save();
     this.tone(680, "sine", 0.06, true);
   },
 
-  togglePerformance() {
-    const toggle = qs("performanceToggle");
-    this.settings.performance = toggle
-      ? toggle.checked
-      : !this.settings.performance;
+  togglePerformance(value) {
+    if (typeof value === "boolean") {
+      this.settings.performance = value;
+    } else {
+      const toggle = qs("performanceToggle");
+      this.settings.performance = toggle
+        ? toggle.checked
+        : !this.settings.performance;
+    }
     this.applySettings();
     this.save();
 
@@ -1169,30 +1327,14 @@ export const app = {
     );
   },
 
-  toggleSimple() {
-    const toggle = qs("simpleToggle");
-    this.settings.simple = toggle ? toggle.checked : !this.settings.simple;
-    this.applySettings();
-    this.save();
 
-    if (
-      this.settings.simple &&
-      (qs("tab-prosent")?.classList.contains("active") ||
-        qs("tab-ai")?.classList.contains("active"))
-    ) {
-      this.nav("tab-home");
+  toggleDiagram(value) {
+    if (typeof value === "boolean") {
+      this.settings.diagram = value;
+    } else {
+      const toggle = qs("diagramToggle");
+      this.settings.diagram = toggle ? toggle.checked : !this.settings.diagram;
     }
-
-    this.toast.show(
-      this.settings.simple
-        ? "Ҳолати оддӣ фаъол шуд."
-        : "Ҳолати оддӣ хомӯш шуд.",
-    );
-  },
-
-  toggleDiagram() {
-    const toggle = qs("diagramToggle");
-    this.settings.diagram = toggle ? toggle.checked : !this.settings.diagram;
     this.applySettings();
     this.save();
 
@@ -1201,9 +1343,13 @@ export const app = {
     );
   },
 
-  toggleFS() {
-    const toggle = qs("fsToggle");
-    this.settings.fs = toggle ? toggle.checked : !this.settings.fs;
+  toggleFS(value) {
+    if (typeof value === "boolean") {
+      this.settings.fs = value;
+    } else {
+      const toggle = qs("fsToggle");
+      this.settings.fs = toggle ? toggle.checked : !this.settings.fs;
+    }
     this.save();
 
     const root = document.documentElement;
@@ -1223,20 +1369,17 @@ export const app = {
     const body = document.body;
     const theme = this.settings?.theme === "dark" ? "dark" : "light";
     const performance = this.settings?.performance ? "on" : "off";
-    const simple = this.settings?.simple ? "on" : "off";
     const diagram = this.settings?.diagram === false ? "off" : "on";
 
     if (body) {
       body.dataset.theme = theme;
       body.dataset.performance = performance;
-      body.dataset.simple = simple;
       body.style.colorScheme = theme;
     }
 
     if (root) {
       root.dataset.theme = theme;
       root.dataset.performance = performance;
-      root.dataset.simple = simple;
       root.dataset.diagram = diagram;
       root.style.colorScheme = theme;
     }
@@ -1245,7 +1388,6 @@ export const app = {
     setChecked("soundToggle", this.settings.sound);
     setChecked("fsToggle", this.settings.fs);
     setChecked("performanceToggle", this.settings.performance);
-    setChecked("simpleToggle", this.settings.simple);
     setChecked("diagramToggle", this.settings.diagram);
 
     document

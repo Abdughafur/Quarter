@@ -1,5 +1,5 @@
 ﻿/* profile.js */
-/* Created by Abdughafur - ЧОРЯК v4.1 */
+/* Created by Abdughafur - ЧОРЯК v4.2 */
 import { clean, qs, setInputValue } from "../utils/helpers.js";
 import { saveState, loadState, DEFAULT_PROFILE } from "./storage.js";
 
@@ -114,4 +114,4 @@ async function init() {
 
 void init();
 
-/* Created by Abdughafur - ЧОРЯК v4.1 */
+/* Created by Abdughafur - ЧОРЯК v4.2 */

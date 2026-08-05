@@ -5,14 +5,13 @@ const DB_NAME = "ChoryakDB";
 const DB_VERSION = 1;
 const STORE_NAME = "state";
 const FALLBACK_STORAGE_KEY = "chorak_state";
-const LEGACY_PREFIXES = ["chorak_v4.1", "chorak_v4.0"];
+const LEGACY_PREFIXES = ["chorak_v4.2", "chorak_v4.1", "chorak_v4.0"];
 
 export const DEFAULT_SETTINGS = Object.freeze({
   theme: "light",
   sound: true,
   fs: true,
   performance: true,
-  simple: false,
   diagram: true,
 });
 
@@ -54,10 +53,6 @@ function normalizeSettings(value) {
       settings.performance === undefined
         ? DEFAULT_SETTINGS.performance
         : Boolean(settings.performance),
-    simple:
-      settings.simple === undefined
-        ? DEFAULT_SETTINGS.simple
-        : Boolean(settings.simple),
     diagram:
       settings.diagram === undefined
         ? DEFAULT_SETTINGS.diagram
@@ -219,4 +214,31 @@ export async function saveState({ grades, settings, pct, info, profile }) {
   } catch {}
 
   await saveToIndexedDb(payload);
+}
+
+export async function clearState() {
+  try {
+    localStorage.removeItem(FALLBACK_STORAGE_KEY);
+  } catch {}
+
+  for (const prefix of LEGACY_PREFIXES) {
+    try {
+      localStorage.removeItem(`${prefix}_grades`);
+      localStorage.removeItem(`${prefix}_settings`);
+      localStorage.removeItem(`${prefix}_pct`);
+      localStorage.removeItem(`${prefix}_info`);
+      localStorage.removeItem(`${prefix}_profile`);
+    } catch {}
+  }
+
+  if ("indexedDB" in window) {
+    try {
+      await new Promise((resolve) => {
+        const request = indexedDB.deleteDatabase(DB_NAME);
+        request.onsuccess = resolve;
+        request.onerror = resolve;
+        request.onblocked = resolve;
+      });
+    } catch {}
+  }
 }
