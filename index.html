@@ -5,8 +5,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <meta name="theme-color" content="#f8fafc" />
+  <meta name="theme-color" content="#06b6d4" />
+  <meta name="msapplication-navbutton-color" content="#06b6d4" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Чоряк" />
   <title>Чоряк</title>
   <link rel="icon" href="assets/images/app-icon.svg" type="image/svg+xml" />
@@ -16,7 +18,7 @@
 
 </head>
 
-<body data-theme="light" data-performance="on">
+<body data-theme="light">
   <div id="loader" class="loader" aria-hidden="true">
     <div class="loader-card">
       <div class="loader-operator plus">+</div>
@@ -30,6 +32,16 @@
       <div class="loader-operator minus">−</div>
     </div>
   </div>
+    <div id="noteConfirmModal" class="note-modal-backdrop" role="dialog" aria-modal="true">
+      <div class="ios-modal">
+        <h3>Пок кардани ёддошт</h3>
+        <p>Шумо мутмаин ҳастед, ёддошт пок карда шавад? Ин амал барқарор карда намешавад.</p>
+        <div class="modal-actions">
+          <button class="btn secondary" type="button" data-action="cancelDeleteNote">Не</button>
+          <button class="btn" type="button" data-action="confirmDeleteNote">Бале</button>
+        </div>
+      </div>
+    </div>
   <div class="orb one"></div>
   <div class="orb two"></div>
 
@@ -152,12 +164,23 @@
     </section>
 
     <section id="tab-notes" class="tab">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="settings-title">Ёддоштҳо</h3>
+      <div class="card notes-card">
+        <div class="notes-header">
+          <div class="notes-search">
+            <input id="noteSearchInput" class="input-field" type="search" placeholder="Чустуҷӯ..." />
+          </div>
+          <div class="notes-filters">
+            <button class="pill active" type="button" data-action="setNoteFilter" data-filter="all">Ҳама</button>
+            <button class="pill" type="button" data-action="setNoteFilter" data-filter="lesson">Дарс</button>
+            <button class="pill" type="button" data-action="setNoteFilter" data-filter="task">Вазифа</button>
+            <button class="pill" type="button" data-action="setNoteFilter" data-filter="idea">Идея</button>
+          </div>
         </div>
-        <div class="msg">Ин бахш ба зудӣ меояд.</div>
+
+        <div id="notesList" class="notes-list"></div>
       </div>
+
+      <button class="btn add-note-btn floating-add-note" type="button" data-action="openNoteModal">+</button>
     </section>
 
     <section id="tab-journal" class="tab">
@@ -165,7 +188,7 @@
         <div class="card-header">
           <h3 class="settings-title">Журнал</h3>
         </div>
-        <div class="msg">🚧 Ин бахш ҳоло дар ҳоли таҳия аст ва ба зудӣ дастрас мешавад.</div>
+        <div class="msg">Ин бахш ҳоло дар ҳоли таҳия аст. Барои гирифтани маълумоти бештар ё ирсоли пешниҳодҳо метавонед бо таҳиягар дар тамос шавед.</div>
       </div>
     </section>
     <section id="tab-more" class="tab">
@@ -218,20 +241,6 @@
               <span class="option-arrow">›</span>
             </button>
 
-            <button class="option-item" type="button" data-action="showMorePerformance">
-              <span class="option-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
-                  width="40" height="40" viewBox="0 0 20 20" fill="#ffffff">
-                  <path
-                    d="M3.76 17.010h12.48c1.1-1.38 1.76-3.11 1.76-5.010 0-4.41-3.58-8-8-8s-8 3.59-8 8c0 1.9 0.66 3.63 1.76 5.010zM9 6c0-0.55 0.45-1 1-1s1 0.45 1 1c0 0.56-0.45 1-1 1s-1-0.44-1-1zM4 8c0-0.55 0.45-1 1-1s1 0.45 1 1c0 0.56-0.45 1-1 1s-1-0.44-1-1zM8.52 11.4c0.84-0.83 6.51-3.5 6.51-3.5s-2.66 5.68-3.49 6.51c-0.84 0.84-2.18 0.84-3.020 0-0.83-0.83-0.83-2.18 0-3.010zM3 13c0-0.55 0.45-1 1-1s1 0.45 1 1c0 0.56-0.45 1-1 1s-1-0.44-1-1zM9 13c0-0.55 0.45-1 1-1s1 0.45 1 1c0 0.56-0.45 1-1 1s-1-0.44-1-1zM15 13c0-0.55 0.45-1 1-1s1 0.45 1 1c0 0.56-0.45 1-1 1s-1-0.44-1-1z">
-                  </path>
-                </svg>
-              </span>
-              <span class="option-content">
-                <strong>Performance</strong>
-              </span>
-              <span class="option-arrow">›</span>
-            </button>
 
             <button class="option-item" type="button" data-action="showMoreShortcuts">
               <span class="option-icon">
@@ -495,26 +504,6 @@
         </div>
       </div>
 
-      <div id="more-performance-view" class="more-subview">
-        <div class="card">
-          <div class="back-nav">
-            <button class="btn-back" data-action="hideSubviews" type="button">
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
-              </svg>
-              Бозгашт
-            </button>
-          </div>
-          <h3 class="settings-title">Performance</h3>
-          <label class="setting-row">
-            <span class="setting-text">
-              <strong>Беҳтарин Performance</strong>
-              <span>Агар барнома суст кор кунад ин қисматро фаъол кунед!</span>
-            </span>
-            <input type="checkbox" id="performanceToggle" data-action="togglePerformance" />
-          </label>
-        </div>
-      </div>
 
       <div id="more-shortcuts-view" class="more-subview">
         <div class="card">
@@ -593,7 +582,7 @@
               Ч</div>
             <div class="about">
               <p><strong>Чоряк</strong></p>
-              <p><strong>Версия:</strong> 4.2 Prime Edition</p>
+              <p><strong>Версия:</strong> 4.2.1 Prime Edition</p>
               <p><strong>Таҳиягар:</strong> Abdughafur (Абдуғафур)</p>
             </div>
           </div>
@@ -616,6 +605,35 @@
       <div class="modal-actions"><button class="btn secondary" type="button"
           data-action="closeModal">Лағв</button><button id="modalSaveButton" class="btn" type="button"
           data-action="saveModalInfo">Экспорт</button></div>
+    </div>
+  </div>
+
+  <div id="noteModal" class="note-modal-backdrop" role="dialog" aria-modal="true">
+    <div class="note-modal">
+      <div class="note-modal-header">
+        <h3 id="noteModalTitle">Ёддости нав</h3>
+        <button class="note-modal-close" type="button" data-action="closeNoteModal">×</button>
+      </div>
+      <div class="note-modal-body">
+        <input id="noteTitleInput" class="input-field" type="text" placeholder="Сарлавҳа" autocomplete="off" />
+        <input type="hidden" id="noteCategoryInput" value="lesson" />
+        <textarea id="noteBodyInput" class="input-field note-body-input" rows="6" placeholder="Тавсиф ё маълумоти ёддошт"></textarea>
+        <h3 class="note-category-label">Категория</h3>
+        <div class="note-category-row" id="noteCategoryRow">
+          <button type="button" class="note-category-pill" data-category="lesson">Дарс</button>
+          <button type="button" class="note-category-pill" data-category="task">Вазифа</button>
+          <button type="button" class="note-category-pill" data-category="idea">Идея</button>
+          <button type="button" class="note-category-pill" data-category="other">Дигар</button>
+        </div>
+      </div>
+      <div class="note-modal-footer note-modal-footer-rows">
+        <div class="note-modal-actions note-modal-actions-row">
+        </div>
+        <div class="note-modal-actions note-modal-actions-row">
+          <button id="noteDeleteButton" class="btn secondary" type="button" data-action="showDeleteConfirm" style="display:none;">Пок кардан</button>
+          <button id="noteSaveButton" class="btn" type="button" data-action="saveNote">Сабт</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -755,11 +773,9 @@
 
 <!--
 
-Чоряк - v4.2 Prime Edition
+Чоряк - 4.2.1 Prime Edition
 Developer: Abdughafur Khujzoda
 :)
 
-The End 4.2 Version
--->
-
+The End 4.2.1 Version
 <!---2026-->

@@ -11,7 +11,6 @@ export const DEFAULT_SETTINGS = Object.freeze({
   theme: "light",
   sound: true,
   fs: true,
-  performance: true,
   diagram: true,
 });
 
@@ -44,15 +43,9 @@ function normalizeSettings(value) {
   const settings = value && typeof value === "object" ? value : {};
 
   return {
-    ...DEFAULT_SETTINGS,
-    ...settings,
     theme: settings.theme === "dark" ? "dark" : "light",
     sound: settings.sound !== false,
     fs: Boolean(settings.fs),
-    performance:
-      settings.performance === undefined
-        ? DEFAULT_SETTINGS.performance
-        : Boolean(settings.performance),
     diagram:
       settings.diagram === undefined
         ? DEFAULT_SETTINGS.diagram
@@ -85,6 +78,25 @@ function normalizePct(value) {
   };
 }
 
+function normalizeNotes(value) {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .filter((note) => note && typeof note === "object")
+    .map((note) => ({
+      id: String(note.id || uid()),
+      title: String(note.title || "").slice(0, 128),
+      body: String(note.body || "").slice(0, 1024),
+      category: ["lesson", "task", "idea", "important", "other"].includes(note.category)
+        ? note.category
+        : "other",
+      important: Boolean(note.important),
+      createdAt: Number(note.createdAt) || Date.now(),
+      updatedAt: Number(note.updatedAt) || Date.now(),
+    }))
+    .slice(0, 200);
+}
+
 function normalizeState(value) {
   const payload = value && typeof value === "object" ? value : {};
 
@@ -94,6 +106,7 @@ function normalizeState(value) {
     pct: normalizePct(payload.pct ?? null),
     info: payload.info && typeof payload.info === "object" ? payload.info : {},
     profile: normalizeProfile(payload.profile ?? null),
+    notes: normalizeNotes(payload.notes ?? []),
   };
 }
 
@@ -206,8 +219,8 @@ export async function loadState() {
   return normalized;
 }
 
-export async function saveState({ grades, settings, pct, info, profile }) {
-  const payload = normalizeState({ grades, settings, pct, info, profile });
+export async function saveState({ grades, settings, pct, info, profile, notes }) {
+  const payload = normalizeState({ grades, settings, pct, info, profile, notes });
 
   try {
     localStorage.setItem(FALLBACK_STORAGE_KEY, JSON.stringify(payload));

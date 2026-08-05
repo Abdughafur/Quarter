@@ -11,5 +11,4 @@
 
 .tab.active {
   display: block;
-  animation: fade 0.22s ease both;
 }

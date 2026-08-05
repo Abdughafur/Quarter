@@ -33,6 +33,11 @@ export const app = {
   updateFrame: null,
   shouldBump: false,
   initialized: false,
+  notes: [],
+  noteFilter: "all",
+  activeNoteId: null,
+  noteHistory: [],
+  noteHistoryIndex: -1,
   profile: {
     name: "",
     surname: "",
@@ -48,6 +53,9 @@ export const app = {
     this.grades = state.grades;
     this.pct = state.pct;
     this.settings = state.settings;
+    this.notes = Array.isArray(state.notes) ? state.notes : [];
+    this.noteFilter = "all";
+    this.activeNoteId = null;
 
     this.bind(state.info);
     this.profile = state.profile || this.profile;
@@ -58,6 +66,7 @@ export const app = {
     this.buildPercentRows();
     this.applySettings();
     this.updateAll();
+    this.renderNotes();
 
     setTimeout(() => qs("loader")?.classList.add("hide"), 250);
     // initialize nav highlight and draggable behavior
@@ -67,18 +76,23 @@ export const app = {
   setupNavDrag() {
     try {
       // enable draggable highlight only on phone-sized screens
-      const isMobile = typeof window !== 'undefined'
-        && ((window.matchMedia && window.matchMedia('(max-width: 760px)').matches) || window.innerWidth <= 760);
+      const isMobile =
+        typeof window !== "undefined" &&
+        ((window.matchMedia &&
+          window.matchMedia("(max-width: 760px)").matches) ||
+          window.innerWidth <= 760);
       if (!isMobile) return;
       const nav = document.querySelector("nav");
       if (!nav) return;
 
-      const highlight = nav.querySelector(".nav-highlight") || (() => {
-        const el = document.createElement("div");
-        el.className = "nav-highlight";
-        nav.insertBefore(el, nav.firstChild);
-        return el;
-      })();
+      const highlight =
+        nav.querySelector(".nav-highlight") ||
+        (() => {
+          const el = document.createElement("div");
+          el.className = "nav-highlight";
+          nav.insertBefore(el, nav.firstChild);
+          return el;
+        })();
 
       const buttons = Array.from(nav.querySelectorAll(".nav-btn"));
       if (!buttons.length) return;
@@ -96,100 +110,146 @@ export const app = {
         const targetH = Math.max(28, Math.round(brect.height - 8));
         highlight.style.width = `${targetW}px`;
         highlight.style.height = `${targetH}px`;
-        const x = Math.round(brect.left - rect.left + (brect.width - targetW) / 2);
+        const x = Math.round(
+          brect.left - rect.left + (brect.width - targetW) / 2,
+        );
         if (!animate) highlight.style.transition = "none";
         requestAnimationFrame(() => {
           highlight.style.transform = `translateX(${x}px)`;
           // mark the target button so we can visually emphasise it
-          buttons.forEach((b) => b.classList.remove('highlighted'));
-          btn.classList.add('highlighted');
+          buttons.forEach((b) => b.classList.remove("highlighted"));
+          btn.classList.add("highlighted");
           if (!animate) {
             // force reflow then restore
             // eslint-disable-next-line no-unused-expressions
             highlight.offsetHeight;
-            highlight.style.transition = "transform 220ms cubic-bezier(.2,.9,.2,1), width 180ms ease, height 180ms ease";
+            highlight.style.transition =
+              "transform 220ms cubic-bezier(.2,.9,.2,1), width 180ms ease, height 180ms ease";
           }
         });
       };
 
       // initial position to active and size highlight
-      const active = nav.querySelector('.nav-btn.active') || buttons[0];
+      const active = nav.querySelector(".nav-btn.active") || buttons[0];
       updatePosition(active, false);
 
       // when nav is changed programmatically
       this.updateNavHighlight = (button) => {
-        const btn = button || nav.querySelector('.nav-btn.active') || buttons[0];
+        const btn =
+          button || nav.querySelector(".nav-btn.active") || buttons[0];
         if (btn) updatePosition(btn, true);
       };
 
       // pointer drag
       let dragging = false;
       let pointerId = null;
+      let pendingFrame = false;
+      let currentX = 0;
+      let navRect = null;
+      let buttonCenters = [];
+      let minX = 0;
+      let maxX = 0;
+      let lastNearest = null;
+
+      const refreshButtonData = () => {
+        navRect = nav.getBoundingClientRect();
+        buttonCenters = buttons.map((btn) => {
+          const brect = btn.getBoundingClientRect();
+          return {
+            btn,
+            center: brect.left - navRect.left + brect.width / 2,
+          };
+        });
+
+        const first = buttonCenters[0];
+        const last = buttonCenters[buttonCenters.length - 1];
+        minX = Math.round(first.center - highlight.offsetWidth / 2);
+        maxX = Math.round(last.center - highlight.offsetWidth / 2);
+      };
+
+      const updateDrag = () => {
+        pendingFrame = false;
+        if (!dragging) return;
+        if (!navRect || !buttonCenters.length) refreshButtonData();
+
+        const xCenter = currentX - navRect.left;
+        const clamped = Math.max(
+          minX,
+          Math.min(maxX, Math.round(xCenter - highlight.offsetWidth / 2)),
+        );
+        highlight.style.transform = `translate3d(${clamped}px, 0, 0)`;
+
+        let nearest = buttonCenters[0];
+        let nearestDist = Infinity;
+        for (const item of buttonCenters) {
+          const dist = Math.abs(item.center - xCenter);
+          if (dist < nearestDist) {
+            nearestDist = dist;
+            nearest = item;
+          }
+        }
+
+        if (nearest.btn !== lastNearest) {
+          buttons.forEach((b) => b.classList.remove("highlighted"));
+          nearest.btn.classList.add("highlighted");
+          lastNearest = nearest.btn;
+        }
+      };
 
       const onPointerDown = (e) => {
-        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        if (e.pointerType === "mouse" && e.button !== 0) return;
         dragging = true;
         pointerId = e.pointerId;
-        nav.setPointerCapture && nav.setPointerCapture(pointerId);
+        nav.setPointerCapture?.(pointerId);
+        refreshButtonData();
+        currentX = e.clientX;
+        lastNearest = null;
+        highlight.style.transition = "none";
+        if (!pendingFrame) {
+          pendingFrame = true;
+          requestAnimationFrame(updateDrag);
+        }
       };
 
       const onPointerMove = (e) => {
         if (!dragging || e.pointerId !== pointerId) return;
-        const rect = nav.getBoundingClientRect();
-        const first = buttons[0].getBoundingClientRect();
-        const last = buttons[buttons.length - 1].getBoundingClientRect();
-        const minX = Math.round(first.left - rect.left + (first.width - highlight.offsetWidth) / 2);
-        const maxX = Math.round(last.left - rect.left + (last.width - highlight.offsetWidth) / 2);
-        const xCenter = e.clientX - rect.left - highlight.offsetWidth / 2;
-        const clamped = Math.max(minX, Math.min(maxX, Math.round(xCenter)));
-        highlight.style.transition = "none";
-        highlight.style.transform = `translateX(${clamped}px)`;
-
-        // while dragging, highlight nearest button visually
-        let nearest = buttons[0];
-        let nearestDist = Infinity;
-        buttons.forEach((btn) => {
-          const brect = btn.getBoundingClientRect();
-          const bx = brect.left - rect.left + brect.width / 2;
-          const dist = Math.abs(bx - (e.clientX - rect.left));
-          if (dist < nearestDist) {
-            nearestDist = dist;
-            nearest = btn;
-          }
-        });
-        buttons.forEach((b) => b.classList.remove('highlighted'));
-        nearest.classList.add('highlighted');
+        currentX = e.clientX;
+        if (!pendingFrame) {
+          pendingFrame = true;
+          requestAnimationFrame(updateDrag);
+        }
       };
 
       const onPointerUp = (e) => {
         if (!dragging || e.pointerId !== pointerId) return;
         dragging = false;
-        try { nav.releasePointerCapture && nav.releasePointerCapture(pointerId); } catch (_) {}
-        // choose nearest button
-        const rect = nav.getBoundingClientRect();
-        const centerX = e.clientX - rect.left;
-        let nearest = buttons[0];
+        try {
+          nav.releasePointerCapture?.(pointerId);
+        } catch (_) {}
+
+        refreshButtonData();
+        const centerX = e.clientX - navRect.left;
+        let nearest = buttonCenters[0];
         let nearestDist = Infinity;
-        buttons.forEach((btn) => {
-          const brect = btn.getBoundingClientRect();
-          const bx = brect.left - rect.left + brect.width / 2;
-          const dist = Math.abs(bx - centerX);
+        for (const item of buttonCenters) {
+          const dist = Math.abs(item.center - centerX);
           if (dist < nearestDist) {
             nearestDist = dist;
-            nearest = btn;
+            nearest = item;
           }
-        });
-        // activate that tab
-        const tab = nearest.dataset.tab;
-        if (tab) this.nav(tab, nearest);
-        updatePosition(nearest, true);
-        highlight.style.transition = "transform 220ms cubic-bezier(.2,.9,.2,1), width 180ms ease, height 180ms ease";
+        }
+
+        const tab = nearest.btn.dataset.tab;
+        if (tab) this.nav(tab, nearest.btn);
+        updatePosition(nearest.btn, true);
+        highlight.style.transition =
+          "transform 220ms cubic-bezier(.2,.9,.2,1), width 180ms ease, height 180ms ease";
       };
 
-      nav.addEventListener('pointerdown', onPointerDown);
-      window.addEventListener('pointermove', onPointerMove);
-      window.addEventListener('pointerup', onPointerUp);
-      window.addEventListener('pointercancel', onPointerUp);
+      nav.addEventListener("pointerdown", onPointerDown);
+      window.addEventListener("pointermove", onPointerMove);
+      window.addEventListener("pointerup", onPointerUp);
+      window.addEventListener("pointercancel", onPointerUp);
     } catch (err) {
       // silent
     }
@@ -227,11 +287,28 @@ export const app = {
 
     document.addEventListener("click", (event) => {
       const actionButton = event.target.closest("[data-action]");
-      if (actionButton) this.action(actionButton.dataset.action, actionButton.dataset);
+      if (actionButton)
+        this.action(actionButton.dataset.action, actionButton.dataset);
 
       const tabButton = event.target.closest("[data-tab]");
       if (tabButton) this.nav(tabButton.dataset.tab, tabButton);
     });
+
+    qs("notesList")?.addEventListener("click", (event) => {
+      const noteCard = event.target.closest(".note-item");
+      if (!noteCard) return;
+      const noteId = noteCard.dataset.noteId;
+      if (noteId) this.openNoteModal(noteId);
+    });
+
+    qs("noteCategoryRow")?.addEventListener("click", (event) => {
+      const button = event.target.closest(".note-category-pill");
+      if (!button) return;
+      const category = button.dataset.category;
+      this.setNoteCategory(category);
+    });
+
+    qs("noteSearchInput")?.addEventListener("input", () => this.renderNotes());
 
     if (this.settings.fs) {
       document.addEventListener(
@@ -264,9 +341,11 @@ export const app = {
   },
 
   bindSwitches() {
-    const switches = Array.from(document.querySelectorAll(
-      "#themeToggle, #soundToggle, #fsToggle, #diagramToggle, #performanceToggle",
-    ));
+    const switches = Array.from(
+      document.querySelectorAll(
+        "#themeToggle, #soundToggle, #fsToggle, #diagramToggle",
+      ),
+    );
 
     switches.forEach((input) => {
       let dragging = false;
@@ -380,7 +459,9 @@ export const app = {
   },
 
   async confirmLogoutFinal() {
-    this.toast.show("Баромадан ва тоза кардани маълумот...", { duration: 1800 });
+    this.toast.show("Баромадан ва тоза кардани маълумот...", {
+      duration: 1800,
+    });
     await clearState();
     window.location.reload();
   },
@@ -485,7 +566,6 @@ export const app = {
       toggleTheme: () => this.toggleTheme(payload),
       toggleSound: () => this.toggleSound(payload),
       toggleFS: () => this.toggleFS(payload),
-      togglePerformance: () => this.togglePerformance(payload),
       toggleDiagram: () => this.toggleDiagram(payload),
       editProfile: () => this.showSubView("more-profile-view"),
       saveProfile: () => this.saveProfile(),
@@ -494,7 +574,6 @@ export const app = {
       showSettings: () => this.showSubView("more-settings-view"),
       showDeveloper: () => this.showSubView("more-developer-view"),
       showMoreProfile: () => this.showSubView("more-profile-view"),
-      showMorePerformance: () => this.showSubView("more-performance-view"),
       showMoreShortcuts: () => this.showSubView("more-shortcuts-view"),
       showMoreAbout: () => this.showSubView("more-about-view"),
       hideSubviews: () => this.showSubView("more-home-view"),
@@ -503,13 +582,22 @@ export const app = {
       cancelLogout: () => this.closeLogoutModal(),
       cancelLogoutFinal: () => this.closeLogoutFinalModal(),
       confirmLogout: () => this.confirmLogoutFinal(),
-      scrollToPerformance: () => this.showSubView("more-performance-view"),
       scrollToShortcuts: () => this.showSubView("more-shortcuts-view"),
       shareApp: () => this.shareApp(),
       installPwa: () => this.installPwa(),
+      openNoteModal: (payload) => this.openNoteModal(payload?.noteId),
+      closeNoteModal: () => this.closeNoteModal(),
+      saveNote: () => this.saveNote(),
+      deleteNote: () => this.deleteNote(),
+      showDeleteConfirm: () => this.showDeleteConfirm(),
+      cancelDeleteNote: () => this.cancelDeleteNote(),
+      confirmDeleteNote: () => this.confirmDeleteNote(),
+
+      setNoteCategory: (payload) => this.setNoteCategory(payload?.category),
+      setNoteFilter: (payload) => this.setNoteFilter(payload),
     };
 
-    actions[name]?.();
+    actions[name]?.(payload);
   },
 
   keyboard(event) {
@@ -700,8 +788,9 @@ export const app = {
       const num = avgLarge.querySelector?.(".large-number");
       if (num) num.textContent = String(Math.round(stats.final));
       else avgLarge.textContent = String(Math.round(stats.final));
-      const labelEl = avgLarge.querySelector?.('.label-small');
-      if (labelEl) labelEl.textContent = this.grades.length ? gradeLabel(stats.final) : "";
+      const labelEl = avgLarge.querySelector?.(".label-small");
+      if (labelEl)
+        labelEl.textContent = this.grades.length ? gradeLabel(stats.final) : "";
       avgLarge.className = "large";
       if (anim) this.bump(avgLarge);
     }
@@ -1039,19 +1128,6 @@ export const app = {
     ctx.font = "900 70px Arial";
     ctx.fillText("Чоряк", 150, 180);
 
-    ctx.fillStyle = "rgba(147, 51, 234, 0.25)";
-    roundRect(ctx, 395, 125, 120, 52, 14);
-    ctx.fill();
-    ctx.strokeStyle = "rgba(147, 51, 234, 0.4)";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    ctx.fillStyle = "#c084fc";
-    ctx.font = "800 24px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("v4.2", 395 + 60, 125 + 34);
-    ctx.textAlign = "left";
-
     ctx.fillStyle = "rgba(255,255,255,0.64)";
     ctx.font = "700 26px Arial";
     ctx.fillText(`Вақт: ${exportStamp}`, 800, 170);
@@ -1191,7 +1267,6 @@ export const app = {
   },
 
   nav(id, button) {
-
     document
       .querySelectorAll(".tab")
       .forEach((tab) => tab.classList.remove("active"));
@@ -1206,7 +1281,10 @@ export const app = {
 
     // update draggable highlight if present
     try {
-      this.updateNavHighlight && this.updateNavHighlight(button || document.querySelector(`[data-tab="${id}"]`));
+      this.updateNavHighlight &&
+        this.updateNavHighlight(
+          button || document.querySelector(`[data-tab="${id}"]`),
+        );
     } catch (e) {}
 
     this.tone(600, "sine", 0.04);
@@ -1231,7 +1309,9 @@ export const app = {
   },
 
   async confirmLogout() {
-    this.toast.show("Баромадан ва тоза кардани маълумот...", { duration: 1800 });
+    this.toast.show("Баромадан ва тоза кардани маълумот...", {
+      duration: 1800,
+    });
     await clearState();
     window.location.reload();
   },
@@ -1308,26 +1388,6 @@ export const app = {
     this.tone(680, "sine", 0.06, true);
   },
 
-  togglePerformance(value) {
-    if (typeof value === "boolean") {
-      this.settings.performance = value;
-    } else {
-      const toggle = qs("performanceToggle");
-      this.settings.performance = toggle
-        ? toggle.checked
-        : !this.settings.performance;
-    }
-    this.applySettings();
-    this.save();
-
-    this.toast.show(
-      this.settings.performance
-        ? "Беҳтарин Performance фаъол шуд."
-        : "Беҳтарин Performance хомӯш шуд.",
-    );
-  },
-
-
   toggleDiagram(value) {
     if (typeof value === "boolean") {
       this.settings.diagram = value;
@@ -1341,6 +1401,231 @@ export const app = {
     this.toast.show(
       this.settings.diagram ? "Диаграмма фаъол шуд." : "Диаграмма хомӯш шуд.",
     );
+  },
+
+  openNoteModal(noteId = null) {
+    this.activeNoteId = noteId;
+    const note = noteId ? this.notes.find((item) => item.id === noteId) : null;
+    setText("noteModalTitle", note ? "Таҳрир кардани ёддошт" : "Ёддости нав");
+    setInputValue("noteTitleInput", note?.title || "");
+    setInputValue("noteBodyInput", note?.body || "");
+    setInputValue("noteCategoryInput", note?.category || "lesson");
+    if (qs("noteImportantInput"))
+      qs("noteImportantInput").checked = Boolean(note?.important);
+    qs("noteDeleteButton").style.display = note ? "inline-flex" : "none";
+    qs("noteDeleteConfirm")?.classList.remove("open");
+    this.noteHistory = [];
+    this.noteHistoryIndex = -1;
+    this.setNoteCategory(qs("noteCategoryInput")?.value || "lesson");
+    this.recordNoteChange();
+    qs("noteModal")?.classList.add("open");
+  },
+
+  closeNoteModal() {
+    qs("noteModal")?.classList.remove("open");
+    this.activeNoteId = null;
+    this.noteHistory = [];
+    this.noteHistoryIndex = -1;
+  },
+
+  saveNote() {
+    const title = clean(qs("noteTitleInput")?.value || "");
+    const body = clean(qs("noteBodyInput")?.value || "", 512);
+    const category = qs("noteCategoryInput")?.value || "other";
+    const important = qs("noteImportantInput")?.checked || false;
+
+    if (!title && !body) {
+      this.toast.show("Лутфан ёддоштро холӣ нагузоред.");
+      return;
+    }
+
+    const noteData = {
+      title: title || "Ёддошт",
+      body,
+      category,
+      important,
+    };
+
+    if (this.activeNoteId) {
+      const note = this.notes.find((item) => item.id === this.activeNoteId);
+      if (!note) return;
+      note.title = noteData.title;
+      note.body = noteData.body;
+      note.category = noteData.category;
+      note.important = noteData.important;
+      note.updatedAt = Date.now();
+      this.toast.show("Ёддошт навсозӣ шуд.");
+    } else {
+      this.notes.unshift({
+        id: uid(),
+        ...noteData,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+      this.toast.show("Ёддошт сабт шуд.");
+    }
+
+    this.save();
+    this.renderNotes();
+    this.closeNoteModal();
+  },
+
+  showDeleteConfirm() {
+    if (!this.activeNoteId) return;
+    openInfoModal(qs("noteConfirmModal"));
+  },
+
+  cancelDeleteNote() {
+    closeInfoModal(qs("noteConfirmModal"));
+  },
+
+  confirmDeleteNote() {
+    closeInfoModal(qs("noteConfirmModal"));
+    this.deleteNote();
+  },
+
+  deleteNote() {
+    if (!this.activeNoteId) return;
+    this.notes = this.notes.filter((item) => item.id !== this.activeNoteId);
+    this.save();
+    this.renderNotes();
+    this.closeNoteModal();
+    this.toast.show("Ёддошт пок карда шуд.");
+  },
+
+  setNoteCategory(category) {
+    if (!qs("noteCategoryInput")) return;
+    qs("noteCategoryInput").value = category;
+    qs("noteCategoryRow")
+      ?.querySelectorAll(".note-category-pill")
+      .forEach((pill) => {
+        pill.classList.toggle("active", pill.dataset.category === category);
+      });
+    this.recordNoteChange("category");
+  },
+
+  recordNoteChange(field) {
+    const title = clean(qs("noteTitleInput")?.value || "");
+    const body = clean(qs("noteBodyInput")?.value || "", 512);
+    const category = qs("noteCategoryInput")?.value || "other";
+    const important = qs("noteImportantInput")?.checked || false;
+
+    const snapshot = { title, body, category, important };
+    const last = this.noteHistory[this.noteHistoryIndex];
+    if (JSON.stringify(last) === JSON.stringify(snapshot)) return;
+
+    this.noteHistory = this.noteHistory.slice(0, this.noteHistoryIndex + 1);
+    this.noteHistory.push(snapshot);
+    this.noteHistoryIndex = this.noteHistory.length - 1;
+    this.renderNoteHistory();
+  },
+
+  applyHistoryState() {
+    const state = this.noteHistory[this.noteHistoryIndex];
+    if (!state) return;
+    setInputValue("noteTitleInput", state.title);
+    setInputValue("noteBodyInput", state.body);
+    setInputValue("noteCategoryInput", state.category);
+    if (qs("noteImportantInput"))
+      qs("noteImportantInput").checked = state.important;
+    this.setNoteCategory(state.category);
+    this.renderNoteHistory();
+  },
+
+  renderNoteHistory() {
+    const list = qs("noteHistory")?.querySelector(".note-history-list");
+    if (!list) return;
+    list.innerHTML = "";
+    if (!this.noteHistory.length) {
+      list.innerHTML = `<div class="note-history-empty">Ҳеч тағйирот вуҷуд надорад.</div>`;
+      return;
+    }
+    const entries = this.noteHistory.slice(
+      Math.max(0, this.noteHistory.length - 5),
+    );
+    entries.forEach((state, index) => {
+      const step = document.createElement("div");
+      step.className = `note-history-entry${this.noteHistoryIndex === index + Math.max(0, this.noteHistory.length - 5) ? " active" : ""}`;
+      step.textContent = `${index === entries.length - 1 ? "Ҳозира" : `Қадами ${index + 1}`}`;
+      list.appendChild(step);
+    });
+  },
+
+  setNoteFilter(payload) {
+    const filter =
+      typeof payload === "string" ? payload : payload?.filter || "all";
+    this.noteFilter = filter;
+    document.querySelectorAll(".pill").forEach((pill) => {
+      pill.classList.toggle("active", pill.dataset.filter === filter);
+    });
+    this.renderNotes();
+  },
+
+  renderNotes() {
+    const list = qs("notesList");
+    if (!list) return;
+
+    const query = String(qs("noteSearchInput")?.value || "")
+      .trim()
+      .toLowerCase();
+
+    const filtered = this.notes.filter((note) => {
+      if (this.noteFilter !== "all" && note.category !== this.noteFilter) {
+        return false;
+      }
+      if (!query) return true;
+      return [note.title, note.body, note.category].some((text) =>
+        String(text || "")
+          .toLowerCase()
+          .includes(query),
+      );
+    });
+
+    list.innerHTML = "";
+
+    if (!filtered.length) {
+      const empty = document.createElement("div");
+      empty.className = "note-empty";
+      const queryRaw = String(qs("noteSearchInput")?.value || "").trim();
+      if (queryRaw) {
+        const snippet =
+          queryRaw.length > 7 ? `${queryRaw.slice(0, 7)}...` : queryRaw;
+        empty.textContent = `Барои "${snippet}" чизе ёфт нашуд.`;
+      } else if (this.noteFilter && this.noteFilter !== "all") {
+        const labels = {
+          lesson: "Дарс",
+          task: "Вазифа",
+          idea: "Идея",
+          other: "Дигар",
+        };
+        const label = labels[this.noteFilter] || this.noteFilter;
+        empty.textContent = `Дар "${label}" чизе ёфт нашуд.`;
+      } else {
+        empty.textContent =
+          "Шумо ҳоло ягон ёддошт надоред. Барои оғоз ва осон кардани кори худ, ёддошти нав сабт кунед.";
+      }
+      list.appendChild(empty);
+      return;
+    }
+
+    filtered.forEach((note) => {
+      const item = document.createElement("article");
+      item.className = "note-item";
+      item.dataset.noteId = note.id;
+      item.innerHTML = `
+        <div class="note-label-row">
+          <div>
+            <h4 class="note-item-title">${String(note.title)}</h4>
+            <p class="note-item-body">${String(note.body)}</p>
+          </div>
+          <span class="note-chip note-chip-${note.category || "other"}">${note.category === "lesson" ? "Дарс" : note.category === "task" ? "Вазифа" : note.category === "idea" ? "Идея" : "Дигар"}</span>
+        </div>
+        <div class="note-item-meta">
+          <span class="note-time">${new Date(note.createdAt).toLocaleString("tg-TJ", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" })}</span>
+        </div>
+      `;
+      list.appendChild(item);
+    });
   },
 
   toggleFS(value) {
@@ -1368,18 +1653,15 @@ export const app = {
     const root = document.documentElement;
     const body = document.body;
     const theme = this.settings?.theme === "dark" ? "dark" : "light";
-    const performance = this.settings?.performance ? "on" : "off";
     const diagram = this.settings?.diagram === false ? "off" : "on";
 
     if (body) {
       body.dataset.theme = theme;
-      body.dataset.performance = performance;
       body.style.colorScheme = theme;
     }
 
     if (root) {
       root.dataset.theme = theme;
-      root.dataset.performance = performance;
       root.dataset.diagram = diagram;
       root.style.colorScheme = theme;
     }
@@ -1387,12 +1669,21 @@ export const app = {
     setChecked("themeToggle", theme === "dark");
     setChecked("soundToggle", this.settings.sound);
     setChecked("fsToggle", this.settings.fs);
-    setChecked("performanceToggle", this.settings.performance);
     setChecked("diagramToggle", this.settings.diagram);
 
+    const themeColor = theme === "dark" ? "#000000" : "#06b6d4";
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute("content", theme === "dark" ? "#030712" : "#f8fafc");
+      ?.setAttribute("content", themeColor);
+    document
+      .querySelector('meta[name="msapplication-navbutton-color"]')
+      ?.setAttribute("content", themeColor);
+    document
+      .querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')
+      ?.setAttribute(
+        "content",
+        theme === "dark" ? "black-translucent" : "default",
+      );
   },
 
   updateProfileUI(info = {}) {
@@ -1442,6 +1733,7 @@ export const app = {
         grade: clean(qs("modalGradeInput")?.value || ""),
       },
       profile: this.profile,
+      notes: this.notes,
     });
     this.updateProfileUI(this.profile);
   },

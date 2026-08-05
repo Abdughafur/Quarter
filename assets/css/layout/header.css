@@ -2,7 +2,7 @@
 header {
   max-width: 560px;
   margin: 0 auto;
-  padding: 18px 16px 2px;
+  padding: 16px 16px 6px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -17,11 +17,11 @@ header {
 }
 
 .app-icon {
-  width: 72px;
-  height: 72px;
-  min-width: 72px;
-  min-height: 72px;
-  border-radius: 50px;
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  min-height: 56px;
+  border-radius: 18px;
   flex: 0 0 auto;
   overflow: hidden;
 }
@@ -38,12 +38,12 @@ header {
 }
 
 .brand .logo {
-  font-size: 1.35rem;
-  font-weight: 1000;
+  font-size: 1.2rem;
+  font-weight: 900;
 }
 
 .brand .eyebrow {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: var(--muted);
-  font-weight: 800;
+  font-weight: 700;
 }

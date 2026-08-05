@@ -1,20 +1,47 @@
 /* helpers.css */
-[data-performance="on"] *,
-[data-performance="on"] *::before,
-[data-performance="on"] *::after {
-  animation: none !important;
-  transition: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
 
-[data-performance="on"] .orb,
-[data-performance="on"] body::before {
-  display: none !important;
-}
+/* reduce heavy effects on smaller devices for smoother animation */
+@media (max-width: 760px), (prefers-reduced-motion: reduce) {
+  .card,
+  .hero,
+  .note-modal,
+  .note-modal-backdrop,
+  .loader,
+  .loader-shell,
+  nav,
+  .profile-card,
+  .diagram-card,
+  .shortcut-card,
+  .orb,
+  body::before,
+  .loader-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 10px 14px rgba(0, 0, 0, 0.08) !important;
+    filter: none !important;
+  }
 
-[data-performance="on"] .bar {
-  transition: none;
+  * {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+
+  #toast {
+    transition: transform 0.2s ease !important;
+  }
+
+  .nav-highlight {
+    transition: transform 0.18s ease !important;
+  }
+
+  .large-number.scrolling {
+    animation: none !important;
+  }
+
+  .gradient-text {
+    animation: none !important;
+  }
 }
 
 /* allow toggling diagram visibility via settings */

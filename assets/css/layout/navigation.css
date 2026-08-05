@@ -15,8 +15,7 @@ nav {
   background: linear-gradient(180deg, var(--card), var(--card2));
   border: 1px solid var(--border);
   border-radius: 30px;
-  backdrop-filter: blur(34px) saturate(180%);
-  box-shadow: 0 24px 50px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
   touch-action: pan-y;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -37,36 +36,29 @@ nav {
   gap: 3px;
   font-size: 0.62rem;
   font-weight: 1000;
-  transition:
-    transform 0.2s var(--ease),
-    background 0.2s ease,
-    color 0.2s ease;
+  transition: transform 0.16s ease;
   touch-action: none;
 }
 
 .nav-btn.active {
   color: white;
   background: linear-gradient(135deg, var(--primary), var(--accent));
-  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.3);
-  transform: none; /* do not move icon/button; background handled by pill */
+  transform: none;
 }
 
 .nav-btn svg {
   width: 20px;
   height: 20px;
   fill: currentColor;
-  transition: transform 120ms ease, opacity 120ms ease;
 }
 
-/* keep icons visible even when highlighted; ensure consistent sizing */
 .nav-btn.highlighted svg {
   opacity: 1;
-  transform: none; /* keep icon steady while pill is over it */
+  transform: none;
 }
 
-/* draggable highlight under active nav button */
 .nav-highlight {
-  display: none; /* hidden by default on desktop; enabled on small screens below */
+  display: none;
   position: absolute;
   top: 6px;
   left: 8px;
@@ -74,9 +66,9 @@ nav {
   height: calc(100% - 12px);
   border-radius: 12px;
   background: linear-gradient(135deg, var(--primary), var(--accent));
-  box-shadow: 0 10px 24px rgba(14, 165, 233, 0.22);
-  transform: translateX(0) translateY(0);
-  transition: transform 220ms cubic-bezier(.2,.9,.2,1), width 180ms ease, height 180ms ease;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  transition: transform 180ms ease;
   pointer-events: none;
   z-index: 0;
 }

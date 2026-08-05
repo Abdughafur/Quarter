@@ -14,25 +14,15 @@ Modern web application for quarterly grade calculation, percentage analytics, an
 
 ### ✨ Имкониятҳо
 
-<<<<<<< HEAD
-* 📊 Ҳисоби автоматии чоряк
-* 🧠 Таҳлили AI (MinAI)
-* 📈 Диаграммаҳо
-* 🌙 Dark / Light Mode
-* 🖼 PNG Export
-* 📤 Share Image
-* 💾 LocalStorage
-* 📱 Responsive Design
-=======
 - 📊 Ҳисоби автоматии чоряк
 - 🧠 Таҳлили AI (MinAI)
 - 📈 Диаграммаҳо
+- 📝 Ёддоштҳо
 - 🌙 Dark / Light Mode
 - 🖼 PNG Export
 - 📤 Share Image
 - 💾 LocalStorage
 - 📱 Responsive Design
->>>>>>> def90ae (v4.2 Changes)
 
 ### ⚠ Литсензия
 
@@ -48,25 +38,15 @@ Modern web application for quarterly grade calculation, percentage analytics, an
 
 ### ✨ Features
 
-<<<<<<< HEAD
-* 📊 Automatic grade calculation
-* 🧠 MinAI analysis
-* 📈 Charts
-* 🌙 Dark / Light Mode
-* 🖼 PNG Export
-* 📤 Share Image
-* 💾 LocalStorage
-* 📱 Responsive Design
-=======
 - 📊 Automatic grade calculation
 - 🧠 MinAI analysis
 - 📈 Charts
+- 📝 Notes
 - 🌙 Dark / Light Mode
 - 🖼 PNG Export
 - 📤 Share Image
 - 💾 LocalStorage
 - 📱 Responsive Design
->>>>>>> def90ae (v4.2 Changes)
 
 ### ⚠ License
 
@@ -78,29 +58,19 @@ Modern web application for quarterly grade calculation, percentage analytics, an
 
 ## 📖 О проекте
 
-**Чоряк** — современное веб-приложение для расчёта четвертной оценки, анализа процентов и AI-анализа успеваемости с помощью **MinAI**.
+**Чоряк** — современное веб-приложение для расчёта четвертных оценок, анализа процентов и AI-анализа успеваемости с помощью **MinAI**.
 
 ### ✨ Возможности
 
-<<<<<<< HEAD
-* 📊 Автоматический расчёт
-* 🧠 AI-анализ MinAI
-* 📈 Графики
-* 🌙 Тёмная / светлая тема
-* 🖼 Экспорт PNG
-* 📤 Поделиться изображением
-* 💾 LocalStorage
-* 📱 Адаптивный дизайн
-=======
 - 📊 Автоматический расчёт
 - 🧠 AI-анализ MinAI
 - 📈 Графики
+- 📝 Заметки
 - 🌙 Тёмная / светлая тема
 - 🖼 Экспорт PNG
 - 📤 Поделиться изображением
 - 💾 LocalStorage
 - 📱 Адаптивный дизайн
->>>>>>> def90ae (v4.2 Changes)
 
 ### ⚠ Лицензия
 
@@ -110,7 +80,7 @@ Modern web application for quarterly grade calculation, percentage analytics, an
 
 <div align="center">
 
-**Made with ❤️ in Tajikistan**
+**Made with ❤️ in Tajikistan**  
 **By Abdughafur Khujzoda**
 
 </div>
