@@ -2,10 +2,14 @@
 .clear-percent-btn {
   width: 100%;
   margin-bottom: 12px;
+  min-height: 42px;
+  border-radius: 999px;
   background: linear-gradient(135deg, #ef4444, #dc2626);
   color: #ffffff;
   box-shadow: 0 12px 28px rgba(220, 38, 38, 0.24);
   border: none;
+  font-weight: 950;
+  letter-spacing: 0.02em;
 }
 
 .clear-percent-btn:active {

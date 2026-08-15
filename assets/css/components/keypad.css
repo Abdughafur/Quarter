@@ -8,7 +8,7 @@
 
 .key {
   height: 58px;
-  border-radius: 21px;
+  border-radius: 999px; /* capsule style */
   border: 1px solid var(--border);
   color: var(--text);
   background:
@@ -23,6 +23,7 @@
     transform 0.14s var(--ease),
     background 0.18s ease,
     color 0.18s ease;
+  will-change: transform, background;
 }
 
 .key:active {

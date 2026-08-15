@@ -1,49 +1,64 @@
 /* charts.css */
 .chart {
+  position: relative;
   width: 100%;
-  height: 150px;
+  height: 176px;
   margin-top: 14px;
-  padding: 12px 8px 50px;
+  padding: 18px 12px 26px;
   display: flex;
   align-items: flex-end;
   justify-content: space-around;
-  border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid var(--soft);
+  gap: 8px;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(147, 197, 253, 0.08), rgba(14, 165, 233, 0.02));
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
   overflow: visible;
 }
 
+.chart::before {
+  content: "";
+  position: absolute;
+  inset: 14px 10px 28px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(59,130,246,0.04));
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  pointer-events: none;
+}
+
 .bar-wrap {
+  position: relative;
+  z-index: 1;
   flex: 1;
   height: 100%;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  position: relative;
 }
 
 .bar-wrap::after {
   content: attr(data-label);
   position: absolute;
-  bottom: -18px;
+  bottom: -20px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   color: var(--muted);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
 }
 
 .bar {
-  width: min(25px, 64%);
-  min-height: 5px;
-  border-radius: 12px 12px 3px 3px;
+  width: min(28px, 68%);
+  min-height: 8px;
+  border-radius: 14px 14px 8px 8px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent 45%),
-    linear-gradient(to top, var(--primary), var(--accent));
-  box-shadow: 0 10px 22px rgba(14, 165, 233, 0.22);
-  bottom: -22px;
-  left: 50%;
-  transform: translateX(-50%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.38), transparent 24%),
+    linear-gradient(180deg, #7dd3fc 0%, #38bdf8 22%, #2563eb 100%);
+  box-shadow:
+    0 14px 30px rgba(37, 99, 235, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(255,255,255,0.26);
+  transform: translateY(0);
 }

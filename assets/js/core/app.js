@@ -170,6 +170,8 @@ export const app = {
       const updateDrag = () => {
         pendingFrame = false;
         if (!dragging) return;
+        // if highlight hidden (eg. journal tab), skip heavy updates
+        if (highlight.style.display === 'none') return;
         if (!navRect || !buttonCenters.length) refreshButtonData();
 
         const xCenter = currentX - navRect.left;
@@ -560,6 +562,7 @@ export const app = {
       deleteLast: () => this.deleteLast(),
       clearAll: () => this.clearAll(),
       clearAllPercentages: () => this.clearAllPercentages(),
+      clearPupilCount: () => this.clearPupilCount(),
       downloadResult: () => this.ensureInfo(),
       closeModal: () => this.closeModal(),
       saveModalInfo: () => this.saveModalInfo(),
@@ -612,8 +615,15 @@ export const app = {
       event.preventDefault();
       this.add(Number(key));
     } else if (key === "0") {
-      event.preventDefault();
-      this.add(10);
+      // if percent tab is active, use 0 as quick clear-percent shortcut
+      const prosentActive = qs("tab-prosent")?.classList.contains("active");
+      if (prosentActive) {
+        event.preventDefault();
+        this.clearAllPercentages();
+      } else {
+        event.preventDefault();
+        this.add(10);
+      }
     } else if (key === "backspace") {
       event.preventDefault();
       this.deleteLast();
@@ -630,10 +640,12 @@ export const app = {
       this.nav("tab-more");
     } else if (key === "p") {
       this.nav("tab-prosent");
+    } else if (key === "j") {
+      // navigate to journal tab
+      event.preventDefault();
+      this.nav("tab-journal");
     } else if (key === "n") {
       this.nav("tab-notes");
-    } else if (key === "j") {
-      this.nav("tab-journal");
       /* Русский */
     } else if (key === "с") {
       event.preventDefault();
@@ -647,8 +659,6 @@ export const app = {
       this.nav("tab-more");
     } else if (key === "з") {
       this.nav("tab-prosent");
-    } else if (key === "ь") {
-      this.nav("tab-journal");
       /* Тоҷикӣ */
     } else if (key === "с") {
       event.preventDefault();
@@ -662,8 +672,6 @@ export const app = {
       this.nav("tab-more");
     } else if (key === "з") {
       this.nav("tab-prosent");
-    } else if (key === "ӣ") {
-      this.nav("tab-journal");
     } else if (key === "н") {
       this.nav("tab-notes");
     } else if (key === "escape") {
@@ -723,19 +731,27 @@ export const app = {
   },
 
   clearAllPercentages() {
-    this.grades = [];
-    this.pct = { total: 0, counts: {} };
-
-    const pupilInput = qs("pupilCountInput");
-    if (pupilInput) pupilInput.value = "";
+    // Clear only percentage distribution inputs; preserve pupil total and recorded grades
+    this.pct.counts = {};
 
     for (let grade = 10; grade >= 1; grade -= 1) {
       const input = qs(`gradeCount${grade}`);
       if (input) input.value = "";
     }
 
-    this.scheduleUpdate(true);
-    this.toast.show("Ҳама баллҳо ва фоизҳо тоза шуд.");
+    // update UI and persist
+    this.percentUpdate();
+    this.save();
+    this.toast.show("Ҳама фоизҳо тоза шуданд.");
+  },
+
+  clearPupilCount() {
+    this.pct.total = 0;
+    const pupilInput = qs("pupilCountInput");
+    if (pupilInput) pupilInput.value = "";
+    this.percentUpdate();
+    this.save();
+    this.toast.show("Шумораи хонандагон тоза шуд.");
   },
 
   toggleLast() {
@@ -1279,8 +1295,23 @@ export const app = {
       "active",
     );
 
+    const journalButton = document.querySelector(".journal-floating-btn");
+    if (journalButton) {
+      // hide floating journal button on journal and notes tabs
+      const shouldHideJournal = id === "tab-journal" || id === "tab-notes";
+      journalButton.classList.toggle("is-hidden", shouldHideJournal);
+      // keep notes-mode class for legacy positioning logic removed
+      journalButton.classList.toggle("notes-mode", false);
+    }
+
     // update draggable highlight if present
     try {
+      // hide draggable highlight when journal tab is active
+      const navHighlight = document.querySelector('.nav-highlight');
+      if (navHighlight) {
+        navHighlight.style.display = id === 'tab-journal' ? 'none' : '';
+      }
+
       this.updateNavHighlight &&
         this.updateNavHighlight(
           button || document.querySelector(`[data-tab="${id}"]`),

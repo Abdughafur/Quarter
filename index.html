@@ -19,6 +19,20 @@
 </head>
 
 <body data-theme="light">
+  <!-- SVG filter used for subtle glass effect; kept size 0 to avoid visual impact -->
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <filter id="lg-filter" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feImage x="0" y="0" width="420" height="280" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22420%22%20height%3D%22280%22%20viewBox%3D%220%200%20420%20280%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22Y%22%20x1%3D%220%22%20x2%3D%220%22%20y1%3D%223%25%22%20y2%3D%2297%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230F0%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23000%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22X%22%20x1%3D%222%25%22%20x2%3D%2298%25%22%20y1%3D%220%22%20y2%3D%220%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23F00%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23000%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22420%22%20height%3D%22280%22%20fill%3D%22%23808080%22%2F%3E%3Cg%20filter%3D%22blur(2px)%22%3E%3Crect%20width%3D%22420%22%20height%3D%22280%22%20fill%3D%22%23000080%22%2F%3E%3Crect%20width%3D%22420%22%20height%3D%22280%22%20fill%3D%22url(%23Y)%22%20style%3D%22mix-blend-mode%3Ascreen%22%2F%3E%3Crect%20width%3D%22420%22%20height%3D%22280%22%20fill%3D%22url(%23X)%22%20style%3D%22mix-blend-mode%3Ascreen%22%2F%3E%3Crect%20x%3D%2214%22%20y%3D%2214%22%20width%3D%22392%22%20height%3D%22252%22%20rx%3D%2226%22%20ry%3D%2226%22%20fill%3D%22%23808080%22%20filter%3D%22blur(14px)%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" result="displacementMap" />
+      <feDisplacementMap in="SourceGraphic" in2="displacementMap" scale="144" xChannelSelector="R" yChannelSelector="G" />
+      <feColorMatrix type="matrix" result="displacedR" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" />
+      <feDisplacementMap in="SourceGraphic" in2="displacementMap" scale="142" xChannelSelector="R" yChannelSelector="G" />
+      <feColorMatrix type="matrix" result="displacedG" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" />
+      <feDisplacementMap in="SourceGraphic" in2="displacementMap" scale="140" xChannelSelector="R" yChannelSelector="G" />
+      <feColorMatrix type="matrix" result="displacedB" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" />
+      <feBlend in="displacedR" in2="displacedG" mode="screen" result="rg" />
+      <feBlend in="rg" in2="displacedB" mode="screen" />
+    </filter>
+  </svg>
   <div id="loader" class="loader" aria-hidden="true">
     <div class="loader-card">
       <div class="loader-operator plus">+</div>
@@ -32,7 +46,7 @@
       <div class="loader-operator minus">−</div>
     </div>
   </div>
-    <div id="noteConfirmModal" class="note-modal-backdrop" role="dialog" aria-modal="true">
+    <div id="noteConfirmModal" class="modal-backdrop" role="dialog" aria-modal="true">
       <div class="ios-modal">
         <h3>Пок кардани ёддошт</h3>
         <p>Шумо мутмаин ҳастед, ёддошт пок карда шавад? Ин амал барқарор карда намешавад.</p>
@@ -147,9 +161,10 @@
     <section id="tab-prosent" class="tab">
       <div class="card">
         <h3 class="settings-title">Фоизҳо</h3>
-        <div class="input-row" style="grid-template-columns:1fr">
+        <div class="input-row" style="grid-template-columns:1fr; position:relative;">
           <input id="pupilCountInput" class="input-field" type="number" inputmode="numeric" min="0" max="100"
             placeholder="Шумораи умумии хонандагон, максимум 100" />
+          <button class="pupil-clear-btn" type="button" title="Тозакунӣ" data-action="clearPupilCount">×</button>
         </div>
 
         <div id="percentRows" class="percent-table"></div>
@@ -184,11 +199,19 @@
     </section>
 
     <section id="tab-journal" class="tab">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="settings-title">Журнал</h3>
+      <div class="card journal-shell-card">
+        <div class="journal-top-badge">Журнал</div>
+
+        <div class="journal-coming-soon-card">
+          <div class="journal-badge">Ба зудӣ</div>
+          <h3 class="journal-title">Журнал</h3>
+          <p>Барои сохтани ин бахш саҳми худро гузоред. Саҳм гузоштан ихтиёрӣ аст ва барои гирифтани маълумоти бештар тугмаи "Муфассал"- ро пах кунед.</p>
         </div>
-        <div class="msg">Ин бахш ҳоло дар ҳоли таҳия аст. Барои гирифтани маълумоти бештар ё ирсоли пешниҳодҳо метавонед бо таҳиягар дар тамос шавед.</div>
+
+        <div class="journal-contact-row">
+          <a class="contact-btn" href="support.html">Муфассал</a>
+          <a class="contact-btn" href="tel:+992928024414">Тамос</a>
+        </div>
       </div>
     </section>
     <section id="tab-more" class="tab">
@@ -516,49 +539,50 @@
             </button>
           </div>
           <h3 class="settings-title">Keyboard shortcuts</h3>
-          <div class="shortcuts-grid" id="shortcutsSection">
+          <p class="settings-sub">Quick keyboard actions to speed up workflow.</p>
+          <div class="shortcuts-grid shortcuts-grid--styled" id="shortcutsSection">
             <div class="shortcut-card">
-              <kbd>1–9 / 0</kbd>
+              <div class="kbd-wrap"><kbd>1–9</kbd><kbd class="kbd-slim">/ 0</kbd></div>
               <div class="shortcut-desc">Ворид кардани баҳо</div>
             </div>
 
             <div class="shortcut-card">
-              <kbd>Backspace</kbd>
+              <div class="kbd-wrap"><kbd>Backspace</kbd></div>
               <div class="shortcut-desc">Пок кардани баҳои охирин</div>
             </div>
 
             <div class="shortcut-card">
-              <kbd>C</kbd>
+              <div class="kbd-wrap"><kbd>C</kbd></div>
               <div class="shortcut-desc">Пок кардани ҳамаи баҳоҳо</div>
             </div>
 
             <div class="shortcut-card">
-              <kbd>E</kbd>
+              <div class="kbd-wrap"><kbd>E</kbd></div>
               <div class="shortcut-desc">Иваз кардани навъи балл</div>
             </div>
 
             <div class="shortcut-card">
-              <kbd>H</kbd>
+              <div class="kbd-wrap"><kbd>H</kbd></div>
               <div class="shortcut-desc">Таб: Асосӣ</div>
             </div>
 
             <div class="shortcut-card">
-              <kbd>S</kbd>
+              <div class="kbd-wrap"><kbd>S</kbd></div>
               <div class="shortcut-desc">Таб: Бештар</div>
             </div>
 
             <div class="shortcut-card">
-              <kbd>P</kbd>
+              <div class="kbd-wrap"><kbd>P</kbd></div>
               <div class="shortcut-desc">Таб: Фоиз</div>
             </div>
 
             <div class="shortcut-card">
-              <kbd>J</kbd>
+              <div class="kbd-wrap"><kbd>J</kbd></div>
               <div class="shortcut-desc">Таб: Журнал</div>
             </div>
 
             <div class="shortcut-card">
-              <kbd>N</kbd>
+              <div class="kbd-wrap"><kbd>N</kbd></div>
               <div class="shortcut-desc">Таб: Ёддоштҳо</div>
             </div>
           </div>
@@ -582,7 +606,7 @@
               Ч</div>
             <div class="about">
               <p><strong>Чоряк</strong></p>
-              <p><strong>Версия:</strong> 4.2.1 Prime Edition</p>
+              <p><strong>Версия:</strong> 4.2.2 Prime Edition</p>
               <p><strong>Таҳиягар:</strong> Abdughafur (Абдуғафур)</p>
             </div>
           </div>
@@ -689,23 +713,16 @@
 
   <div id="toast"></div>
 
-  <nav>
-    <button class="nav-btn advanced-tab" data-tab="tab-journal">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-journal-album"
-        viewBox="0 0 16 16" xmlns:xlink="http://www.w3.org/1999/xlink">
-        <path
-          d="M5.5 4a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-5a.5.5 0 0 0-.5-.5zm1 7a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1z">
-        </path>
-        <path
-          d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2">
-        </path>
-        <path
-          d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1z">
-        </path>
-      </svg>
-      Журнал
-    </button>
+  <button class="journal-floating-btn" type="button" data-tab="tab-journal" aria-label="Журнал">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-journal-album"
+      viewBox="0 0 16 16" xmlns:xlink="http://www.w3.org/1999/xlink">
+      <path d="M5.5 4a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-5a.5.5 0 0 0-.5-.5zm1 7a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1z"></path>
+      <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2"></path>
+      <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1z"></path>
+    </svg>
+  </button>
 
+  <nav>
     <button class="nav-btn active" data-tab="tab-home" aria-label="Ҳисобкунак">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"
         xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -773,9 +790,9 @@
 
 <!--
 
-Чоряк - 4.2.1 Prime Edition
+Чоряк - 4.2.2 Prime Edition
 Developer: Abdughafur Khujzoda
 :)
 
-The End 4.2.1 Version
+The End 4.2.2 Version
 <!---2026-->

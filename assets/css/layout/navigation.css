@@ -1,4 +1,41 @@
 /* navigation.css */
+.journal-floating-btn {
+  position: fixed;
+  right: 22px;
+  bottom: 92px;
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  box-shadow: 0 12px 22px rgba(14, 165, 233, 0.18);
+  display: grid;
+  place-items: center;
+  z-index: 1100;
+  transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s ease;
+  cursor: pointer;
+  will-change: transform, opacity;
+}
+
+.journal-floating-btn.notes-mode {
+  /* when notes are active, keep journal button above the + note button */
+  right: 20px;
+  bottom: calc(86px + 12px);
+}
+
+.journal-floating-btn.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.88);
+  pointer-events: none;
+}
+
+.journal-floating-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
 nav {
   position: fixed;
   left: 10px;
@@ -12,14 +49,17 @@ nav {
   gap: 6px;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(180deg, var(--card), var(--card2));
-  border: 1px solid var(--border);
-  border-radius: 30px;
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 40px;
+  backdrop-filter: blur(6px) saturate(1.5) brightness(1.05);
+  -webkit-backdrop-filter: blur(8px) saturate(1.8) brightness(1.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 8px 32px rgba(0, 0, 0, 0.18);
   touch-action: pan-y;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   z-index: 1000;
+  will-change: transform;
 }
 
 .nav-btn {
@@ -64,7 +104,7 @@ nav {
   left: 8px;
   width: 56px;
   height: calc(100% - 12px);
-  border-radius: 12px;
+  border-radius: 20px;
   background: linear-gradient(135deg, var(--primary), var(--accent));
   transform: translate3d(0, 0, 0);
   will-change: transform;
@@ -88,6 +128,8 @@ nav {
     height: 56px;
     padding: 6px;
     border-radius: 28px;
+    backdrop-filter: blur(3px) saturate(1.2) brightness(1.02);
+    -webkit-backdrop-filter: blur(4px) saturate(1.3) brightness(1.02);
   }
 
   .nav-highlight {
@@ -105,6 +147,127 @@ nav {
     border-radius: 999px; /* capsule buttons on mobile */
     font-size: 0.6rem;
   }
+
+  .journal-floating-btn {
+    right: 18px;
+    bottom: 78px;
+    width: 56px;
+    height: 56px;
+  }
+
+  .journal-floating-btn.notes-mode {
+    right: calc(16px + 56px + 12px);
+    bottom: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  /* fallback for browsers without backdrop-filter: use semi-opaque background and subtle border */
+  nav {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 8px 20px rgba(2,6,23,0.06);
+  }
+
+  [data-theme="dark"] nav {
+    background: rgba(10, 12, 16, 0.92);
+    border: 1px solid rgba(255,255,255,0.02);
+  }
+}
+
+/* Theme-specific tweaks: stronger white in light mode, deeper black in dark mode */
+body[data-theme="light"] nav {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6), 0 10px 30px rgba(2, 6, 23, 0.04);
+}
+
+body[data-theme="dark"] nav {
+  background: rgba(6, 8, 10, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6), 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.journal-shell-card {
+  display: grid;
+  gap: 16px;
+}
+
+.journal-top-badge {
+  margin: 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  font-size: 0.74rem;
+  font-weight: 1000;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.22);
+}
+
+.journal-coming-soon-card {
+  display: grid;
+  gap: 12px;
+  padding: 24px 18px;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(148,163,184,0.04));
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.journal-badge {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(14, 165, 233, 0.12);
+  border: 1px solid rgba(14, 165, 233, 0.22);
+  color: var(--primary);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.journal-title {
+  margin: 0;
+  font-size: clamp(1.3rem, 2vw, 1.8rem);
+  font-weight: 1100;
+}
+
+.journal-coming-soon-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+  font-weight: 800;
+}
+
+.journal-contact-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.journal-contact-row .contact-btn {
+  min-height: 42px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 900;
 }
 
 /* ensure SVG icons don't transform when active */

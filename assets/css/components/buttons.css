@@ -25,14 +25,19 @@
 }
 
 .contact-btn {
-  min-height: 46px;
-  border-radius: 16px;
+  min-height: 42px;
+  border-radius: 999px;
   text-decoration: none;
   color: white;
   background: linear-gradient(135deg, var(--primary), var(--accent));
   display: grid;
   place-items: center;
-  font-size: 0.82rem;
-  font-weight: 1000;
-  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.24);
+  font-size: 0.78rem;
+  font-weight: 900;
+  box-shadow: 0 10px 20px rgba(14, 165, 233, 0.16);
+  transition: transform 0.14s ease, opacity 0.14s ease;
+}
+
+.contact-btn:active {
+  transform: scale(0.98);
 }

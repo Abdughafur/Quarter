@@ -37,6 +37,8 @@
   gap: 7px;
   padding: 7px 12px;
   border-radius: 999px;
+  min-width: 92px;
+  justify-content: center;
   background: linear-gradient(135deg, var(--primary), var(--accent));
   color: white;
   font-size: 0.72rem;
@@ -48,4 +50,27 @@
 
 .ai-badge::before {
   content: "✦";
+}
+
+/* center AI badge inside card and keep capsule width consistent */
+.card > .ai-badge {
+  margin: 12px auto;
+  display: inline-flex;
+}
+
+/* keep MinAI analysis capsule centered */
+#aiAnalysisBox {
+  text-align: center;
+  border-radius: 999px;
+  padding: 10px 18px;
+  display: inline-block;
+  margin: 12px auto;
+}
+
+/* light, cheap transitions for smooth feel on modern browsers, low cost on old ones */
+.btn,
+.ai-badge,
+.floating-add-note {
+  transition: transform 160ms ease, opacity 160ms ease;
+  will-change: transform, opacity;
 }

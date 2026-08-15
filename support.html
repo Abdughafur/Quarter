@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="tg">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Саҳм барои рушди барнома</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-light: #eef2ff;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --accent: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.08) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 24px;
+            padding: 36px 28px;
+            box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.07);
+            backdrop-filter: blur(10px);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            margin-bottom: 20px;
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--primary);
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.25;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .description {
+            line-height: 1.7;
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        .goal-card {
+            margin: 28px 0;
+            padding: 24px;
+            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .goal-title {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .amount {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -1px;
+        }
+
+        .progress-container {
+            margin-top: 16px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .progress-track {
+            height: 10px;
+            background: var(--border);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, #6366f1 100%);
+            border-radius: inherit;
+            transition: width 0.4s ease;
+        }
+
+        .payment-section {
+            margin-top: 28px;
+        }
+
+        .payment-section h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+
+        .payment-box {
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: #fafafa;
+        }
+
+        .payment-box p {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-muted);
+        }
+
+        .payment-box p+p {
+            margin-top: 10px;
+        }
+
+        .actions {
+            margin-top: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .contact-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 14px;
+            background: var(--primary);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 15px;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .back-btn:active {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .note {
+            font-size: 12px;
+            text-align: center;
+            color: var(--text-muted);
+            margin-top: 24px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <div class="card">
+            <div class="badge"> <span class="badge-dot"></span> Саҳм дар рушди барнома </div>
+            <h1>Биёед қисми нави барномаро ба анҷом расонем</h1>
+            <p class="description"> Барои ба роҳ мондани марҳилаи нав ва идома додани рушди барнома маблағи 250 сомонӣ
+                зарур аст. Бо ҷамъ шудани ин маблағ, кори қисми нави барнома оғоз мегардад. </p>
+            <div class="goal-card">
+                <div class="goal-title">Маблағи зарурӣ</div>
+                <div class="amount">250 сомонӣ</div>
+                <div class="progress-container">
+                    <div class="progress-header"> <span>Ҷамъ шуд: 0 сомонӣ</span> <span>250 сомонӣ</span> </div>
+                    <div class="progress-track">
+                        <div class="progress-bar"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="payment-section">
+                <h2>Саҳми шумо чӣ кор мекунад?</h2>
+                <div class="payment-box">
+                    <p> Шумо метавонед ба ҷамъ шудани маблағи зарурӣ саҳм гузоред. Миқдори саҳмро худатон муайян
+                        мекунед. </p>
+                    <p> Вақте ки 250 сомонӣ пурра ҷамъ мешавад, таҳияи қисми нави барнома оғоз мегардад. </p>
+                    <p> Пас аз анҷом ёфтани таҳия, қисми «Журнал» барои ҳамаи корбарони барнома ройгон дастрас хоҳад
+                        буд. </p>
+                </div>
+            </div>
+            <div class="actions"> <a class="contact-btn" href="mailto:abdughafur.2010.khujzoda@gmail.com"> Барои саҳм
+                    гузоштан </a> <a class="back-btn" href="index.html"> ← Бозгашт ба барнома </a> </div>
+            <p class="note"> Ҳадаф — ҷамъ кардани 250 сомонӣ барои идома додани рушди барнома мебошад. Пас аз расидан ба
+                ҳадаф, ҷамъоварӣ ба анҷом мерасад.
+                <br><br>
+                <hr>
+                <p class="note">Барои гирифтани маълумоти навтарин ба Интернет пайваст шавед!</p>
+            </p>
+        </div>
+    </main>
+</body>
+
+</html>
