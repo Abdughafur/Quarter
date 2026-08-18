@@ -22,12 +22,17 @@
   <!-- SVG filter used for subtle glass effect; kept size 0 to avoid visual impact -->
   <svg width="0" height="0" style="position: absolute" aria-hidden="true">
     <filter id="lg-filter" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-      <feImage x="0" y="0" width="420" height="280" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22420%22%20height%3D%22280%22%20viewBox%3D%220%200%20420%20280%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22Y%22%20x1%3D%220%22%20x2%3D%220%22%20y1%3D%223%25%22%20y2%3D%2297%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230F0%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23000%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22X%22%20x1%3D%222%25%22%20x2%3D%2298%25%22%20y1%3D%220%22%20y2%3D%220%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23F00%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23000%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22420%22%20height%3D%22280%22%20fill%3D%22%23808080%22%2F%3E%3Cg%20filter%3D%22blur(2px)%22%3E%3Crect%20width%3D%22420%22%20height%3D%22280%22%20fill%3D%22%23000080%22%2F%3E%3Crect%20width%3D%22420%22%20height%3D%22280%22%20fill%3D%22url(%23Y)%22%20style%3D%22mix-blend-mode%3Ascreen%22%2F%3E%3Crect%20width%3D%22420%22%20height%3D%22280%22%20fill%3D%22url(%23X)%22%20style%3D%22mix-blend-mode%3Ascreen%22%2F%3E%3Crect%20x%3D%2214%22%20y%3D%2214%22%20width%3D%22392%22%20height%3D%22252%22%20rx%3D%2226%22%20ry%3D%2226%22%20fill%3D%22%23808080%22%20filter%3D%22blur(14px)%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" result="displacementMap" />
-      <feDisplacementMap in="SourceGraphic" in2="displacementMap" scale="144" xChannelSelector="R" yChannelSelector="G" />
+      <feImage x="0" y="0" width="420" height="280"
+        href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22420%22%20height%3D%22280%22%20viewBox%3D%220%200%20420%20280%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22Y%22%20x1%3D%220%22%20x2%3D%220%22%20y1%3D%223%25%22%20y2%3D%2297%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230F0%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23000%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22X%22%20x1%3D%222%25%22%20x2%3D%2298%25%22%20y1%3D%220%22%20y2%3D%220%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23F00%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23000%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22420%22%20height%3D%22280%22%20fill%3D%22%23808080%22%2F%3E%3Cg%20filter%3D%22blur(2px)%22%3E%3Crect%20width%3D%22420%22%20height%3D%22280%22%20fill%3D%22%23000080%22%2F%3E%3Crect%20width%3D%22420%22%20height%3D%22280%22%20fill%3D%22url(%23Y)%22%20style%3D%22mix-blend-mode%3Ascreen%22%2F%3E%3Crect%20width%3D%22420%22%20height%3D%22280%22%20fill%3D%22url(%23X)%22%20style%3D%22mix-blend-mode%3Ascreen%22%2F%3E%3Crect%20x%3D%2214%22%20y%3D%2214%22%20width%3D%22392%22%20height%3D%22252%22%20rx%3D%2226%22%20ry%3D%2226%22%20fill%3D%22%23808080%22%20filter%3D%22blur(14px)%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"
+        result="displacementMap" />
+      <feDisplacementMap in="SourceGraphic" in2="displacementMap" scale="144" xChannelSelector="R"
+        yChannelSelector="G" />
       <feColorMatrix type="matrix" result="displacedR" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" />
-      <feDisplacementMap in="SourceGraphic" in2="displacementMap" scale="142" xChannelSelector="R" yChannelSelector="G" />
+      <feDisplacementMap in="SourceGraphic" in2="displacementMap" scale="142" xChannelSelector="R"
+        yChannelSelector="G" />
       <feColorMatrix type="matrix" result="displacedG" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" />
-      <feDisplacementMap in="SourceGraphic" in2="displacementMap" scale="140" xChannelSelector="R" yChannelSelector="G" />
+      <feDisplacementMap in="SourceGraphic" in2="displacementMap" scale="140" xChannelSelector="R"
+        yChannelSelector="G" />
       <feColorMatrix type="matrix" result="displacedB" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" />
       <feBlend in="displacedR" in2="displacedG" mode="screen" result="rg" />
       <feBlend in="rg" in2="displacedB" mode="screen" />
@@ -46,16 +51,16 @@
       <div class="loader-operator minus">−</div>
     </div>
   </div>
-    <div id="noteConfirmModal" class="modal-backdrop" role="dialog" aria-modal="true">
-      <div class="ios-modal">
-        <h3>Пок кардани ёддошт</h3>
-        <p>Шумо мутмаин ҳастед, ёддошт пок карда шавад? Ин амал барқарор карда намешавад.</p>
-        <div class="modal-actions">
-          <button class="btn secondary" type="button" data-action="cancelDeleteNote">Не</button>
-          <button class="btn" type="button" data-action="confirmDeleteNote">Бале</button>
-        </div>
+  <div id="noteConfirmModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="ios-modal">
+      <h3>Пок кардани ёддошт</h3>
+      <p>Шумо мутмаин ҳастед, ёддошт пок карда шавад? Ин амал барқарор карда намешавад.</p>
+      <div class="modal-actions">
+        <button class="btn secondary" type="button" data-action="cancelDeleteNote">Не</button>
+        <button class="btn" type="button" data-action="confirmDeleteNote">Бале</button>
       </div>
     </div>
+  </div>
   <div class="orb one"></div>
   <div class="orb two"></div>
 
@@ -136,8 +141,8 @@
               <div class="stat-value"><strong id="preciseAvgUI">0.00</strong></div>
             </div>
 
-            <div class="actions"><button class="btn export-action" type="button"
-                data-action="downloadResult">Зеркашӣ кардани натиҷа</button></div>
+            <div class="actions"><button class="btn export-action" type="button" data-action="downloadResult">Зеркашӣ
+                кардани натиҷа</button></div>
           </div>
         </div>
       </div>
@@ -201,19 +206,25 @@
     <section id="tab-journal" class="tab">
       <div class="card journal-shell-card">
         <div class="journal-top-badge">Журнал</div>
-
         <div class="journal-coming-soon-card">
-          <div class="journal-badge">Ба зудӣ</div>
+          <div class="journal-badge">Ҳоло дастрас нест</div>
           <h3 class="journal-title">Журнал</h3>
-          <p>Барои сохтани ин бахш саҳми худро гузоред. Саҳм гузоштан ихтиёрӣ аст ва барои гирифтани маълумоти бештар тугмаи "Муфассал"- ро пахш кунед.</p>
+          <p>
+            Бахши «Журнал» ҳоло дар марҳилаи таҳия қарор дорад ва айни замон дастрас нест.
+            Азбаски дастгирӣ ва навсозии барнома ҳоло қатъ шудааст, муҳлати омода шудани ин бахш муайян нест.
+            Пас аз идомаи таҳияи барнома, имконияти дастрас шудани «Журнал» баррасӣ хоҳад шуд.
+            Барои гирифтани маълумоти бештар тугмаи «Муфассал»-ро пахш кунед.
+          </p>
         </div>
 
         <div class="journal-contact-row">
           <a class="contact-btn" href="support.html">Муфассал</a>
           <a class="contact-btn" href="tel:+992928024414">Тамос</a>
         </div>
+
       </div>
     </section>
+
     <section id="tab-more" class="tab">
 
       <div id="more-home-view" class="more-subview active">
@@ -449,11 +460,16 @@
             <p class="dev-title">Creator & Software Developer</p>
           </div>
           <div class="dev-bio">
-            <b>Чоряк</b> барои осон кардани ҳисобу таҳлили натиҷаҳои чорякӣ таҳия шудааст. Агар ҳангоми истифода хатогӣ
-            (bug) ё мушкилоте пайдо кунед ё барои беҳтар намудани барнома пешниҳод, идея ё хусусияти нав дошта бошед,
-            лутфан бо таҳиягар дар тамос шавед. Андешаҳои шумо барои такмил ва рушди минбаъдаи барнома хеле муҳим
-            мебошанд.
+            <b>Чоряк</b> барои осон кардани ҳисобу таҳлили натиҷаҳои чорякӣ таҳия шудааст.
+            Айни замон барнома дастгирии фаъол намегирад ва раванди навсозии он муваққатан қатъ шудааст.
+            Аз ин рӯ, баъзе қисмҳо ё имкониятҳои барнома метавонанд маҳдуд, ғайрифаъол ё дастнорас бошанд ва
+            эҳтимол аст, ки баъзе хатогиҳо ислоҳ нашуда бошанд. Агар ҳангоми истифода бо мушкилот ё хатогӣ (bug) рӯ ба
+            рӯ шавед,
+            метавонед онро ба таҳиягар хабар диҳед. Ҳамчунин, агар барои беҳтар намудани барнома пешниҳод, идея ё
+            хусусияти нав дошта бошед,
+            лутфан бо таҳиягар дар тамос шавед. Андешаҳои шумо барои рушди минбаъдаи <b>Чоряк</b> муҳим мебошанд.
           </div>
+
           <div class="contact-section">
             <h4 class="contact-title">Тамос ва алоқа</h4>
             <div class="contact-grid">
@@ -539,7 +555,7 @@
             </button>
           </div>
           <h3 class="settings-title">Keyboard shortcuts</h3>
-          <p class="settings-sub">Quick keyboard actions to speed up workflow.</p>
+          <!-- <p class="settings-sub">Quick keyboard actions to speed up workflow.</p> -->
           <div class="shortcuts-grid shortcuts-grid--styled" id="shortcutsSection">
             <div class="shortcut-card">
               <div class="kbd-wrap"><kbd>1–9</kbd><kbd class="kbd-slim">/ 0</kbd></div>
@@ -641,7 +657,8 @@
       <div class="note-modal-body">
         <input id="noteTitleInput" class="input-field" type="text" placeholder="Сарлавҳа" autocomplete="off" />
         <input type="hidden" id="noteCategoryInput" value="lesson" />
-        <textarea id="noteBodyInput" class="input-field note-body-input" rows="6" placeholder="Тавсиф ё маълумоти ёддошт"></textarea>
+        <textarea id="noteBodyInput" class="input-field note-body-input" rows="6"
+          placeholder="Тавсиф ё маълумоти ёддошт"></textarea>
         <h3 class="note-category-label">Категория</h3>
         <div class="note-category-row" id="noteCategoryRow">
           <button type="button" class="note-category-pill" data-category="lesson">Дарс</button>
@@ -654,7 +671,8 @@
         <div class="note-modal-actions note-modal-actions-row">
         </div>
         <div class="note-modal-actions note-modal-actions-row">
-          <button id="noteDeleteButton" class="btn secondary" type="button" data-action="showDeleteConfirm" style="display:none;">Пок кардан</button>
+          <button id="noteDeleteButton" class="btn secondary" type="button" data-action="showDeleteConfirm"
+            style="display:none;">Пок кардан</button>
           <button id="noteSaveButton" class="btn" type="button" data-action="saveNote">Сабт</button>
         </div>
       </div>
@@ -716,9 +734,15 @@
   <button class="journal-floating-btn" type="button" data-tab="tab-journal" aria-label="Журнал">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-journal-album"
       viewBox="0 0 16 16" xmlns:xlink="http://www.w3.org/1999/xlink">
-      <path d="M5.5 4a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-5a.5.5 0 0 0-.5-.5zm1 7a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1z"></path>
-      <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2"></path>
-      <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1z"></path>
+      <path
+        d="M5.5 4a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-5a.5.5 0 0 0-.5-.5zm1 7a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1z">
+      </path>
+      <path
+        d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2">
+      </path>
+      <path
+        d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1z">
+      </path>
     </svg>
   </button>
 

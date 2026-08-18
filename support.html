@@ -2,266 +2,237 @@
 <html lang="tg">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Саҳм барои рушди барнома</title>
-    <style>
-        :root {
-            --primary: #3b82f6;
-            --primary-light: #eef2ff;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --accent: #10b981;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+  <title>Чоряк - Журнал</title>
 
-        body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: var(--bg);
-            background-image: radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.08) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px 16px;
-        }
+  <link rel="stylesheet" href="assets/css/main.css">
 
-        .container {
-            width: 100%;
-            max-width: 520px;
-        }
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+        'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
 
-        .card {
-            background: var(--card-bg);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            border-radius: 24px;
-            padding: 36px 28px;
-            box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.07);
-            backdrop-filter: blur(10px);
-        }
+    body {
+      background: linear-gradient(135deg, #f2f8ff 0%, #eaf6ff 100%);
+      color: #06273b;
+      min-height: 100vh;
 
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: 9999px;
-            background: var(--primary-light);
-            color: var(--primary);
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-            margin-bottom: 20px;
-        }
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-        .badge-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background-color: var(--primary);
-        }
+      padding: 20px;
+    }
 
-        h1 {
-            font-size: 26px;
-            font-weight: 800;
-            color: var(--text-main);
-            line-height: 1.25;
-            margin-bottom: 12px;
-            letter-spacing: -0.5px;
-        }
+    .container {
+      width: 100%;
+      max-width: 440px;
+    }
 
-        .description {
-            line-height: 1.7;
-            color: var(--text-muted);
-            font-size: 15px;
-        }
+    .card {
+      background: rgba(255, 255, 255, 0.96);
 
-        .goal-card {
-            margin: 28px 0;
-            padding: 24px;
-            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            text-align: center;
-        }
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
 
-        .goal-title {
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
+      border: 1px solid rgba(255, 255, 255, 0.85);
 
-        .amount {
-            font-size: 36px;
-            font-weight: 800;
-            color: var(--text-main);
-            letter-spacing: -1px;
-        }
+      border-radius: 26px;
 
-        .progress-container {
-            margin-top: 16px;
-        }
+      box-shadow: 0 18px 46px rgba(14, 43, 77, 0.08);
 
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
+      padding: 40px 28px;
 
-        .progress-track {
-            height: 10px;
-            background: var(--border);
-            border-radius: 9999px;
-            overflow: hidden;
-        }
+      text-align: center;
 
-        .progress-bar {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary) 0%, #6366f1 100%);
-            border-radius: inherit;
-            transition: width 0.4s ease;
-        }
+      display: flex;
+      flex-direction: column;
+      align-items: center;
 
-        .payment-section {
-            margin-top: 28px;
-        }
+      gap: 20px;
+    }
 
-        .payment-section h2 {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: var(--text-main);
-        }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
 
-        .payment-box {
-            padding: 20px;
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            background: #fafafa;
-        }
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
 
-        .payment-box p {
-            font-size: 14px;
-            line-height: 1.7;
-            color: var(--text-muted);
-        }
+      padding: 6px 14px;
 
-        .payment-box p+p {
-            margin-top: 10px;
-        }
+      border-radius: 20px;
 
-        .actions {
-            margin-top: 28px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
 
-        .contact-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            padding: 16px 20px;
-            border-radius: 14px;
-            background: var(--primary);
-            color: #ffffff;
-            font-weight: 700;
-            font-size: 15px;
-            text-decoration: none;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
-            transition: all 0.2s ease;
-        }
+    .badge-dot {
+      width: 7px;
+      height: 7px;
 
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 12px;
-            color: var(--text-muted);
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            border-radius: 12px;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
+      border-radius: 50%;
 
-        .back-btn:active {
-            background-color: var(--primary-light);
-            color: var(--primary);
-        }
+      background: #ef4444;
+    }
 
-        .note {
-            font-size: 12px;
-            text-align: center;
-            color: var(--text-muted);
-            margin-top: 24px;
-            line-height: 1.5;
-        }
-    </style>
+    .icon-wrapper {
+      width: 80px;
+      height: 80px;
+
+      background: rgba(239, 68, 68, 0.08);
+
+      border-radius: 50%;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      color: #ef4444;
+
+      margin-top: 5px;
+    }
+
+    .title {
+      font-size: 1.4rem;
+
+      font-weight: 800;
+
+      color: #1e293b;
+
+      line-height: 1.3;
+    }
+
+    .description {
+      color: #64748b;
+
+      font-size: 0.95rem;
+
+      line-height: 1.7;
+
+      margin: 0;
+    }
+
+    .btn {
+      display: inline-flex;
+
+      align-items: center;
+      justify-content: center;
+
+      background: linear-gradient(
+        135deg,
+        #3b82f6 0%,
+        #06b6d4 100%
+      );
+
+      color: #ffffff;
+
+      font-weight: 600;
+
+      font-size: 1rem;
+
+      padding: 14px 28px;
+
+      border-radius: 16px;
+
+      text-decoration: none;
+
+      width: 100%;
+
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+
+      transition: all 0.2s ease;
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      opacity: 0.9;
+    }
+  </style>
 </head>
 
-<body>
-    <main class="container">
-        <div class="card">
-            <div class="badge"> <span class="badge-dot"></span> Саҳм дар рушди барнома </div>
-            <h1>Биёед қисми нави барномаро ба анҷом расонем</h1>
-            <p class="description"> Барои ба роҳ мондани марҳилаи нав ва идома додани рушди барнома маблағи 250 сомонӣ
-                зарур аст. Бо ҷамъ шудани ин маблағ, кори қисми нави барнома оғоз мегардад. </p>
-            <div class="goal-card">
-                <div class="goal-title">Маблағи зарурӣ</div>
-                <div class="amount">250 сомонӣ</div>
-                <div class="progress-container">
-                    <div class="progress-header"> <span>Ҷамъ шуд: 0 сомонӣ</span> <span>250 сомонӣ</span> </div>
-                    <div class="progress-track">
-                        <div class="progress-bar"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="payment-section">
-                <h2>Саҳми шумо чӣ кор мекунад?</h2>
-                <div class="payment-box">
-                    <p> Шумо метавонед ба ҷамъ шудани маблағи зарурӣ саҳм гузоред. Миқдори саҳмро худатон муайян
-                        мекунед. </p>
-                    <p> Вақте ки 250 сомонӣ пурра ҷамъ мешавад, таҳияи қисми нави барнома оғоз мегардад. </p>
-                    <p> Пас аз анҷом ёфтани таҳия, қисми «Журнал» барои ҳамаи корбарони барнома ройгон дастрас хоҳад
-                        буд. </p>
-                </div>
-            </div>
-            <div class="actions"> <a class="contact-btn" href="mailto:abdughafur.2010.khujzoda@gmail.com"> Барои саҳм
-                    гузоштан </a> <a class="back-btn" href="index.html"> ← Бозгашт ба барнома </a> </div>
-            <div class="note">
-                <p>
-                    Ҳадаф — ҷамъ кардани 250 сомонӣ барои идома додани
-                    рушди барнома мебошад. Пас аз расидан ба ҳадаф,
-                    ҷамъоварӣ ба анҷом мерасад.
-                </p>
 
-                <hr>
+<body data-theme="light">
 
-                <p style="margin-top: 16px;">
-                    Барои гирифтани маълумоти навтарин ба Интернет пайваст шавед!
-                </p>
-            </div>
+  <main class="container">
+
+    <section class="tab active">
+
+      <div class="card">
+
+        <!-- Ҳолати бахш -->
+        <div class="badge">
+          <span class="badge-dot"></span>
+          Журнал дастрас нест
         </div>
-    </main>
+
+
+        <!-- Иконкаи журнал -->
+        <div class="icon-wrapper">
+
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="44"
+            height="44"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+
+            <!-- Китоб -->
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+
+            <line x1="8" y1="7" x2="16" y2="7"></line>
+
+            <line x1="8" y1="11" x2="16" y2="11"></line>
+
+            <line x1="8" y1="15" x2="13" y2="15"></line>
+
+          </svg>
+
+        </div>
+
+
+        <!-- Сарлавҳа -->
+        <div class="title">
+          Бахши «Журнал» ҳоло дастрас нест
+        </div>
+
+
+        <!-- Маълумот -->
+        <p class="description">
+          Бахши «Журнал» ҳоло фаъол нест ва айни замон
+          истифодаи он имконнопазир мебошад.
+          Дастгирӣ ва навсозии барномаи «Чоряк» дар ҳоли ҳозир
+          қатъ шудааст, бинобар ин баъзе қисмҳо ва имкониятҳои
+          барнома метавонанд маҳдуд ё дастнорас бошанд.
+        </p>
+
+
+        <!-- Бозгашт -->
+        <a class="btn" href="index.html">
+          Баргашт ба Барнома
+        </a>
+
+      </div>
+
+    </section>
+
+  </main>
+
 </body>
 
 </html>
