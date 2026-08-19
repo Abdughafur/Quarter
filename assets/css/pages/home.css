@@ -113,4 +113,6 @@
   grid-template-columns: 1fr;
   gap: 9px;
   margin-top: 14px;
+  justify-items: center;
+  align-items: center;
 }

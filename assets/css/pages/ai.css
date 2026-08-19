@@ -6,3 +6,47 @@
   line-height: 1.62;
   font-weight: 850;
 }
+
+/* MinAI card tweaks */
+.minai-card {
+  text-align: center;
+  padding: 12px;
+}
+.minai-card .minai-media {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  padding: 6px 0;
+  /* allow the container to limit height but not force cropping */
+  max-height: 320px;
+}
+.minai-card .minai-media img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+  display: block;
+}
+
+@media (max-width: 420px) {
+  .minai-card .minai-media {
+    /* allow natural image proportions on very small screens */
+    max-height: none;
+  }
+  .minai-card .minai-media img {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 160px;
+    display: block;
+  }
+}
+.minai-card .minai-title {
+  margin-top: 10px;
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: var(--muted);
+}

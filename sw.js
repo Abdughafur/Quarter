@@ -5,7 +5,7 @@ const PRECACHE = [
   "./",
   "./index.html",
   "./profile.html",
-  "./download.html",
+  // download.html intentionally not precached to keep it online-only
   "./support.html",
   "./manifest.json",
   "./assets/css/main.css",
@@ -52,6 +52,7 @@ const PRECACHE = [
   "./assets/js/ui/modal.js",
   "./assets/js/ui/chart.js",
   "./assets/js/utils/helpers.js",
+  "./minai/ai.png",
 ];
 
 function isDownloadPage(url) {

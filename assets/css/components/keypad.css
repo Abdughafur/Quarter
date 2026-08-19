@@ -28,11 +28,26 @@
 
 .key:active {
   transform: scale(0.92) translateY(2px);
+}
+
+/* only keys without .scale-only get the active background/color change */
+.key:not(.scale-only):active {
   background: linear-gradient(135deg, var(--primary), var(--accent));
   color: #fff;
 }
 
-.key.clear {
+/* Ensure clear and back keys only scale (no bg/color swap) */
+.key.clear:active,
+.key.back:active {
+  transform: scale(0.92) translateY(2px);
+  background: rgba(239, 68, 68, 0.11) !important;
+  color: var(--danger) !important;
+  border-color: rgba(239, 68, 68, 0.18) !important;
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.12) !important;
+}
+
+.key.clear,
+.key.back {
   color: var(--danger);
   background: rgba(239, 68, 68, 0.11);
   border-color: rgba(239, 68, 68, 0.18);
@@ -55,7 +70,18 @@
   box-shadow: 0 8px 24px rgba(14, 165, 233, 0.35);
 }
 
-[data-theme="dark"] .key.clear {
+/* dark theme: keep clear/back only scaling */
+[data-theme="dark"] .key.clear:active,
+[data-theme="dark"] .key.back:active {
+  transform: scale(0.92) translateY(2px);
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(239, 68, 68, 0.25) !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2) !important;
+}
+
+[data-theme="dark"] .key.clear,
+[data-theme="dark"] .key.back {
   background: rgba(239, 68, 68, 0.15);
   border-color: rgba(239, 68, 68, 0.25);
   color: #fca5a5;

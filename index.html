@@ -38,17 +38,11 @@
       <feBlend in="rg" in2="displacedB" mode="screen" />
     </filter>
   </svg>
-  <div id="loader" class="loader" aria-hidden="true">
-    <div class="loader-card">
-      <div class="loader-operator plus">+</div>
-      <div class="loader-math">
-        <span class="loader-number">/</span>
-        <span class="loader-symbol">×</span>
-        <span class="loader-number">*</span>
-        <span class="loader-symbol">÷</span>
-        <span class="loader-number">,</span>
-      </div>
-      <div class="loader-operator minus">−</div>
+  <!-- Splash screen (replaces old loader) -->
+  <div id="splash" class="splash" aria-hidden="false">
+    <div class="splash-inner">
+      <img class="splash-logo" src="assets/images/app-icon.svg" alt="App logo" />
+      <div class="splash-title">Чоряк</div>
     </div>
   </div>
   <div id="noteConfirmModal" class="modal-backdrop" role="dialog" aria-modal="true">
@@ -141,8 +135,12 @@
               <div class="stat-value"><strong id="preciseAvgUI">0.00</strong></div>
             </div>
 
-            <div class="actions"><button class="btn export-action" type="button" data-action="downloadResult">Зеркашӣ
-                кардани натиҷа</button></div>
+            <div class="actions">
+              <div class="glass-capsule">
+                <button class="btn export-action" type="button" data-action="downloadResult">Зеркашӣ
+                кардани натиҷа</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -154,9 +152,23 @@
         <div class="chart" id="gradeChart"></div>
       </div>
 
+      <!-- Old simple AI card (commented out) -->
+      <!--
       <div class="card">
         <div class="ai-badge">MinAI</div>
         <div id="aiText" class="msg">Барои гирифтани таҳлил, аввал баллҳоро ворид кунед.</div>
+      </div>
+      -->
+
+      <!-- Present MinAI card with image -->
+      <div class="card minai-card">
+        <div class="minai-media">
+          <img src="minai/ai.png" alt="MinAI image" />
+        </div>
+        <div class="ai-badge">MinAI</div>
+        <h3 class="minai-title">
+  MinAI v1.0 ҳоло дастрас нест. Пас аз анҷоми таҳияи версияи нав, MinAI дубора дастрас хоҳад шуд.
+</h3>
       </div>
       <div class="card" id="aiAnalysisBox" style="display:none ; font-weight: 900;">
         MinAI v1.0 </div>

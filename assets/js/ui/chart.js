@@ -5,11 +5,13 @@ export function buildKeypad(container, handlers) {
   container.textContent = "";
 
   for (let value = 1; value <= 9; value += 1) {
-    container.append(createKey(String(value), () => handlers.onAdd(value)));
+    // numeric keys use 'scale-only' so they only scale on active (no bg/color change)
+    container.append(createKey(String(value), () => handlers.onAdd(value), "scale-only"));
   }
 
-  container.append(createKey("←", handlers.onDelete));
-  container.append(createKey("10", () => handlers.onAdd(10)));
+  // back key should look like clear button
+  container.append(createKey("←", handlers.onDelete, "clear back"));
+  container.append(createKey("10", () => handlers.onAdd(10), "scale-only"));
   container.append(createKey("Тоза", handlers.onClear, "clear"));
 }
 

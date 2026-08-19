@@ -137,3 +137,23 @@
     font-size: 0.6rem;
   }
 }
+
+/* Ensure nav and buttons stay capsule-shaped on mobile devices across themes/pages */
+@media (max-width: 760px) {
+  nav {
+    border-radius: 999px !important;
+  }
+
+  .nav-btn {
+    border-radius: 999px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+  }
+
+  /* slightly smaller on very small screens */
+  @media (max-width: 360px) {
+    .nav-btn {
+      height: 46px !important;
+    }
+  }
+}

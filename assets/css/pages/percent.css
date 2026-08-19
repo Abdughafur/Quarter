@@ -1,7 +1,8 @@
 /* percent.css */
 .clear-percent-btn {
-  width: 100%;
-  margin-bottom: 12px;
+  display: block;
+  width: auto;
+  margin: 12px auto 0;
   min-height: 42px;
   border-radius: 999px;
   background: linear-gradient(135deg, #ef4444, #dc2626);
@@ -10,6 +11,7 @@
   border: none;
   font-weight: 950;
   letter-spacing: 0.02em;
+  padding: 0 18px;
 }
 
 .clear-percent-btn:active {
@@ -31,6 +33,24 @@
   border: 1px solid var(--soft);
   background: rgba(255, 255, 255, 0.12);
   border-radius: 17px;
+}
+
+/* Make the count inputs look like compact glass capsules */
+.percent-row .input-field {
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 6px 14px rgba(2,6,23,0.12), inset 0 1px 0 rgba(255,255,255,0.03);
+  text-align: center;
+  font-weight: 900;
+}
+
+.percent-row .input-field:focus {
+  border-color: rgba(59,130,246,0.9);
+  box-shadow: 0 8px 22px rgba(59,130,246,0.12);
 }
 
 .grade-title {

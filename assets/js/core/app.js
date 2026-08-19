@@ -68,7 +68,17 @@ export const app = {
     this.updateAll();
     this.renderNotes();
 
-    setTimeout(() => qs("loader")?.classList.add("hide"), 250);
+    // play splash animation: add showing class so logo/title animate into place
+    const splash = qs("splash");
+    if (splash) {
+      // start animation frame for CSS transitions
+      requestAnimationFrame(() => splash.classList.add("showing"));
+      // after 3s hide splash
+      setTimeout(() => {
+        splash.classList.add("fading");
+        setTimeout(() => splash.classList.add("hide"), 420);
+      }, 3000);
+    }
     // initialize nav highlight and draggable behavior
     this.setupNavDrag();
   },
@@ -561,7 +571,7 @@ export const app = {
     const actions = {
       deleteLast: () => this.deleteLast(),
       clearAll: () => this.clearAll(),
-      clearAllPercentages: () => this.clearAllPercentages(),
+      clearAllPercentages: () => { this.vibrate?.(40); this.clearAllPercentages(true); },
       clearPupilCount: () => this.clearPupilCount(),
       downloadResult: () => this.ensureInfo(),
       closeModal: () => this.closeModal(),
@@ -682,8 +692,14 @@ export const app = {
   buildKeypad() {
     buildKeypad(qs("keypad"), {
       onAdd: (value) => this.add(value),
-      onDelete: () => this.deleteLast(),
-      onClear: () => this.clearAll(),
+      onDelete: () => {
+        this.vibrate?.(30);
+        this.deleteLast(true);
+      },
+      onClear: () => {
+        this.vibrate?.(40);
+        this.clearAll(true);
+      },
     });
   },
 
@@ -709,9 +725,9 @@ export const app = {
     this.scheduleUpdate(true);
   },
 
-  deleteLast() {
+  deleteLast(silent = false) {
     if (!this.grades.length) {
-      this.toast.show("Ҳоло ягон балл нест.");
+      if (!silent) this.toast.show("Ҳоло ягон балл нест.");
       return;
     }
 
@@ -719,18 +735,18 @@ export const app = {
     this.scheduleUpdate(true);
   },
 
-  clearAll() {
+  clearAll(silent = false) {
     if (!this.grades.length) {
-      this.toast.show("Ҳоло ягон балл нест.");
+      if (!silent) this.toast.show("Ҳоло ягон балл нест.");
       return;
     }
 
     this.grades = [];
     this.scheduleUpdate(true);
-    this.toast.show("Ҳама баллҳо тоза шуд.");
+    if (!silent) this.toast.show("Ҳама баллҳо тоза шуд.");
   },
 
-  clearAllPercentages() {
+  clearAllPercentages(silent = false) {
     // Clear only percentage distribution inputs; preserve pupil total and recorded grades
     this.pct.counts = {};
 
@@ -742,7 +758,7 @@ export const app = {
     // update UI and persist
     this.percentUpdate();
     this.save();
-    this.toast.show("Ҳама фоизҳо тоза шуданд.");
+    if (!silent) this.toast.show("Ҳама фоизҳо тоза шуданд.");
   },
 
   clearPupilCount() {
@@ -1793,6 +1809,16 @@ export const app = {
       oscillator.start();
       oscillator.stop(this.audioCtx.currentTime + duration);
     } catch {}
+  },
+
+  vibrate(ms = 50) {
+    try {
+      if (navigator && typeof navigator.vibrate === "function") {
+        navigator.vibrate(ms);
+      }
+    } catch (e) {
+      // ignore
+    }
   },
 };
 
