@@ -47,6 +47,19 @@ export function setHtml(id, value) {
   if (el) el.innerHTML = String(value);
 }
 
+export function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>'"]/g, (character) => {
+    const entities = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "'": "&#39;",
+      '"': "&quot;",
+    };
+    return entities[character];
+  });
+}
+
 export function setInputValue(id, value) {
   const el = qs(id);
   if (el && el.value !== String(value)) el.value = String(value);

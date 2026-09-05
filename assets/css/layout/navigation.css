@@ -36,6 +36,20 @@
   pointer-events: none;
 }
 
+/* Keep the floating journal action out of the way while a More subview is open. */
+body.more-subview-open .journal-floating-btn {
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.88);
+  pointer-events: none;
+}
+
+body.more-subview-open nav {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(calc(100% + 24px));
+}
+
 .journal-floating-btn svg {
   width: 20px;
   height: 20px;
@@ -139,6 +153,10 @@ nav {
     opacity: 0;
     pointer-events: none;
     transform: translateY(calc(100% + 24px));
+  }
+
+  body.more-subview-open .journal-floating-btn {
+    transform: translateY(calc(100% + 24px)) scale(0.88);
   }
 
   .nav-btn {
@@ -275,17 +293,22 @@ body[data-theme="dark"] nav {
   transform: none !important;
 }
 
-/* Hide native scrollbars on mobile for a cleaner app look */
-@media (max-width: 720px) {
-  html,
-  body {
-    -ms-overflow-style: none; /* IE 10+ */
-    scrollbar-width: none; /* Firefox */
-  }
-  html::-webkit-scrollbar,
-  body::-webkit-scrollbar {
-    display: none; /* Safari/WebKit */
-    width: 0;
-    height: 0;
-  }
+html,
+body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+*,
+*::before,
+*::after {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }

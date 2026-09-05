@@ -82,6 +82,11 @@
   box-shadow: none;
 }
 
+[data-theme="dark"] .block,
+[data-theme="dark"] .block.exam {
+  box-shadow: none;
+}
+
 [data-theme="dark"] .input-field {
   background: rgba(10, 16, 24, 0.94);
   border-color: rgba(255, 255, 255, 0.08);

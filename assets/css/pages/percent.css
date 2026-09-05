@@ -15,7 +15,8 @@
   font-weight: 950;
   letter-spacing: 0.02em;
   padding: 0 18px;
-  touch-action: pan-y;
+  touch-action: none;
+  overscroll-behavior: none;
   user-select: none;
   transition:
     transform 520ms cubic-bezier(0.22, 1, 0.36, 1),

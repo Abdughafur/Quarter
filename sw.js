@@ -1,13 +1,17 @@
 /* sw.js */
-const CACHE_NAME = "choryak-cache";
+const CACHE_NAME = "choryak-cache-v4.3.1";
 
 const PRECACHE = [
   "./",
   "./index.html",
+  "./landing.html",
   "./profile.html",
+  "./startup.html",
   // download.html intentionally not precached to keep it online-only
   "./support.html",
   "./manifest.json",
+  "./assets/images/logoLight.png",
+  "./assets/images/abdughafur.png",
   "./assets/css/main.css",
   "./assets/css/core/reset.css",
   "./assets/css/core/variables.css",
@@ -43,8 +47,10 @@ const PRECACHE = [
   "./assets/css/utilities/radius.css",
   "./assets/css/utilities/helpers.css",
   "./assets/js/core/app.js",
+  "./assets/js/core/entry.js",
   "./assets/js/core/profile.js",
   "./assets/js/core/storage.js",
+  "./assets/js/core/startup.js",
   "./assets/js/core/stats.js",
   "./assets/js/core/pwa.js",
   "./assets/js/ai/minai.js",

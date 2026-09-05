@@ -1,4 +1,4 @@
-# ✨ Чоряк
+# ✨ Чоряк v4.3.1
 
 ### AI-Powered Quarterly Grade Calculator
 

@@ -5,6 +5,7 @@ import {
   getTrend,
   gradeLabel,
 } from "../core/stats.js";
+import { escapeHtml } from "../utils/helpers.js";
 
 export function renderMinAI({ box, text, grades }) {
   if (!box || !text) return;
@@ -25,8 +26,7 @@ export function renderMinAI({ box, text, grades }) {
   const mid = grades.filter((grade) => grade.val >= 6 && grade.val <= 7).length;
   const high = grades.filter((grade) => grade.val >= 8).length;
 
-  let advice =
-    "-------------------";
+  let advice = "-------------------";
 
   if (final < 6.5) {
     advice =
@@ -37,7 +37,7 @@ export function renderMinAI({ box, text, grades }) {
   }
 
   box.style.display = "block";
-  text.innerHTML = `<b>MinAI:</b><br>Натиҷаи ҳозира <b>${final.toFixed(2)}</b> — <b>${gradeLabel(final)}</b>.<br>Сатҳи таҳсил: <b>${trend}</b>.<br>${balance}<br>${advice}<br><br>${needed}`;
+  text.innerHTML = `<b>MinAI:</b><br>Натиҷаи ҳозира <b>${escapeHtml(final.toFixed(2))}</b> — <b>${escapeHtml(gradeLabel(final))}</b>.<br>Сатҳи таҳсил: <b>${escapeHtml(trend)}</b>.<br>${escapeHtml(balance)}<br>${escapeHtml(advice)}<br><br>${escapeHtml(needed)}`;
 }
 
 // MinAI v1.0

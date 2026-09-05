@@ -141,7 +141,7 @@
     linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 45%),
     linear-gradient(135deg, var(--primary), var(--accent));
   color: white;
-  box-shadow: 0 10px 20px rgba(14, 165, 233, 0.24);
+  box-shadow: none;
   position: relative;
   font-size: 1.25rem;
   line-height: 1;
@@ -152,7 +152,7 @@
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.24), transparent 45%),
     linear-gradient(135deg, #f59e0b, #f97316);
-  box-shadow: 0 10px 20px rgba(245, 158, 11, 0.24);
+  box-shadow: none;
 }
 
 .block.exam::after {
@@ -231,4 +231,38 @@
   margin-top: 14px;
   justify-items: center;
   align-items: center;
+}
+
+.calculator-desktop-layout {
+  display: contents;
+}
+
+.calculator-input-column,
+.calculator-insights-column {
+  display: contents;
+}
+
+@media (min-width: 1100px) {
+  main.container:has(> #tab-home.active) {
+    max-width: 1180px;
+  }
+
+  .calculator-desktop-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 32px;
+    align-items: start;
+  }
+
+  .calculator-input-column,
+  .calculator-insights-column {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .calculator-insights-column {
+    padding-left: 32px;
+    border-left: 1px solid var(--border);
+  }
 }

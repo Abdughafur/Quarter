@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="tg">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Чоряк — Startup</title>
+    <link rel="icon" href="assets/images/logoLight.png" type="image/png" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+</head>
+
+<body class="startup-page" data-theme="light">
+    <main class="startup-shell">
+        <section id="startupTheme" class="startup-card" aria-labelledby="startupTitle">
+            <div class="startup-mark"><img src="assets/images/logoLight.png" alt="" /></div>
+            <h1 id="startupTitle">Чорякро ба табъи худ созед</h1>
+            <p class="startup-text">Намуди равшан ё торикро интихоб кунед. Ин интихоб дар барнома нигоҳ дошта мешавад.
+            </p>
+            <div class="theme-choices" role="radiogroup" aria-label="Интихоби мавзӯъ">
+                <button type="button" class="theme-choice" data-theme-choice="light" role="radio"
+                    aria-checked="false"><span class="theme-preview theme-preview-light"></span><b>Ҳолати
+                        равшан</b><small>Равшан ва тоза</small></button>
+                <button type="button" class="theme-choice" data-theme-choice="dark" role="radio"
+                    aria-checked="false"><span class="theme-preview theme-preview-dark"></span><b>Ҳолати
+                        торик</b><small>Беҳтарин барои шаб</small></button>
+            </div>
+            <button id="startupContinue" class="btn startup-button" type="button">Идома додан <span
+                    aria-hidden="true">→</span></button>
+        </section>
+
+        <section id="startupWelcome" class="startup-card startup-welcome" aria-labelledby="welcomeTitle" hidden>
+            <div class="welcome-mark">✓</div>
+            <p class="landing-kicker">Ҳама чиз омода аст</p>
+            <h1 id="welcomeTitle">Хуш омадед ба Чоряк</h1>
+            <p class="startup-text">Профили шумо сохта шуд. Акнун метавонед баллҳоятонро ворид карда, натиҷаи худро бо
+                осонӣ бинед.</p>
+            <button id="startupEnter" class="btn startup-button" type="button">Оғоз<span
+                    aria-hidden="true">→</span></button>
+        </section>
+    </main>
+    <script type="module" src="assets/js/core/entry.js"></script>
+    <script type="module" src="assets/js/core/startup.js"></script>
+</body>
+
+</html>

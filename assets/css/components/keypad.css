@@ -20,30 +20,9 @@
     var(--card2);
   font-size: 1.22rem;
   font-weight: 1000;
-  box-shadow:
-    0 10px 22px rgba(15, 23, 42, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.42);
-  transition:
-    background 0.08s ease,
-    color 0.08s ease,
-    box-shadow 0.08s ease;
+  box-shadow: 0 5px 12px rgba(15, 23, 42, 0.06);
   touch-action: manipulation;
   user-select: none;
-}
-
-/* only keys without .scale-only get the active background/color change */
-.key:not(.scale-only):active {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: #fff;
-}
-
-/* Ensure clear and back keys only scale (no bg/color swap) */
-.key.clear:active,
-.key.back:active {
-  background: rgba(239, 68, 68, 0.11) !important;
-  color: var(--danger) !important;
-  border-color: rgba(239, 68, 68, 0.18) !important;
-  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.12) !important;
 }
 
 .key.clear,
@@ -75,24 +54,7 @@
     rgba(17, 24, 39, 0.7);
   border-color: rgba(255, 255, 255, 0.08);
   color: #e2e8f0;
-  box-shadow:
-    0 8px 20px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-[data-theme="dark"] .key:active {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: #ffffff;
-  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.35);
-}
-
-/* dark theme: keep clear/back only scaling */
-[data-theme="dark"] .key.clear:active,
-[data-theme="dark"] .key.back:active {
-  background: rgba(239, 68, 68, 0.15) !important;
-  color: #fca5a5 !important;
-  border-color: rgba(239, 68, 68, 0.25) !important;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.22);
 }
 
 [data-theme="dark"] .key.clear,

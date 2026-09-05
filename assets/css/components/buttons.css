@@ -50,19 +50,21 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 46px;
-  min-width: 210px;
+  min-height: 42px;
+  min-width: 112px;
   max-width: 100%;
   color: #ffffff;
-  padding: 0 18px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 0 16px;
+  border-radius: 12px;
+  background: rgba(34, 211, 238, 0.12);
+  border: 1px solid rgba(142, 219, 240, 0.28);
   box-shadow:
-    0 14px 30px rgba(14, 165, 233, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    0 7px 16px rgba(2, 12, 22, 0.11),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(12px) saturate(135%);
+  -webkit-backdrop-filter: blur(12px) saturate(135%);
   font-weight: 900;
-  font-size: 0.86rem;
+  font-size: 0.76rem;
   white-space: nowrap;
   touch-action: none;
   user-select: none;
@@ -85,11 +87,51 @@
 
 .btn.export-action.is-stretching {
   opacity: 1;
+  background: rgba(34, 211, 238, 0.2);
   box-shadow:
-    0 18px 34px rgba(14, 165, 233, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.32);
+    0 10px 20px rgba(34, 211, 238, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.btn.export-action.is-releasing {
+  animation: stretch-release 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: both;
+  will-change: transform;
 }
 
 .btn.export-action:active {
   opacity: 0.96;
+}
+
+.grades-toggle.is-releasing,
+.btn-back.is-releasing,
+.clear-percent-btn.is-releasing,
+.journal-floating-btn.is-releasing,
+.floating-add-note.is-releasing,
+.nav-btn.is-releasing,
+.btn.export-action.is-releasing {
+  animation: stretch-release 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: both;
+  will-change: transform;
+}
+
+@keyframes stretch-release {
+  0% {
+    transform: translate(var(--stretch-x, 0px), var(--stretch-y, 0px))
+      rotate(var(--stretch-angle, 0deg)) scaleX(var(--stretch-scale, 1))
+      rotate(calc(var(--stretch-angle, 0deg) * -1));
+  }
+  35% {
+    transform: translate(var(--release-x, 0px), var(--release-y, 0px))
+      rotate(var(--release-angle, 0deg)) scaleX(0.985)
+      rotate(calc(var(--release-angle, 0deg) * -1));
+  }
+  68% {
+    transform: translate(var(--return-x, 0px), var(--return-y, 0px))
+      rotate(var(--return-angle, 0deg)) scaleX(1.01)
+      rotate(calc(var(--return-angle, 0deg) * -1));
+  }
+  100% {
+    transform: translate(0, 0) rotate(0) scale(1);
+  }
 }

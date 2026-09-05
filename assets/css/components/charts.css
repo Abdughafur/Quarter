@@ -15,9 +15,7 @@
     rgba(14, 165, 233, 0.06)
   );
   border: 1px solid rgba(148, 163, 184, 0.18);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    0 8px 20px rgba(15, 23, 42, 0.04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
   display: flex;
   overflow: hidden;
   overflow-x: hidden;
@@ -181,14 +179,20 @@
 }
 
 .trend-point-value {
-  fill: var(--text);
+  fill: #334155;
   font-size: 10px;
   font-weight: 900;
   paint-order: stroke;
-  stroke: rgba(255, 255, 255, 0.9);
-  stroke-width: 4px;
+  stroke: rgba(255, 255, 255, 0.72);
+  stroke-width: 3px;
   stroke-linejoin: round;
   letter-spacing: 0.02em;
+}
+
+[data-theme="dark"] .trend-point-value {
+  fill: #bae6fd;
+  stroke: #08131f;
+  stroke-width: 3.5px;
 }
 
 .trend-points circle:hover,

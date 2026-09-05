@@ -4,6 +4,9 @@ let hasReloadedForUpdate = false;
 let isPwaSupported = false;
 
 function isStandaloneMode() {
+  if (typeof window.matchMedia !== "function") {
+    return window.navigator.standalone === true;
+  }
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
     window.navigator.standalone === true ||
@@ -70,7 +73,12 @@ window.addEventListener("appinstalled", () => {
   updateInstallButton();
 });
 
-if ("serviceWorker" in navigator) {
+const canUseServiceWorker =
+  "serviceWorker" in navigator &&
+  (window.location.protocol === "http:" ||
+    window.location.protocol === "https:");
+
+if (canUseServiceWorker) {
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (hasReloadedForUpdate) return;
     hasReloadedForUpdate = true;

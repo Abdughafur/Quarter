@@ -13,6 +13,8 @@
   font-size: 0.86rem;
   font-weight: 1000;
   white-space: nowrap;
+  touch-action: none;
+  user-select: none;
 }
 
 .loader-logo,
@@ -71,6 +73,8 @@
 .btn,
 .ai-badge,
 .floating-add-note {
-  transition: transform 160ms ease, opacity 160ms ease;
+  transition:
+    transform 160ms ease,
+    opacity 160ms ease;
   will-change: transform, opacity;
 }

@@ -1,5 +1,5 @@
 ﻿/* profile.js */
-/* Created by Abdughafur - ЧОРЯК 4.3 */
+/* Created by Abdughafur - ЧОРЯК 4.3.1 */
 import { clean, qs, setInputValue } from "../utils/helpers.js";
 import { saveState, loadState, DEFAULT_PROFILE } from "./storage.js";
 
@@ -108,10 +108,10 @@ async function init() {
 
     await saveProfile(updatedProfile);
     showNotice("Профил сабт шуд.", "success");
-    setTimeout(() => window.location.assign("index.html"), 900);
+    setTimeout(() => window.location.assign("startup.html"), 900);
   });
 }
 
 void init();
 
-/* Created by Abdughafur - ЧОРЯК 4.3 */
+/* Created by Abdughafur - ЧОРЯК 4.3.1 */

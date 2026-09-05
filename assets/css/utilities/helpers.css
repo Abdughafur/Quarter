@@ -1,5 +1,17 @@
 /* helpers.css */
 
+*,
+*::before,
+*::after {
+  scrollbar-width: none !important;
+}
+
+*::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 /* allow toggling diagram visibility via settings */
 [data-diagram="off"] .diagram-card {
   display: none !important;
@@ -7,38 +19,41 @@
 
 @media (min-width: 761px) {
   body {
-    padding-bottom: 24px;
+    padding-bottom: 104px;
   }
 
   nav {
-    left: 18px;
+    left: 50%;
     right: auto;
-    bottom: auto;
-    top: 50%;
-    width: 82px;
-    height: auto;
-    max-width: none;
+    bottom: 18px;
+    top: auto;
+    width: min(700px, calc(100vw - 36px));
+    height: 64px;
     margin: 0;
-    padding: 10px;
-    flex-direction: column;
-    border-radius: 32px;
-    transform: translateY(-50%);
+    padding: 7px;
+    flex-direction: row;
+    border-radius: 999px;
+    transform: translateX(-50%);
   }
 
   .nav-btn {
-    width: 60px;
-    height: 60px;
-    flex: 0 0 60px;
-    font-size: 0.58rem;
+    width: auto;
+    height: 50px;
+    flex: 1 1 0;
+    flex-direction: row;
+    gap: 8px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    white-space: nowrap;
   }
 
   .nav-btn.active {
-    transform: translateX(2px);
+    transform: none;
   }
 
   header,
   .container {
-    padding-left: 104px;
+    padding-left: 16px;
   }
 }
 

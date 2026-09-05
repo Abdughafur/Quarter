@@ -48,6 +48,17 @@ header {
   font-weight: 700;
 }
 
+#headerTitle,
+#headerPhoto {
+  display: none !important;
+}
+
+@media (min-width: 761px) {
+  #headerTitle {
+    display: none;
+  }
+}
+
 @media (max-width: 760px) {
   header {
     display: none;

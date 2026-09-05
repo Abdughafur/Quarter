@@ -14,6 +14,7 @@ import { Toast } from "../ui/toast.js";
 import {
   clean,
   clamp,
+  escapeHtml,
   qs,
   roundRect,
   setChecked,
@@ -23,6 +24,34 @@ import {
   uid,
   whenReady,
 } from "../utils/helpers.js";
+
+const setStretchState = (element, offsetX, offsetY, angle, scale) => {
+  element.style.setProperty("--stretch-x", `${offsetX}px`);
+  element.style.setProperty("--stretch-y", `${offsetY}px`);
+  element.style.setProperty("--stretch-angle", `${angle}deg`);
+  element.style.setProperty("--stretch-scale", String(scale));
+  element.style.setProperty("--release-x", `${-offsetX * 0.34}px`);
+  element.style.setProperty("--release-y", `${-offsetY * 0.34}px`);
+  element.style.setProperty("--release-angle", `${-angle * 0.38}deg`);
+  element.style.setProperty("--return-x", `${offsetX * 0.12}px`);
+  element.style.setProperty("--return-y", `${offsetY * 0.12}px`);
+  element.style.setProperty("--return-angle", `${angle * 0.12}deg`);
+};
+
+const clearStretchState = (element) => {
+  [
+    "--stretch-x",
+    "--stretch-y",
+    "--stretch-angle",
+    "--stretch-scale",
+    "--release-x",
+    "--release-y",
+    "--release-angle",
+    "--return-x",
+    "--return-y",
+    "--return-angle",
+  ].forEach((property) => element.style.removeProperty(property));
+};
 
 export const app = {
   grades: [],
@@ -174,6 +203,11 @@ export const app = {
         } else {
           nearest.btn.style.setProperty("--drag-origin", dragDirection);
         }
+
+        const dragOffset = Math.max(-12, Math.min(12, currentX - dragStartX));
+        const dragScale =
+          1 + Math.min(Math.abs(currentX - dragStartX) * 0.0015, 0.08);
+        setStretchState(nearest.btn, dragOffset, 0, 0, dragScale);
       };
 
       const onPointerDown = (e) => {
@@ -213,6 +247,14 @@ export const app = {
         document.documentElement.classList.remove("button-stretching");
         document.body.classList.remove("button-stretching");
         nav.classList.remove("is-dragging");
+        if (lastNearest) {
+          const releasedButton = lastNearest;
+          releasedButton.classList.add("is-releasing");
+          setTimeout(() => {
+            releasedButton.classList.remove("is-releasing");
+            clearStretchState(releasedButton);
+          }, 600);
+        }
         buttons.forEach((button) => {
           button.classList.remove("drag-target");
           button.style.removeProperty("--drag-origin");
@@ -286,13 +328,14 @@ export const app = {
 
       const offsetX = Math.max(-3, Math.min(3, deltaX * 0.035));
       const offsetY = Math.max(-2, Math.min(2, deltaY * 0.025));
-      const scale = 0.975 + Math.min(distance * 0.0025, 0.045);
-      const dragDirection = deltaX >= 0 ? "left center" : "right center";
+      const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+      const scale = 1 + Math.min(distance * 0.0025, 0.075);
 
-      toggle.style.transformOrigin = dragDirection;
+      toggle.style.transformOrigin = "center";
       toggle.style.transition =
         "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)";
-      toggle.style.transform = `translate(${offsetX}px, ${offsetY}px) scaleX(${scale})`;
+      toggle.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg) scaleX(${scale}) rotate(${-angle}deg)`;
+      setStretchState(toggle, offsetX, offsetY, angle, scale);
     });
 
     const resetToggle = (event) => {
@@ -302,11 +345,9 @@ export const app = {
         toggle.releasePointerCapture?.(pointerId);
       } catch (error) {}
       toggle.classList.remove("is-stretching");
+      toggle.classList.add("is-releasing");
       document.documentElement.classList.remove("button-stretching");
       document.body.classList.remove("button-stretching");
-      toggle.style.transition =
-        "transform 560ms cubic-bezier(0.22, 1, 0.36, 1)";
-      toggle.style.transform = "translate(0, 0) scaleX(1)";
 
       if (dragged) {
         toggle.dataset.dragged = "true";
@@ -315,9 +356,11 @@ export const app = {
 
       pointerId = null;
       setTimeout(() => {
+        toggle.classList.remove("is-releasing");
         toggle.style.removeProperty("transform");
         toggle.style.removeProperty("transition");
         toggle.style.removeProperty("transform-origin");
+        clearStretchState(toggle);
       }, 600);
     };
 
@@ -373,13 +416,14 @@ export const app = {
 
       const offsetX = Math.max(-3, Math.min(3, deltaX * 0.04));
       const offsetY = Math.max(-2, Math.min(2, deltaY * 0.025));
-      const scale = 0.98 + Math.min(distance * 0.003, 0.05);
-      const dragDirection = deltaX >= 0 ? "left center" : "right center";
+      const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+      const scale = 1 + Math.min(distance * 0.0025, 0.075);
 
-      toggle.style.transformOrigin = dragDirection;
+      toggle.style.transformOrigin = "center";
       toggle.style.transition =
         "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)";
-      toggle.style.transform = `translate(${offsetX}px, ${offsetY}px) scaleX(${scale})`;
+      toggle.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg) scaleX(${scale}) rotate(${-angle}deg)`;
+      setStretchState(toggle, offsetX, offsetY, angle, scale);
     });
 
     const resetToggle = (event) => {
@@ -389,11 +433,9 @@ export const app = {
         toggle.releasePointerCapture?.(pointerId);
       } catch (error) {}
       toggle.classList.remove("is-stretching");
+      toggle.classList.add("is-releasing");
       document.documentElement.classList.remove("button-stretching");
       document.body.classList.remove("button-stretching");
-      toggle.style.transition =
-        "transform 560ms cubic-bezier(0.22, 1, 0.36, 1)";
-      toggle.style.transform = "translate(0, 0) scaleX(1)";
 
       if (dragged) {
         toggle.dataset.dragged = "true";
@@ -402,9 +444,11 @@ export const app = {
 
       pointerId = null;
       setTimeout(() => {
+        toggle.classList.remove("is-releasing");
         toggle.style.removeProperty("transform");
         toggle.style.removeProperty("transition");
         toggle.style.removeProperty("transform-origin");
+        clearStretchState(toggle);
       }, 600);
     };
 
@@ -437,7 +481,9 @@ export const app = {
         "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
       button.style.transform = "scale(0.985)";
       try {
-        button.setPointerCapture?.(pointerId);
+        try {
+          button.setPointerCapture?.(pointerId);
+        } catch (error) {}
       } catch (error) {}
     });
 
@@ -451,27 +497,28 @@ export const app = {
 
       const offsetX = Math.max(-4, Math.min(4, deltaX * 0.035));
       const offsetY = Math.max(-2, Math.min(2, deltaY * 0.02));
-      const scale = 0.985 + Math.min(distance * 0.0025, 0.05);
-      const dragDirection = deltaX >= 0 ? "left center" : "right center";
+      const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+      const scale = 1 + Math.min(distance * 0.0018, 0.085);
 
-      button.style.transformOrigin = dragDirection;
+      button.style.transformOrigin = "center";
       button.style.transition =
-        "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)";
-      button.style.transform = `translate(${offsetX}px, ${offsetY}px) scaleX(${scale})`;
+        "transform 120ms cubic-bezier(0.22, 1, 0.36, 1), background 180ms ease, box-shadow 180ms ease";
+      button.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg) scaleX(${scale}) rotate(${-angle}deg)`;
+      setStretchState(button, offsetX, offsetY, angle, scale);
     });
 
     const resetButton = (event) => {
       if (event.pointerId !== pointerId) return;
 
       try {
-        button.releasePointerCapture?.(pointerId);
+        try {
+          button.releasePointerCapture?.(pointerId);
+        } catch (error) {}
       } catch (error) {}
       button.classList.remove("is-stretching");
+      button.classList.add("is-releasing");
       document.documentElement.classList.remove("button-stretching");
       document.body.classList.remove("button-stretching");
-      button.style.transition =
-        "transform 560ms cubic-bezier(0.22, 1, 0.36, 1)";
-      button.style.transform = "translate(0, 0) scaleX(1)";
 
       if (dragged) {
         button.dataset.dragged = "true";
@@ -480,9 +527,11 @@ export const app = {
 
       pointerId = null;
       setTimeout(() => {
+        button.classList.remove("is-releasing");
         button.style.removeProperty("transform");
         button.style.removeProperty("transition");
         button.style.removeProperty("transform-origin");
+        clearStretchState(button);
       }, 600);
     };
 
@@ -564,18 +613,15 @@ export const app = {
           const distance = Math.hypot(deltaX, deltaY);
           if (distance > 8) dragged = true;
 
-          const angle = Math.max(
-            -1.5,
-            Math.min(1.5, (Math.atan2(deltaY, deltaX) * 180) / Math.PI),
-          );
+          const angle = (Math.atan2(deltaY, deltaX) * 180) / Math.PI;
           const offsetX = Math.max(-3, Math.min(3, deltaX * 0.035));
           const offsetY = Math.max(-3, Math.min(3, deltaY * 0.02));
-          const scale = 0.97 + Math.min(distance * 0.004, 0.04);
-          const dragDirection = deltaX >= 0 ? "left center" : "right center";
-          headerControl.style.transformOrigin = dragDirection;
+          const scale = 1 + Math.min(distance * 0.0025, 0.075);
+          headerControl.style.transformOrigin = "center";
           headerControl.style.transition =
             "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)";
-          headerControl.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg) scaleX(${scale})`;
+          headerControl.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg) scaleX(${scale}) rotate(${-angle}deg)`;
+          setStretchState(headerControl, offsetX, offsetY, angle, scale);
         });
 
         const resetDrag = (event) => {
@@ -584,16 +630,15 @@ export const app = {
             headerControl.releasePointerCapture?.(event.pointerId);
           } catch (error) {}
           headerControl.classList.remove("is-dragging");
+          headerControl.classList.add("is-releasing");
           document.documentElement.classList.remove("button-stretching");
           document.body.classList.remove("button-stretching");
-          headerControl.style.transition =
-            "transform 560ms cubic-bezier(0.22, 1, 0.36, 1)";
-          headerControl.style.transform =
-            "translate(0, 0) rotate(0deg) scaleX(1)";
           setTimeout(() => {
+            headerControl.classList.remove("is-releasing");
             headerControl.style.removeProperty("transition");
             headerControl.style.removeProperty("transform");
             headerControl.style.removeProperty("transform-origin");
+            clearStretchState(headerControl);
           }, 600);
           if (dragged) {
             headerControl.dataset.dragged = "true";
@@ -610,14 +655,13 @@ export const app = {
         .querySelectorAll(".mobile-subview-header .btn-back.is-dragging")
         .forEach((headerControl) => {
           headerControl.classList.remove("is-dragging");
-          headerControl.style.transition =
-            "transform 560ms cubic-bezier(0.22, 1, 0.36, 1)";
-          headerControl.style.transform =
-            "translate(0, 0) rotate(0deg) scaleX(1)";
+          headerControl.classList.add("is-releasing");
           setTimeout(() => {
+            headerControl.classList.remove("is-releasing");
             headerControl.style.removeProperty("transition");
             headerControl.style.removeProperty("transform");
             headerControl.style.removeProperty("transform-origin");
+            clearStretchState(headerControl);
           }, 600);
         });
       document.documentElement.classList.remove("button-stretching");
@@ -637,6 +681,7 @@ export const app = {
 
       clearButton.addEventListener("pointerdown", (event) => {
         if (event.pointerType === "mouse" && event.button !== 0) return;
+        event.preventDefault();
 
         startX = event.clientX;
         startY = event.clientY;
@@ -662,13 +707,14 @@ export const app = {
 
         const offsetX = Math.max(-4, Math.min(4, deltaX * 0.04));
         const offsetY = Math.max(-2, Math.min(2, deltaY * 0.02));
-        const scale = 1.015 + Math.min(Math.abs(deltaX) * 0.003, 0.05);
-        const dragDirection = deltaX >= 0 ? "left center" : "right center";
+        const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+        const scale = 1 + Math.min(distance * 0.0025, 0.075);
 
-        clearButton.style.transformOrigin = dragDirection;
+        clearButton.style.transformOrigin = "center";
         clearButton.style.transition =
           "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)";
-        clearButton.style.transform = `translate(${offsetX}px, ${offsetY - 1}px) scaleX(${scale})`;
+        clearButton.style.transform = `translate(${offsetX}px, ${offsetY - 1}px) rotate(${angle}deg) scaleX(${scale}) rotate(${-angle}deg)`;
+        setStretchState(clearButton, offsetX, offsetY - 1, angle, scale);
       });
 
       const resetClearButton = (event) => {
@@ -676,11 +722,9 @@ export const app = {
 
         clearButton.releasePointerCapture?.(pointerId);
         clearButton.classList.remove("is-pressing");
+        clearButton.classList.add("is-releasing");
         document.documentElement.classList.remove("button-stretching");
         document.body.classList.remove("button-stretching");
-        clearButton.style.transition =
-          "transform 560ms cubic-bezier(0.22, 1, 0.36, 1)";
-        clearButton.style.transform = "translate(0, 0) scaleX(1)";
 
         if (dragged) {
           clearButton.dataset.dragged = "true";
@@ -689,9 +733,11 @@ export const app = {
 
         pointerId = null;
         setTimeout(() => {
+          clearButton.classList.remove("is-releasing");
           clearButton.style.removeProperty("transform");
           clearButton.style.removeProperty("transition");
           clearButton.style.removeProperty("transform-origin");
+          clearStretchState(clearButton);
         }, 600);
       };
 
@@ -721,7 +767,9 @@ export const app = {
           floatingButton.style.transition =
             "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
           floatingButton.style.transform = "scale(0.98)";
-          floatingButton.setPointerCapture?.(pointerId);
+          try {
+            floatingButton.setPointerCapture?.(pointerId);
+          } catch (error) {}
         });
 
         floatingButton.addEventListener("pointermove", (event) => {
@@ -734,37 +782,44 @@ export const app = {
 
           const offsetX = Math.max(-4, Math.min(4, deltaX * 0.035));
           const offsetY = Math.max(-4, Math.min(4, deltaY * 0.035));
-          const scaleX = 0.98 + Math.min(distance * 0.003, 0.06);
-          const scaleY = 0.98 + Math.min(distance * 0.0015, 0.025);
-          const dragDirection = deltaX >= 0 ? "left center" : "right center";
+          const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+          const scale = 1 + Math.min(distance * 0.0025, 0.075);
 
-          floatingButton.style.transformOrigin = dragDirection;
+          floatingButton.style.transformOrigin = "center";
           floatingButton.style.transition =
             "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)";
-          floatingButton.style.transform = `translate(${offsetX}px, ${offsetY}px) scaleX(${scaleX}) scaleY(${scaleY})`;
+          floatingButton.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg) scaleX(${scale}) rotate(${-angle}deg)`;
+          setStretchState(floatingButton, offsetX, offsetY, angle, scale);
         });
 
         const resetFloatingButton = (event) => {
           if (event.pointerId !== pointerId) return;
 
-          floatingButton.releasePointerCapture?.(pointerId);
+          try {
+            floatingButton.releasePointerCapture?.(pointerId);
+          } catch (error) {}
           floatingButton.classList.remove("is-stretching");
+          floatingButton.classList.add("is-releasing");
           document.documentElement.classList.remove("button-stretching");
           document.body.classList.remove("button-stretching");
-          floatingButton.style.transition =
-            "transform 560ms cubic-bezier(0.22, 1, 0.36, 1)";
-          floatingButton.style.transform = "translate(0, 0) scale(1)";
 
           if (dragged) {
             floatingButton.dataset.dragged = "true";
-            setTimeout(() => delete floatingButton.dataset.dragged, 0);
+            setTimeout(
+              () => delete floatingButton.dataset.dragged,
+              floatingButton.classList.contains("journal-floating-btn")
+                ? 260
+                : 0,
+            );
           }
 
           pointerId = null;
           setTimeout(() => {
+            floatingButton.classList.remove("is-releasing");
             floatingButton.style.removeProperty("transform");
             floatingButton.style.removeProperty("transition");
             floatingButton.style.removeProperty("transform-origin");
+            clearStretchState(floatingButton);
           }, 600);
         };
 
@@ -782,9 +837,75 @@ export const app = {
     qs("noteCategoryRow")?.addEventListener("click", (event) => {
       const button = event.target.closest(".note-category-pill");
       if (!button) return;
+      if (button.dataset.dragged) {
+        delete button.dataset.dragged;
+        return;
+      }
       const category = button.dataset.category;
       this.setNoteCategory(category);
     });
+
+    document
+      .querySelectorAll(".note-category-pill, .notes-filters .pill")
+      .forEach((button) => {
+        let pointerId = null;
+        let startX = 0;
+        let startY = 0;
+        let dragged = false;
+
+        button.addEventListener("pointerdown", (event) => {
+          if (event.pointerType === "mouse" && event.button !== 0) return;
+          event.preventDefault();
+          pointerId = event.pointerId;
+          startX = event.clientX;
+          startY = event.clientY;
+          dragged = false;
+          button.classList.add("is-stretching");
+          document.documentElement.classList.add("button-stretching");
+          document.body.classList.add("button-stretching");
+          try {
+            button.setPointerCapture?.(pointerId);
+          } catch (error) {}
+        });
+
+        button.addEventListener("pointermove", (event) => {
+          if (event.pointerId !== pointerId) return;
+          const deltaX = event.clientX - startX;
+          const deltaY = event.clientY - startY;
+          const distance = Math.hypot(deltaX, deltaY);
+          if (distance > 8) dragged = true;
+          const offsetX = clamp(deltaX * 0.04, -5, 5);
+          const offsetY = clamp(deltaY * 0.04, -5, 5);
+          const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+          const scale = 1 + Math.min(distance * 0.0025, 0.075);
+          button.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg) scaleX(${scale}) rotate(${-angle}deg)`;
+          setStretchState(button, offsetX, offsetY, angle, scale);
+        });
+
+        const resetCategory = (event) => {
+          if (event.pointerId !== pointerId) return;
+          try {
+            button.releasePointerCapture?.(pointerId);
+          } catch (error) {}
+          button.classList.remove("is-stretching");
+          button.classList.add("is-releasing");
+          document.documentElement.classList.remove("button-stretching");
+          document.body.classList.remove("button-stretching");
+          if (dragged) {
+            button.dataset.dragged = "true";
+            setTimeout(() => delete button.dataset.dragged, 260);
+          }
+          pointerId = null;
+          setTimeout(() => {
+            button.classList.remove("is-releasing");
+            button.style.removeProperty("transform");
+            clearStretchState(button);
+          }, 600);
+        };
+
+        button.addEventListener("pointerup", resetCategory);
+        button.addEventListener("pointercancel", resetCategory);
+      });
 
     qs("noteSearchInput")?.addEventListener("input", () => this.renderNotes());
 
@@ -1006,7 +1127,7 @@ export const app = {
     const { name, surname, school } = this.profile;
     if (!name || !surname || !school) {
       if (window.location.protocol !== "file:") {
-        window.location.assign("profile.html");
+        window.location.assign("landing.html");
         return true;
       }
     }
@@ -1327,7 +1448,7 @@ export const app = {
 
     setText("regularAvgUI", stats.avgR.toFixed(2));
     setText("examAvgUI", stats.avgE.toFixed(2));
-    setText("preciseAvgUI", stats.final.toFixed(2));
+    setText("preciseAvgUI", String(Math.round(stats.final)));
     // countUI and chartHint removed — keep UI minimal
 
     const avgLarge = qs("avgLarge");
@@ -1635,7 +1756,7 @@ export const app = {
   },
 
   async exportResult() {
-    const canvas = this.resultCanvas();
+    const canvas = await this.resultCanvas();
     const blob = await new Promise((resolve) =>
       canvas.toBlob(resolve, "image/png", 0.96),
     );
@@ -1658,115 +1779,113 @@ export const app = {
     this.toast.show("Натиҷа экспорт шуд.");
   },
 
-  resultCanvas() {
+  async resultCanvas() {
     const canvas = document.createElement("canvas");
-    canvas.width = 1290;
-    canvas.height = 1330;
+    canvas.width = 1080;
+    canvas.height = 1920;
 
     const ctx = canvas.getContext("2d");
     const stats = calculateStats(this.grades);
     const pupil = clean(qs("modalPupilInput")?.value || "");
     const subject = clean(qs("modalSubjectInput")?.value || "");
     const gradeValue = clean(qs("modalGradeInput")?.value || "");
-    const exportStamp = new Date().toLocaleString("tg-TJ");
+    const now = new Date();
+    const pad = (value) => String(value).padStart(2, "0");
+    const exportStamp = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
-    const primary = "#4f46e5";
-    const primary2 = "#6366f1";
-    const accent = "#9333ea";
+    const ink = "#102a43";
+    const muted = "#6b7f8c";
+    const primary = "#0a84ff";
+    const line = "#dce8ee";
+    const canvasBg = "#f4f8fb";
+    const centerText = (text, x, y) => {
+      ctx.textAlign = "center";
+      ctx.fillText(text, x, y);
+      ctx.textAlign = "left";
+    };
 
-    const bgGrad = ctx.createLinearGradient(0, 0, 1290, 1330);
-    bgGrad.addColorStop(0, "#090514");
-    bgGrad.addColorStop(0.5, "#0b0b1e");
-    bgGrad.addColorStop(1, "#05070f");
-    ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, 1290, 1330);
+    ctx.fillStyle = canvasBg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "900 70px Arial";
-    ctx.fillText("Чоряк", 150, 180);
+    ctx.fillStyle = ink;
+    ctx.font = "900 58px Arial";
 
-    ctx.fillStyle = "rgba(255,255,255,0.64)";
-    ctx.font = "700 26px Arial";
-    ctx.fillText(`Вақт: ${exportStamp}`, 800, 170);
-
-    const lineGrad = ctx.createLinearGradient(120, 240, 1170, 240);
-    lineGrad.addColorStop(0, "rgba(79, 70, 229, 0.1)");
-    lineGrad.addColorStop(0.5, "rgba(147, 51, 234, 0.8)");
-    lineGrad.addColorStop(1, "rgba(79, 70, 229, 0.1)");
-    ctx.strokeStyle = lineGrad;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(120, 240);
-    ctx.lineTo(1170, 240);
-    ctx.stroke();
-
-    roundRect(ctx, 120, 280, 1050, 360, 32);
-    ctx.fillStyle = "rgba(255,255,255,0.06)";
-    ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,0.08)";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    ctx.fillStyle = "#c084fc";
-    ctx.font = "900 24px Arial";
-    ctx.fillText("МАЪЛУМОТИ ХОНАНДА", 170, 340);
-
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "700 32px Arial";
-    ctx.fillText(`Ному насаб: ${pupil || "—"}`, 170, 405);
-    ctx.fillText(`Фан: ${subject || "—"}`, 170, 470);
-    ctx.fillText(`Синф: ${gradeValue || "—"}`, 170, 535);
-
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "900 24px Arial";
-    ctx.fillText("НАТИҶАИ ЧОРЯК", 740, 340);
-
-    const avgScoreGrad = ctx.createLinearGradient(740, 370, 740, 500);
-    avgScoreGrad.addColorStop(0, "#818cf8");
-    avgScoreGrad.addColorStop(1, "#c084fc");
-    ctx.fillStyle = avgScoreGrad;
-    ctx.font = "900 130px Arial";
-    ctx.fillText(stats.final.toFixed(2), 740, 480);
-
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "700 32px Arial";
-    ctx.fillText(`Сатҳ: ${gradeLabel(stats.final)}`, 740, 535);
-
-    const summaryCards = [
-      { title: "Натиҷаи баллҳои дарсӣ", value: stats.avgR.toFixed(2) },
-      { title: "Натиҷаи баллҳои корҳои санҷишӣ", value: stats.avgE.toFixed(2) },
-    ];
-
-    summaryCards.forEach((card, index) => {
-      const x = 120 + index * 550;
-      const y = 670;
-
-      roundRect(ctx, x, y, 500, 150, 24);
-      ctx.fillStyle = "rgba(255,255,255,0.06)";
-      ctx.fill();
-      ctx.strokeStyle = "rgba(255,255,255,0.08)";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      ctx.fillStyle = "#94a3b8";
-      ctx.font = "800 24px Arial";
-      ctx.fillText(card.title, x + 35, y + 48);
-
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "900 50px Arial";
-      ctx.fillText(card.value, x + 35, y + 112);
+    const appIcon = new Image();
+    appIcon.src = "assets/images/logoLight.png";
+    await new Promise((resolve) => {
+      appIcon.onload = resolve;
+      appIcon.onerror = resolve;
     });
+    if (appIcon.complete && appIcon.naturalWidth > 0) {
+      ctx.save();
+      ctx.beginPath();
+      roundRect(ctx, 100, 35, 96, 96, 22);
+      ctx.clip();
+      ctx.drawImage(appIcon, 100, 35, 96, 96);
+      ctx.restore();
+    }
 
-    roundRect(ctx, 120, 890, 1050, 400, 32);
-    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    ctx.fillText("Чоряк", 225, 108);
+
+    ctx.fillStyle = muted;
+    ctx.font = "700 22px Arial";
+    ctx.textAlign = "right";
+    ctx.fillText(`Экспорт: ${exportStamp}`, 980, 105);
+    ctx.textAlign = "left";
+
+    ctx.strokeStyle = line;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(80, 150);
+    ctx.lineTo(1000, 150);
+    ctx.stroke();
+
+    roundRect(ctx, 80, 180, 920, 300, 30);
+    ctx.fillStyle = "#ffffff";
     ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,0.08)";
+    ctx.strokeStyle = line;
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    ctx.fillStyle = "#94a3b8";
+    ctx.fillStyle = muted;
+    ctx.font = "900 20px Arial";
+    centerText("МАЪЛУМОТИ ХОНАНДА", 540, 235);
+
+    ctx.fillStyle = ink;
+    ctx.font = "700 30px Arial";
+    centerText(`Ному насаб: ${pupil || "—"}`, 540, 315);
+    centerText(`Фан: ${subject || "—"}`, 540, 370);
+    centerText(`Синф: ${gradeValue || "—"}`, 540, 425);
+
+    roundRect(ctx, 80, 520, 920, 400, 30);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+    ctx.strokeStyle = line;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = primary;
     ctx.font = "900 24px Arial";
-    ctx.fillText("МИҚДОРИ БАЛЛҲОИ ГИРИФТАШУДА", 170, 905);
+    centerText("НАТИҶАИ ЧОРЯК", 540, 610);
+
+    ctx.fillStyle = ink;
+    ctx.font = "900 170px Arial";
+    centerText(String(Math.round(stats.final)), 540, 765);
+
+    ctx.fillStyle = muted;
+    ctx.font = "700 28px Arial";
+    centerText(`Сатҳ: ${gradeLabel(stats.final)}`, 540, 835);
+
+    roundRect(ctx, 80, 960, 920, 800, 30);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+    ctx.strokeStyle = line;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = muted;
+    ctx.font = "900 21px Arial";
+    centerText("МИҚДОРИ БАЛЛҲОИ ГИРИФТАШУДА", 540, 1050);
 
     const gradeCounts = {};
     for (let g = 1; g <= 10; g++) gradeCounts[g] = 0;
@@ -1777,47 +1896,43 @@ export const app = {
     });
 
     for (let r = 0; r < 5; r++) {
-      const yStart = 955 + r * 65;
+      const yStart = 1120 + r * 105;
 
       const grade1 = 10 - r;
       const count1 = gradeCounts[grade1] || 0;
 
-      roundRect(ctx, 170, yStart, 80, 46, 12);
-      ctx.fillStyle = "rgba(255,255,255,0.12)";
+      roundRect(ctx, 270, yStart, 72, 42, 11);
+      ctx.fillStyle = "#e8f5f9";
       ctx.fill();
-      ctx.strokeStyle = "rgba(255,255,255,0.15)";
+      ctx.strokeStyle = "#cfe3eb";
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "900 26px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText(String(grade1), 170 + 40, yStart + 32);
-      ctx.textAlign = "left";
+      ctx.fillStyle = ink;
+      ctx.font = "900 23px Arial";
+      centerText(String(grade1), 306, yStart + 29);
 
-      ctx.fillStyle = "#e2e8f0";
-      ctx.font = "700 28px Arial";
-      ctx.fillText(`—  ${count1} то`, 170 + 100, yStart + 32);
+      ctx.fillStyle = muted;
+      ctx.font = "700 25px Arial";
+      centerText(`${count1} то`, 405, yStart + 29);
 
       const grade2 = 5 - r;
       const count2 = gradeCounts[grade2] || 0;
 
-      roundRect(ctx, 560, yStart, 80, 46, 12);
-      ctx.fillStyle = "rgba(255,255,255,0.12)";
+      roundRect(ctx, 650, yStart, 72, 42, 11);
+      ctx.fillStyle = "#e8f5f9";
       ctx.fill();
-      ctx.strokeStyle = "rgba(255,255,255,0.15)";
+      ctx.strokeStyle = "#cfe3eb";
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "900 26px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText(String(grade2), 560 + 40, yStart + 32);
-      ctx.textAlign = "left";
+      ctx.fillStyle = ink;
+      ctx.font = "900 23px Arial";
+      centerText(String(grade2), 686, yStart + 29);
 
-      ctx.fillStyle = "#e2e8f0";
-      ctx.font = "700 28px Arial";
-      ctx.fillText(`—  ${count2} то`, 560 + 100, yStart + 32);
+      ctx.fillStyle = muted;
+      ctx.font = "700 25px Arial";
+      centerText(`${count2} то`, 785, yStart + 29);
     }
 
     return canvas;
@@ -2185,10 +2300,10 @@ export const app = {
       item.innerHTML = `
         <div class="note-label-row">
           <div>
-            <h4 class="note-item-title">${String(note.title)}</h4>
-            <p class="note-item-body">${String(note.body)}</p>
+            <h4 class="note-item-title">${escapeHtml(note.title)}</h4>
+            <p class="note-item-body">${escapeHtml(note.body)}</p>
           </div>
-          <span class="note-chip note-chip-${note.category || "other"}">${note.category === "lesson" ? "Дарс" : note.category === "task" ? "Вазифа" : note.category === "idea" ? "Идея" : "Дигар"}</span>
+          <span class="note-chip note-chip-${escapeHtml(note.category || "other")}">${note.category === "lesson" ? "Дарс" : note.category === "task" ? "Вазифа" : note.category === "idea" ? "Идея" : "Дигар"}</span>
         </div>
         <div class="note-item-meta">
           <span class="note-time">${new Date(note.createdAt).toLocaleString("tg-TJ", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" })}</span>

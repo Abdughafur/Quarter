@@ -371,6 +371,18 @@ body[data-theme="dark"].more-subview-open::after {
   background: linear-gradient(145deg, #f59e0b, #f97316);
 }
 
+#more-home-view .option-item[data-action="showDeveloper"] {
+  order: 5;
+}
+
+#more-home-view .option-item[data-action="showMoreAbout"] {
+  order: 6;
+}
+
+#more-home-view .option-item[data-action="installPwa"] {
+  order: 7;
+}
+
 #more-home-view .option-item:nth-child(3) .option-icon {
   background: linear-gradient(145deg, #10b981, #14b8a6);
 }
@@ -495,6 +507,32 @@ body[data-theme="dark"].more-subview-open::after {
   height: 20px;
 }
 
+#more-settings-view .back-nav .btn-back {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 26px rgba(14, 43, 77, 0.14);
+  overflow: hidden;
+  font-size: 0;
+  touch-action: none;
+  overscroll-behavior: none;
+  will-change: transform;
+  transition:
+    transform 180ms cubic-bezier(0.2, 0.9, 0.2, 1),
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+#more-settings-view .back-nav .btn-back svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
 @media (max-width: 760px) {
   .mobile-subview-header {
     display: grid;
@@ -545,6 +583,49 @@ body[data-theme="dark"].more-subview-open::after {
     background: var(--card2);
     color: var(--primary);
     box-shadow: 0 14px 30px rgba(14, 43, 77, 0.22);
+  }
+
+  .more-subview > .card > .back-nav {
+    display: none;
+  }
+}
+
+@media (min-width: 761px) {
+  .mobile-subview-header {
+    display: grid;
+    grid-template-columns: 48px;
+    align-items: center;
+    position: fixed;
+    top: 18px;
+    left: 118px;
+    z-index: 801;
+    width: 48px;
+  }
+
+  .mobile-subview-header .btn-back {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 26px rgba(14, 43, 77, 0.14);
+    overflow: hidden;
+    font-size: 0;
+    touch-action: none;
+    overscroll-behavior: none;
+    will-change: transform;
+  }
+
+  .mobile-subview-header .btn-back svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .more-subview.active:not(#more-home-view) {
+    padding-top: 64px;
   }
 
   .more-subview > .card > .back-nav {

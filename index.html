@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="tg">
-<!--Copyright 2026 - Abdughafur Khujzoda-->
 
 <head>
   <meta charset="utf-8" />
@@ -19,7 +18,6 @@
 </head>
 
 <body data-theme="light">
-  <!-- SVG filter used for subtle glass effect; kept size 0 to avoid visual impact -->
   <svg width="0" height="0" style="position: absolute" aria-hidden="true">
     <filter id="lg-filter" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
       <feImage x="0" y="0" width="420" height="280"
@@ -38,7 +36,6 @@
       <feBlend in="rg" in2="displacedB" mode="screen" />
     </filter>
   </svg>
-  <!-- Splash screen (replaces old loader) -->
   <div id="splash" class="splash" aria-hidden="false">
     <div class="splash-inner">
       <img class="splash-logo" src="assets/images/logoLight.png" alt="App logo" />
@@ -58,143 +55,125 @@
       </div>
     </div>
   </div>
-  <header>
-    <div class="brand">
-      <div class="app-icon" id="headerIcon">
-        <img id="headerPhoto" src="" alt=""
-          style="display:none; width:100%; height:100%; object-fit:cover; object-position:center; border-radius:inherit;" />
-        <span id="headerFallback">Ч</span>
-      </div>
-      <div>
-        <div class="eyebrow">
-          <span class="eyebrow-label">Мактаби</span>
-          <span id="headerSchoolNumber" class="eyebrow-number"></span>
-        </div>
-        <div class="logo" id="headerTitle">Чоряк</div>
-      </div>
-    </div>
-  </header>
-
   <main class="container">
     <section id="tab-home" class="tab active">
-      <div class="card compact-card">
-        <div class="top grades-header">
-          <span class="small">Баллҳо</span>
-          <button class="grades-toggle" type="button" data-action="toggleGradesView" aria-controls="blocksContainer"
-            aria-expanded="false" aria-label="Намоиши ҳамаи баллҳо">
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-              <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
-                stroke-linejoin="round" />
-            </svg>
-          </button>
-        </div>
-        <div class="blocks" id="blocksContainer">
-          <div class="empty">Ҳоло ягон балл нест</div>
-        </div>
-      </div>
-
-      <div class="card compact-card">
-        <div class="keypad" id="keypad"></div>
-      </div>
-
-      <div class="hero">
-        <div class="top"><span class="small">Натиҷаи чоряк</span></div>
-
-        <div class="hero-inner">
-          <div class="score-tile">
-            <div id="avgLarge" class="large">
-              <div class="large-number">0</div>
-              <div class="label-small">-</div>
-            </div>
-          </div>
-
-          <div class="stats-stack">
-            <div class="result-stat-cards" id="resultStatCards">
-              <div class="stat-row">
-                <div class="stat-icon book">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 3h9a2 2 0 0 1 2 2v14a1 1 0 0 1-1.4.91L12 18l-4.6 2.91A1 1 0 0 1 6 20V5a2 2 0 0 1 0-2z"
-                      fill="currentColor" />
-                  </svg>
-                </div>
-                <div class="stat-text">Натиҷаи баллҳои дарсӣ</div>
-                <div class="stat-value"><strong id="regularAvgUI">0.00</strong></div>
-              </div>
-
-              <div class="stat-row">
-                <div class="stat-icon pencil">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
-                      fill="currentColor" />
-                  </svg>
-                </div>
-                <div class="stat-text">Натиҷаи корҳои санҷишӣ</div>
-                <div class="stat-value"><strong id="examAvgUI">0.00</strong></div>
-              </div>
-
-              <div class="stat-row">
-                <div class="stat-icon target">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12zm0 2a4 4 0 1 0 0 8 4 4 0 0 0 0 -8z"
-                      fill="currentColor" />
-                  </svg>
-                </div>
-                <div class="stat-text">Натиҷаи дақиқи чоряк</div>
-                <div class="stat-value"><strong id="preciseAvgUI">0.00</strong></div>
-              </div>
-            </div>
-
-            <button class="result-details-toggle" type="button" data-action="toggleResultDetails"
-              aria-controls="resultStatCards" aria-expanded="false" aria-label="Намоиш ё пинҳон кардани натиҷаҳо">
-              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                  stroke-linejoin="round" />
-              </svg>
-              <span class="sr-only">Намоиши натиҷаҳо</span>
-            </button>
-
-            <div class="actions">
-              <button class="btn export-action" type="button" data-action="downloadResult">
-                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
-                  <path d="M12 3v11m0 0 4-4m-4 4-4-4M5 18.5v1A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-1"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      <div class="calculator-desktop-layout">
+        <div class="calculator-input-column">
+          <div class="card compact-card">
+            <div class="top grades-header">
+              <span class="small">Баллҳо</span>
+              <button class="grades-toggle" type="button" data-action="toggleGradesView" aria-controls="blocksContainer"
+                aria-expanded="false" aria-label="Намоиши ҳамаи баллҳо">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+                  <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
+                    stroke-linejoin="round" />
                 </svg>
-                <span>Зеркашӣ кардани натиҷа</span>
               </button>
             </div>
+            <div class="blocks" id="blocksContainer">
+              <div class="empty">Ҳоло ягон балл нест</div>
+            </div>
+          </div>
+
+          <div class="card compact-card">
+            <div class="keypad" id="keypad"></div>
+          </div>
+
+          <div class="hero">
+            <div class="top"><span class="small">Натиҷаи чоряк</span></div>
+
+            <div class="hero-inner">
+              <div class="score-tile">
+                <div id="avgLarge" class="large">
+                  <div class="large-number">0</div>
+                  <div class="label-small">-</div>
+                </div>
+              </div>
+
+              <div class="stats-stack">
+                <div class="result-stat-cards" id="resultStatCards">
+                  <div class="stat-row">
+                    <div class="stat-icon book">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M6 3h9a2 2 0 0 1 2 2v14a1 1 0 0 1-1.4.91L12 18l-4.6 2.91A1 1 0 0 1 6 20V5a2 2 0 0 1 0-2z"
+                          fill="currentColor" />
+                      </svg>
+                    </div>
+                    <div class="stat-text">Натиҷаи баллҳои дарсӣ</div>
+                    <div class="stat-value"><strong id="regularAvgUI">0.00</strong></div>
+                  </div>
+
+                  <div class="stat-row">
+                    <div class="stat-icon pencil">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                          fill="currentColor" />
+                      </svg>
+                    </div>
+                    <div class="stat-text">Натиҷаи корҳои санҷишӣ</div>
+                    <div class="stat-value"><strong id="examAvgUI">0.00</strong></div>
+                  </div>
+
+                  <div class="stat-row">
+                    <div class="stat-icon target">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12zm0 2a4 4 0 1 0 0 8 4 4 0 0 0 0 -8z"
+                          fill="currentColor" />
+                      </svg>
+                    </div>
+                    <div class="stat-text">Натиҷаи даврашуда</div>
+                    <div class="stat-value"><strong id="preciseAvgUI">0.00</strong></div>
+                  </div>
+                </div>
+
+                <button class="result-details-toggle" type="button" data-action="toggleResultDetails"
+                  aria-controls="resultStatCards" aria-expanded="false" aria-label="Намоиш ё пинҳон кардани натиҷаҳо">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+                  <span class="sr-only">Намоиши натиҷаҳо</span>
+                </button>
+
+                <div class="actions">
+                  <button class="btn export-action" type="button" data-action="downloadResult"
+                    aria-label="Экспорт кардани натиҷа" title="Экспорт кардани натиҷа">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
+                      <path d="M12 3v11m0 0 4-4m-4 4-4-4M5 18.5v1A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-1"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <span>Экспорт</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="card compact-card diagram-card">
-        <div class="top">
-          <span class="small">Диаграмма</span>
+        <div class="calculator-insights-column">
+          <div class="card compact-card diagram-card">
+            <div class="top">
+              <span class="small">Диаграмма</span>
+            </div>
+            <div class="chart" id="gradeChart"></div>
+          </div>
+
+          <div class="card minai-card">
+            <div class="minai-media">
+              <img src="minai/ai.png" alt="MinAI image" />
+            </div>
+            <div class="ai-badge">MinAI</div>
+            <h3 class="minai-title">
+              MinAI v1.0 ҳоло дастрас нест.
+            </h3>
+          </div>
+          <div class="card" id="aiAnalysisBox" style="display:none ; font-weight: 900;">
+            MinAI v1.0 </div>
         </div>
-        <div class="chart" id="gradeChart"></div>
       </div>
-
-      <!-- Old simple AI card (commented out) -->
-      <!--
-      <div class="card">
-        <div class="ai-badge">MinAI</div>
-        <div id="aiText" class="msg">Барои гирифтани таҳлил, аввал баллҳоро ворид кунед.</div>
-      </div>
-      -->
-
-      <!-- Present MinAI card with image -->
-      <div class="card minai-card">
-        <div class="minai-media">
-          <img src="minai/ai.png" alt="MinAI image" />
-        </div>
-        <div class="ai-badge">MinAI</div>
-        <h3 class="minai-title">
-          MinAI v1.0 ҳоло дастрас нест.
-        </h3>
-      </div>
-      <div class="card" id="aiAnalysisBox" style="display:none ; font-weight: 900;">
-        MinAI v1.0 </div>
     </section>
 
 
@@ -641,7 +620,6 @@
             </button>
           </div>
           <h3 class="settings-title">Миёнабурҳои клавиатура</h3>
-          <!-- <p class="settings-sub">Quick keyboard actions to speed up workflow.</p> -->
           <div class="shortcuts-grid shortcuts-grid--styled" id="shortcutsSection">
             <div class="shortcut-card">
               <div class="kbd-wrap"><kbd>1–9</kbd><kbd class="kbd-slim">/ 0</kbd></div>
@@ -715,7 +693,7 @@
             </div>
             <div class="about">
               <p class="about-app-name"><strong>Чоряк</strong></p>
-              <p><strong>Версия:</strong> 4.3</p>
+              <p><strong>Версия:</strong> 4.3.1</p>
               <p><strong>Таҳиягар:</strong> Abdughafur (Абдуғафур)</p>
             </div>
           </div>
@@ -891,6 +869,7 @@
   </nav>
 
 
+  <script type="module" src="assets/js/core/entry.js"></script>
   <script type="module" src="assets/js/core/pwa.js"></script>
   <script type="module" src="assets/js/core/app.js"></script>
   <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516"
@@ -904,14 +883,3 @@
 </body>
 
 </html>
-
-<!--
-
-Чоряк - 4.3
-Developer: Abdughafur Khujzoda
-:)
-
-The End 4.3 Version
-<!---2026-->
-
-<!-- “Believe in God.” -->
