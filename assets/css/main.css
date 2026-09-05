@@ -1,4 +1,4 @@
-/* main.css - Чоряк v4.2.2
+/* main.css - Чоряк v4.3
  Copyright (c) 2026 Abdughafur. All rights reserved.
 */
 @import url("./core/reset.css");
@@ -25,7 +25,6 @@
 @import url("./components/loader.css");
 @import url("./components/badges.css");
 @import url("./pages/home.css");
-@import url("./pages/stats.css");
 @import url("./pages/percent.css");
 @import url("./pages/ai.css");
 @import url("./pages/settings.css");

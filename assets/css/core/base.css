@@ -1,3 +1,10 @@
+html.button-stretching,
+body.button-stretching {
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
 /* base.css */
 body {
   min-height: 100vh;
@@ -13,9 +20,21 @@ body {
     sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at 16% 0%, var(--bg-radial-1, rgba(14, 165, 233, 0.22)), transparent 32%),
-    radial-gradient(circle at 90% 10%, var(--bg-radial-2, rgba(14, 165, 233, 0.2)), transparent 32%),
-    radial-gradient(circle at 50% 100%, var(--bg-radial-3, rgba(16, 185, 129, 0.11)), transparent 30%),
+    radial-gradient(
+      circle at 16% 0%,
+      var(--bg-radial-1, rgba(14, 165, 233, 0.22)),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 90% 10%,
+      var(--bg-radial-2, rgba(14, 165, 233, 0.2)),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 50% 100%,
+      var(--bg-radial-3, rgba(16, 185, 129, 0.11)),
+      transparent 30%
+    ),
     linear-gradient(145deg, var(--bg), var(--bg2));
   transition:
     background 0.25s ease,
@@ -34,29 +53,4 @@ body::before {
     linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
   background-size: 34px 34px;
   mask-image: linear-gradient(to bottom, #000, transparent 72%);
-}
-
-.orb {
-  position: fixed;
-  width: 210px;
-  height: 210px;
-  border-radius: 999px;
-  pointer-events: none;
-  filter: blur(18px);
-  opacity: 0.33;
-  z-index: -1;
-  animation: float 12s ease-in-out infinite;
-}
-
-.orb.one {
-  left: -95px;
-  top: 130px;
-  background: linear-gradient(135deg, var(--accent), var(--primary));
-}
-
-.orb.two {
-  right: -105px;
-  bottom: 150px;
-  background: linear-gradient(135deg, var(--cyan), var(--primary2));
-  animation-delay: -4s;
 }

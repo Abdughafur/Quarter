@@ -11,8 +11,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Чоряк" />
   <title>Чоряк</title>
-  <link rel="icon" href="assets/images/app-icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="assets/images/app-icon.svg" />
+  <link rel="icon" href="assets/images/logoLight.png" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/images/logoLight.png" />
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="assets/css/main.css">
 
@@ -41,7 +41,10 @@
   <!-- Splash screen (replaces old loader) -->
   <div id="splash" class="splash" aria-hidden="false">
     <div class="splash-inner">
-      <img class="splash-logo" src="assets/images/app-icon.svg" alt="App logo" />
+      <img class="splash-logo" src="assets/images/logoLight.png" alt="App logo" />
+      <div class="splash-progress" role="progressbar" aria-label="Боркунии барнома">
+        <span class="splash-progress-fill"></span>
+      </div>
       <div class="splash-title">Чоряк</div>
     </div>
   </div>
@@ -55,9 +58,6 @@
       </div>
     </div>
   </div>
-  <div class="orb one"></div>
-  <div class="orb two"></div>
-
   <header>
     <div class="brand">
       <div class="app-icon" id="headerIcon">
@@ -78,7 +78,16 @@
   <main class="container">
     <section id="tab-home" class="tab active">
       <div class="card compact-card">
-        <div class="top"><span class="small">Баллҳо</span></div>
+        <div class="top grades-header">
+          <span class="small">Баллҳо</span>
+          <button class="grades-toggle" type="button" data-action="toggleGradesView" aria-controls="blocksContainer"
+            aria-expanded="false" aria-label="Намоиши ҳамаи баллҳо">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+              <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
         <div class="blocks" id="blocksContainer">
           <div class="empty">Ҳоло ягон балл нест</div>
         </div>
@@ -100,46 +109,60 @@
           </div>
 
           <div class="stats-stack">
-            <div class="stat-row">
-              <div class="stat-icon book">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M6 3h9a2 2 0 0 1 2 2v14a1 1 0 0 1-1.4.91L12 18l-4.6 2.91A1 1 0 0 1 6 20V5a2 2 0 0 1 0-2z"
-                    fill="currentColor" />
-                </svg>
+            <div class="result-stat-cards" id="resultStatCards">
+              <div class="stat-row">
+                <div class="stat-icon book">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 3h9a2 2 0 0 1 2 2v14a1 1 0 0 1-1.4.91L12 18l-4.6 2.91A1 1 0 0 1 6 20V5a2 2 0 0 1 0-2z"
+                      fill="currentColor" />
+                  </svg>
+                </div>
+                <div class="stat-text">Натиҷаи баллҳои дарсӣ</div>
+                <div class="stat-value"><strong id="regularAvgUI">0.00</strong></div>
               </div>
-              <div class="stat-text">Натиҷаи баллҳои дарсӣ</div>
-              <div class="stat-value"><strong id="regularAvgUI">0.00</strong></div>
+
+              <div class="stat-row">
+                <div class="stat-icon pencil">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                      fill="currentColor" />
+                  </svg>
+                </div>
+                <div class="stat-text">Натиҷаи корҳои санҷишӣ</div>
+                <div class="stat-value"><strong id="examAvgUI">0.00</strong></div>
+              </div>
+
+              <div class="stat-row">
+                <div class="stat-icon target">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12zm0 2a4 4 0 1 0 0 8 4 4 0 0 0 0 -8z"
+                      fill="currentColor" />
+                  </svg>
+                </div>
+                <div class="stat-text">Натиҷаи дақиқи чоряк</div>
+                <div class="stat-value"><strong id="preciseAvgUI">0.00</strong></div>
+              </div>
             </div>
 
-            <div class="stat-row">
-              <div class="stat-icon pencil">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
-                    fill="currentColor" />
-                </svg>
-              </div>
-              <div class="stat-text">Натиҷаи корҳои санҷишӣ</div>
-              <div class="stat-value"><strong id="examAvgUI">0.00</strong></div>
-            </div>
-
-            <div class="stat-row">
-              <div class="stat-icon target">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12zm0 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"
-                    fill="currentColor" />
-                </svg>
-              </div>
-              <div class="stat-text">Натиҷаи дақиқи чоряк</div>
-              <div class="stat-value"><strong id="preciseAvgUI">0.00</strong></div>
-            </div>
+            <button class="result-details-toggle" type="button" data-action="toggleResultDetails"
+              aria-controls="resultStatCards" aria-expanded="false" aria-label="Намоиш ё пинҳон кардани натиҷаҳо">
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+              <span class="sr-only">Намоиши натиҷаҳо</span>
+            </button>
 
             <div class="actions">
-              <div class="glass-capsule">
-                <button class="btn export-action" type="button" data-action="downloadResult">Зеркашӣ
-                кардани натиҷа</button>
-              </div>
+              <button class="btn export-action" type="button" data-action="downloadResult">
+                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
+                  <path d="M12 3v11m0 0 4-4m-4 4-4-4M5 18.5v1A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-1"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span>Зеркашӣ кардани натиҷа</span>
+              </button>
             </div>
           </div>
         </div>
@@ -167,8 +190,8 @@
         </div>
         <div class="ai-badge">MinAI</div>
         <h3 class="minai-title">
-  MinAI v1.0 ҳоло дастрас нест. Пас аз анҷоми таҳияи версияи нав, MinAI дубора дастрас хоҳад шуд.
-</h3>
+          MinAI v1.0 ҳоло дастрас нест.
+        </h3>
       </div>
       <div class="card" id="aiAnalysisBox" style="display:none ; font-weight: 900;">
         MinAI v1.0 </div>
@@ -179,9 +202,22 @@
       <div class="card">
         <h3 class="settings-title">Фоизҳо</h3>
         <div class="input-row" style="grid-template-columns:1fr; position:relative;">
+          <span class="pupil-field-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm6-1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM3.5 19a5.5 5.5 0 0 1 11 0v1h-11v-1Zm11.5 1v-1a6.9 6.9 0 0 0-1.1-3.75A4.5 4.5 0 0 1 20.5 19v1H15Z"
+                fill="currentColor" />
+            </svg>
+          </span>
           <input id="pupilCountInput" class="input-field" type="number" inputmode="numeric" min="0" max="100"
             placeholder="Шумораи умумии хонандагон, максимум 100" />
-          <button class="pupil-clear-btn" type="button" title="Тозакунӣ" data-action="clearPupilCount">×</button>
+          <button class="pupil-clear-btn" type="button" title="Тозакунӣ" data-action="clearPupilCount"
+            aria-label="Тоза кардани шумораи хонандагон">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m7 7 10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="round" />
+            </svg>
+          </button>
         </div>
 
         <div id="percentRows" class="percent-table"></div>
@@ -197,6 +233,7 @@
 
     <section id="tab-notes" class="tab">
       <div class="card notes-card">
+        <h3 class="notes-page-title">Ёддоштҳо</h3>
         <div class="notes-header">
           <div class="notes-search">
             <input id="noteSearchInput" class="input-field" type="search" placeholder="Чустуҷӯ..." />
@@ -212,7 +249,12 @@
         <div id="notesList" class="notes-list"></div>
       </div>
 
-      <button class="btn add-note-btn floating-add-note" type="button" data-action="openNoteModal">+</button>
+      <button class="btn add-note-btn floating-add-note" type="button" data-action="openNoteModal"
+        aria-label="Ёддошти нав илова кардан">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+        </svg>
+      </button>
     </section>
 
     <section id="tab-journal" class="tab">
@@ -223,7 +265,6 @@
           <h3 class="journal-title">Журнал</h3>
           <p>
             Бахши «Журнал» ҳоло дар марҳилаи таҳия қарор дорад ва айни замон дастрас нест.
-            Азбаски дастгирӣ ва навсозии барнома ҳоло қатъ шудааст, муҳлати омода шудани ин бахш муайян нест.
             Пас аз идомаи таҳияи барнома, имконияти дастрас шудани «Журнал» баррасӣ хоҳад шуд.
             Барои гирифтани маълумоти бештар тугмаи «Муфассал»-ро пахш кунед.
           </p>
@@ -242,6 +283,17 @@
       <div id="more-home-view" class="more-subview active">
         <div class="card">
           <h3 class="settings-title">Бештар</h3>
+          <button class="more-profile-summary" type="button" data-action="showMoreProfile">
+            <span class="more-profile-avatar">
+              <img id="moreProfilePhoto" src="" alt="" />
+              <span id="moreProfileFallback">Ч</span>
+            </span>
+            <span class="more-profile-content">
+              <strong id="moreProfileName">Чоряк</strong>
+              <span id="moreProfileSchool">Рақами мактаб илова нашудааст</span>
+            </span>
+            <span class="more-profile-arrow" aria-hidden="true">›</span>
+          </button>
           <div class="option-list">
             <button class="option-item" type="button" data-action="showMoreProfile">
               <span class="option-icon">
@@ -417,6 +469,13 @@
       </div>
 
       <div id="more-profile-view" class="more-subview">
+        <div class="mobile-subview-header">
+          <button class="btn-back" data-action="hideSubviews" type="button" aria-label="Бозгашт">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+            </svg>
+          </button>
+        </div>
         <div class="card">
           <div class="back-nav">
             <button class="btn-back" data-action="hideSubviews" type="button">
@@ -452,6 +511,13 @@
       </div>
 
       <div id="more-developer-view" class="more-subview">
+        <div class="mobile-subview-header">
+          <button class="btn-back" data-action="hideSubviews" type="button" aria-label="Бозгашт">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path>
+            </svg>
+          </button>
+        </div>
         <div class="card">
           <div class="back-nav">
             <button class="btn-back" data-action="hideSubviews" type="button">
@@ -472,14 +538,8 @@
             <p class="dev-title">Creator & Software Developer</p>
           </div>
           <div class="dev-bio">
-            <b>Чоряк</b> барои осон кардани ҳисобу таҳлили натиҷаҳои чорякӣ таҳия шудааст.
-            Айни замон барнома дастгирии фаъол намегирад ва раванди навсозии он муваққатан қатъ шудааст.
-            Аз ин рӯ, баъзе қисмҳо ё имкониятҳои барнома метавонанд маҳдуд, ғайрифаъол ё дастнорас бошанд ва
-            эҳтимол аст, ки баъзе хатогиҳо ислоҳ нашуда бошанд. Агар ҳангоми истифода бо мушкилот ё хатогӣ (bug) рӯ ба
-            рӯ шавед,
-            метавонед онро ба таҳиягар хабар диҳед. Ҳамчунин, агар барои беҳтар намудани барнома пешниҳод, идея ё
-            хусусияти нав дошта бошед,
-            лутфан бо таҳиягар дар тамос шавед. Андешаҳои шумо барои рушди минбаъдаи <b>Чоряк</b> муҳим мебошанд.
+            <b>Чоряк</b> барои ҳисобу таҳлили осони натиҷаҳои таҳсил сохта шудааст — содда, равшан ва ҳамеша наздик ба
+            ниёзҳои шумо.
           </div>
 
           <div class="contact-section">
@@ -515,6 +575,13 @@
       </div>
 
       <div id="more-settings-view" class="more-subview">
+        <div class="mobile-subview-header">
+          <button class="btn-back" data-action="hideSubviews" type="button" aria-label="Бозгашт">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path>
+            </svg>
+          </button>
+        </div>
         <div class="card">
           <div class="back-nav">
             <button class="btn-back" data-action="hideSubviews" type="button">
@@ -557,6 +624,13 @@
 
 
       <div id="more-shortcuts-view" class="more-subview">
+        <div class="mobile-subview-header">
+          <button class="btn-back" data-action="hideSubviews" type="button" aria-label="Бозгашт">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path>
+            </svg>
+          </button>
+        </div>
         <div class="card">
           <div class="back-nav">
             <button class="btn-back" data-action="hideSubviews" type="button">
@@ -566,7 +640,7 @@
               Бозгашт
             </button>
           </div>
-          <h3 class="settings-title">Keyboard shortcuts</h3>
+          <h3 class="settings-title">Миёнабурҳои клавиатура</h3>
           <!-- <p class="settings-sub">Quick keyboard actions to speed up workflow.</p> -->
           <div class="shortcuts-grid shortcuts-grid--styled" id="shortcutsSection">
             <div class="shortcut-card">
@@ -618,6 +692,13 @@
       </div>
 
       <div id="more-about-view" class="more-subview">
+        <div class="mobile-subview-header">
+          <button class="btn-back" data-action="hideSubviews" type="button" aria-label="Бозгашт">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+            </svg>
+          </button>
+        </div>
         <div class="card">
           <div class="back-nav">
             <button class="btn-back" data-action="hideSubviews" type="button">
@@ -629,12 +710,12 @@
           </div>
           <h3 class="settings-title">Дар бораи барнома</h3>
           <div class="app-info">
-            <div class="big-app-icon"
-              style="background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; display: grid; place-items: center; font-weight: 900; box-shadow: 0 8px 24px rgba(79, 70, 229, 0.25);">
-              Ч</div>
+            <div class="big-app-icon">
+              <img src="assets/images/logoLight.png" alt="Чоряк logo" />
+            </div>
             <div class="about">
-              <p><strong>Чоряк</strong></p>
-              <p><strong>Версия:</strong> 4.2.2 Prime Edition</p>
+              <p class="about-app-name"><strong>Чоряк</strong></p>
+              <p><strong>Версия:</strong> 4.3</p>
               <p><strong>Таҳиягар:</strong> Abdughafur (Абдуғафур)</p>
             </div>
           </div>
@@ -826,11 +907,11 @@
 
 <!--
 
-Чоряк - 4.2.2 Prime Edition
+Чоряк - 4.3
 Developer: Abdughafur Khujzoda
 :)
 
-The End 4.2.2 Version
+The End 4.3 Version
 <!---2026-->
 
 <!-- “Believe in God.” -->

@@ -10,6 +10,7 @@
   transition:
     transform 0.16s var(--ease),
     filter 0.16s ease;
+  transform-origin: center;
   text-decoration: none;
 }
 
@@ -35,45 +36,60 @@
   font-size: 0.78rem;
   font-weight: 900;
   box-shadow: 0 10px 20px rgba(14, 165, 233, 0.16);
-  transition: transform 0.14s ease, opacity 0.14s ease;
+  transition:
+    transform 0.14s ease,
+    opacity 0.14s ease;
 }
 
 .contact-btn:active {
   transform: scale(0.98);
 }
 
-/* Glass capsule style for export/download action
-   Uses lightweight translucent layers and inner highlight
-   Avoids heavy backdrop-filter for performance */
-.glass-capsule {
-  display: inline-block;
-  border-radius: 999px;
-  padding: 6px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary2) 100%);
-  border: 1px solid rgba(255,255,255,0.18);
-  box-shadow: 0 14px 30px rgba(59,130,246,0.18), inset 0 1px 0 rgba(255,255,255,0.06);
-  -webkit-backface-visibility: hidden;
-  will-change: transform;
-  transform-origin: center;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-
 .btn.export-action {
-  background: transparent;
-  color: white;
-  padding: 10px 18px;
-  border-radius: 28px;
-  border: none;
-  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  min-width: 210px;
+  max-width: 100%;
+  color: #ffffff;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 14px 30px rgba(14, 165, 233, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
   font-weight: 900;
-  transition: transform 0.12s ease, opacity 0.12s ease;
+  font-size: 0.86rem;
+  white-space: nowrap;
+  touch-action: none;
+  user-select: none;
+  will-change: transform;
+  transition:
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.12s ease;
 }
 
-.glass-capsule:active {
-  transform: translateY(1px) scale(0.995);
+.btn.export-action svg {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 auto;
+}
+
+.btn.export-action span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn.export-action.is-stretching {
+  opacity: 1;
+  box-shadow:
+    0 18px 34px rgba(14, 165, 233, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
 }
 
 .btn.export-action:active {
-  /* keep slight opacity change on inner button, capsule handles transform */
   opacity: 0.96;
 }

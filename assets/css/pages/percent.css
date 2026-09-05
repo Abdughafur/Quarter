@@ -1,21 +1,117 @@
 /* percent.css */
 .clear-percent-btn {
-  display: block;
-  width: auto;
-  margin: 12px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  max-width: 100%;
+  margin: 14px auto 0;
   min-height: 42px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: linear-gradient(135deg, #f87171, #ef4444);
   color: #ffffff;
   box-shadow: 0 12px 28px rgba(220, 38, 38, 0.24);
   border: none;
   font-weight: 950;
   letter-spacing: 0.02em;
   padding: 0 18px;
+  touch-action: pan-y;
+  user-select: none;
+  transition:
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 320ms ease;
 }
 
-.clear-percent-btn:active {
-  transform: scale(0.96);
+#tab-prosent .clear-percent-btn:active,
+#tab-prosent .clear-percent-btn.is-pressing {
+  transform: translateY(-1px) scaleX(1.015);
+  box-shadow: 0 10px 22px rgba(220, 38, 38, 0.2);
+}
+
+#tab-prosent > .card {
+  padding: 8px 0 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#tab-prosent > .card::before {
+  display: none;
+}
+
+#tab-prosent .settings-title {
+  margin: 0 14px 14px;
+  font-size: 1.65rem;
+  letter-spacing: 0;
+}
+
+#tab-prosent .input-row {
+  margin: 0 2px;
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: 0 8px 20px rgba(14, 43, 77, 0.05);
+}
+
+#tab-prosent #pupilCountInput {
+  min-height: 42px;
+  padding-left: 42px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#tab-prosent .pupil-field-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  z-index: 1;
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  color: var(--primary);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+#tab-prosent .pupil-field-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+#tab-prosent .pupil-clear-btn {
+  display: none;
+  width: 30px;
+  height: 30px;
+  right: 11px;
+  background: var(--soft);
+  color: var(--muted);
+  transform: translateY(-50%);
+}
+
+#tab-prosent #pupilCountInput:not(:placeholder-shown) + .pupil-clear-btn {
+  display: inline-grid;
+}
+
+#tab-prosent .pupil-clear-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+#tab-prosent .pupil-clear-btn:active {
+  transform: translateY(-50%) scale(0.92);
+}
+
+#tab-prosent .percent-table {
+  gap: 0;
+  margin: 14px 2px 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: 0 12px 30px rgba(14, 43, 77, 0.06);
 }
 
 .percent-table {
@@ -35,22 +131,62 @@
   border-radius: 17px;
 }
 
+#tab-prosent .percent-row {
+  min-height: 58px;
+  padding: 9px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--soft);
+  border-radius: 0;
+  background: transparent;
+}
+
+#tab-prosent .percent-row:last-child {
+  border-bottom: 0;
+}
+
 /* Make the count inputs look like compact glass capsules */
 .percent-row .input-field {
   width: 100%;
   min-height: 36px;
   padding: 6px 12px;
   border-radius: 999px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 6px 14px rgba(2,6,23,0.12), inset 0 1px 0 rgba(255,255,255,0.03);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.02)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 6px 14px rgba(2, 6, 23, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
   text-align: center;
   font-weight: 900;
 }
 
+#tab-prosent .percent-row .input-field {
+  min-height: 34px;
+  border-color: var(--border);
+  background: var(--card2);
+  box-shadow: none;
+}
+
+#tab-prosent .mini.two {
+  gap: 8px;
+  margin: 14px 2px 0 !important;
+}
+
+#tab-prosent .mini-stat {
+  min-height: 52px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: 0 8px 20px rgba(14, 43, 77, 0.05);
+}
+
 .percent-row .input-field:focus {
-  border-color: rgba(59,130,246,0.9);
-  box-shadow: 0 8px 22px rgba(59,130,246,0.12);
+  border-color: rgba(59, 130, 246, 0.9);
+  box-shadow: 0 8px 22px rgba(59, 130, 246, 0.12);
 }
 
 .grade-title {

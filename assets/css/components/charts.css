@@ -2,63 +2,226 @@
 .chart {
   position: relative;
   width: 100%;
-  height: 176px;
-  margin-top: 14px;
-  padding: 18px 12px 26px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-around;
-  gap: 8px;
-  border-radius: 26px;
-  background: linear-gradient(180deg, rgba(147, 197, 253, 0.08), rgba(14, 165, 233, 0.02));
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
-  overflow: visible;
-}
-
-.chart::before {
-  content: "";
-  position: absolute;
-  inset: 14px 10px 28px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  height: 238px;
+  margin-top: 12px;
+  padding: 0;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(59,130,246,0.04));
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  pointer-events: none;
-}
-
-.bar-wrap {
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  height: 100%;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-.bar-wrap::after {
-  content: attr(data-label);
-  position: absolute;
-  bottom: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.72rem;
-  color: var(--muted);
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: 0.08em;
-}
-
-.bar {
-  width: min(28px, 68%);
-  min-height: 8px;
-  border-radius: 14px 14px 8px 8px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.38), transparent 24%),
-    linear-gradient(180deg, #7dd3fc 0%, #38bdf8 22%, #2563eb 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.3),
+    rgba(14, 165, 233, 0.06)
+  );
+  border: 1px solid rgba(148, 163, 184, 0.18);
   box-shadow:
-    0 14px 30px rgba(37, 99, 235, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.42);
-  border: 1px solid rgba(255,255,255,0.26);
-  transform: translateY(0);
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 8px 20px rgba(15, 23, 42, 0.04);
+  display: flex;
+  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  user-select: none;
+}
+
+.trend-axis {
+  flex: 0 0 30px;
+  width: 30px;
+  min-width: 30px;
+  max-width: 30px;
+  height: 100%;
+  background: var(--card);
+  border-right: 1px solid rgba(100, 116, 139, 0.16);
+  z-index: 1;
+}
+
+.chart-viewport {
+  min-width: 0;
+  flex: 1 1 auto;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.45) transparent;
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.trend-chart {
+  display: block;
+  flex: 0 0 auto;
+  height: 100%;
+}
+
+.chart-viewport::-webkit-scrollbar {
+  height: 6px;
+}
+
+.chart-viewport::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.4);
+}
+
+.chart-viewport.is-dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
+}
+
+.chart-scroll-controls {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 3;
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--card) 78%, transparent);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(12px);
+}
+
+.chart-scroll-button {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(14, 165, 233, 0.12);
+  color: var(--text);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.chart-scroll-button:active {
+  transform: scale(0.9);
+}
+
+.trend-grid line {
+  stroke: rgba(100, 116, 139, 0.16);
+  stroke-dasharray: 2 7;
+}
+
+.trend-axis-label {
+  fill: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.trend-axis-end {
+  text-anchor: end;
+}
+
+.trend-lines path {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 3px 5px rgba(14, 165, 233, 0.2));
+}
+
+.trend-area {
+  fill: url("#ios-chart-fill");
+}
+
+.trend-columns rect {
+  opacity: 0.12;
+}
+
+.trend-columns .trend-up {
+  fill: #34c759;
+}
+.trend-columns .trend-down {
+  fill: #ff3b30;
+}
+.trend-columns .trend-flat {
+  fill: #0a84ff;
+}
+
+.trend-lines .trend-up {
+  stroke: #34c759;
+}
+.trend-lines .trend-down {
+  stroke: #ff3b30;
+}
+.trend-lines .trend-flat {
+  stroke: #0a84ff;
+}
+
+.trend-points .trend-up {
+  fill: #34c759;
+}
+.trend-points .trend-down {
+  fill: #ff3b30;
+}
+.trend-points .trend-flat {
+  fill: #0a84ff;
+}
+
+.trend-up,
+.trend-down,
+.trend-flat {
+  vector-effect: non-scaling-stroke;
+}
+
+.trend-points circle {
+  stroke: var(--card);
+  stroke-width: 2.5;
+  outline: none;
+  cursor: pointer;
+  transition:
+    r 0.16s ease,
+    stroke-width 0.16s ease,
+    filter 0.16s ease;
+}
+
+.trend-point-value {
+  fill: var(--text);
+  font-size: 10px;
+  font-weight: 900;
+  paint-order: stroke;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  letter-spacing: 0.02em;
+}
+
+.trend-points circle:hover,
+.trend-points circle:focus-visible,
+.trend-points circle.selected {
+  stroke: #ffffff;
+  stroke-width: 5;
+  filter: drop-shadow(0 0 7px currentColor);
+}
+
+.chart-empty {
+  display: grid;
+  flex: 1 1 100%;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
+@media (max-width: 520px) {
+  .chart {
+    height: 218px;
+    margin-top: 10px;
+    border-radius: 17px;
+  }
+
+  .trend-chart {
+    width: 100%;
+  }
+
+  .trend-axis-label {
+    font-size: 12px;
+  }
 }

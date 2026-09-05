@@ -57,6 +57,19 @@ export const app = {
     this.noteFilter = "all";
     this.activeNoteId = null;
 
+    this.bindResultDetailsToggle();
+    this.bindGradesToggle();
+    this.bindExportActionStretch();
+
+    const splash = qs("splash");
+    if (splash) {
+      requestAnimationFrame(() => splash.classList.add("showing"));
+      setTimeout(() => {
+        splash.classList.add("fading");
+        setTimeout(() => splash.classList.add("hide"), 420);
+      }, 3000);
+    }
+
     this.bind(state.info);
     this.profile = state.profile || this.profile;
     if (this.checkFirstRun()) return;
@@ -68,17 +81,6 @@ export const app = {
     this.updateAll();
     this.renderNotes();
 
-    // play splash animation: add showing class so logo/title animate into place
-    const splash = qs("splash");
-    if (splash) {
-      // start animation frame for CSS transitions
-      requestAnimationFrame(() => splash.classList.add("showing"));
-      // after 3s hide splash
-      setTimeout(() => {
-        splash.classList.add("fading");
-        setTimeout(() => splash.classList.add("hide"), 420);
-      }, 3000);
-    }
     // initialize nav highlight and draggable behavior
     this.setupNavDrag();
   },
@@ -95,59 +97,22 @@ export const app = {
       const nav = document.querySelector("nav");
       if (!nav) return;
 
-      const highlight =
-        nav.querySelector(".nav-highlight") ||
-        (() => {
-          const el = document.createElement("div");
-          el.className = "nav-highlight";
-          nav.insertBefore(el, nav.firstChild);
-          return el;
-        })();
-
       const buttons = Array.from(nav.querySelectorAll(".nav-btn"));
       if (!buttons.length) return;
 
-      const updatePosition = (btn, animate = true) => {
-        const rect = nav.getBoundingClientRect();
-        const brect = btn.getBoundingClientRect();
-        // compute button background area (account for padding) and inset small gutter
-        const cs = window.getComputedStyle(btn);
-        const padLeft = parseFloat(cs.paddingLeft) || 0;
-        const padRight = parseFloat(cs.paddingRight) || 0;
-        const bgWidth = Math.max(24, brect.width - (padLeft + padRight));
-        const gutter = Math.min(12, Math.round(bgWidth * 0.06));
-        const targetW = Math.round(bgWidth - gutter);
-        const targetH = Math.max(28, Math.round(brect.height - 8));
-        highlight.style.width = `${targetW}px`;
-        highlight.style.height = `${targetH}px`;
-        const x = Math.round(
-          brect.left - rect.left + (brect.width - targetW) / 2,
-        );
-        if (!animate) highlight.style.transition = "none";
-        requestAnimationFrame(() => {
-          highlight.style.transform = `translateX(${x}px)`;
-          // mark the target button so we can visually emphasise it
-          buttons.forEach((b) => b.classList.remove("highlighted"));
-          btn.classList.add("highlighted");
-          if (!animate) {
-            // force reflow then restore
-            // eslint-disable-next-line no-unused-expressions
-            highlight.offsetHeight;
-            highlight.style.transition =
-              "transform 220ms cubic-bezier(.2,.9,.2,1), width 180ms ease, height 180ms ease";
-          }
-        });
+      const updatePosition = (btn) => {
+        btn.classList.add("active");
       };
 
       // initial position to active and size highlight
       const active = nav.querySelector(".nav-btn.active") || buttons[0];
-      updatePosition(active, false);
+      updatePosition(active);
 
       // when nav is changed programmatically
       this.updateNavHighlight = (button) => {
         const btn =
           button || nav.querySelector(".nav-btn.active") || buttons[0];
-        if (btn) updatePosition(btn, true);
+        if (btn) updatePosition(btn);
       };
 
       // pointer drag
@@ -155,6 +120,8 @@ export const app = {
       let pointerId = null;
       let pendingFrame = false;
       let currentX = 0;
+      let dragStartX = 0;
+      let dragDirection = "left center";
       let navRect = null;
       let buttonCenters = [];
       let minX = 0;
@@ -173,23 +140,16 @@ export const app = {
 
         const first = buttonCenters[0];
         const last = buttonCenters[buttonCenters.length - 1];
-        minX = Math.round(first.center - highlight.offsetWidth / 2);
-        maxX = Math.round(last.center - highlight.offsetWidth / 2);
+        minX = Math.round(first.center);
+        maxX = Math.round(last.center);
       };
 
       const updateDrag = () => {
         pendingFrame = false;
         if (!dragging) return;
-        // if highlight hidden (eg. journal tab), skip heavy updates
-        if (highlight.style.display === 'none') return;
         if (!navRect || !buttonCenters.length) refreshButtonData();
 
         const xCenter = currentX - navRect.left;
-        const clamped = Math.max(
-          minX,
-          Math.min(maxX, Math.round(xCenter - highlight.offsetWidth / 2)),
-        );
-        highlight.style.transform = `translate3d(${clamped}px, 0, 0)`;
 
         let nearest = buttonCenters[0];
         let nearestDist = Infinity;
@@ -201,22 +161,36 @@ export const app = {
           }
         }
 
+        dragDirection = currentX >= dragStartX ? "left center" : "right center";
+
         if (nearest.btn !== lastNearest) {
-          buttons.forEach((b) => b.classList.remove("highlighted"));
-          nearest.btn.classList.add("highlighted");
+          buttons.forEach((button) => {
+            button.classList.remove("drag-target");
+            button.style.removeProperty("--drag-origin");
+          });
+          nearest.btn.classList.add("drag-target");
+          nearest.btn.style.setProperty("--drag-origin", dragDirection);
           lastNearest = nearest.btn;
+        } else {
+          nearest.btn.style.setProperty("--drag-origin", dragDirection);
         }
       };
 
       const onPointerDown = (e) => {
         if (e.pointerType === "mouse" && e.button !== 0) return;
         dragging = true;
+        document.documentElement.classList.add("button-stretching");
+        document.body.classList.add("button-stretching");
         pointerId = e.pointerId;
-        nav.setPointerCapture?.(pointerId);
+        dragStartX = e.clientX;
+        dragDirection = "left center";
+        nav.classList.add("is-dragging");
+        try {
+          nav.setPointerCapture?.(pointerId);
+        } catch (_) {}
         refreshButtonData();
         currentX = e.clientX;
         lastNearest = null;
-        highlight.style.transition = "none";
         if (!pendingFrame) {
           pendingFrame = true;
           requestAnimationFrame(updateDrag);
@@ -226,6 +200,7 @@ export const app = {
       const onPointerMove = (e) => {
         if (!dragging || e.pointerId !== pointerId) return;
         currentX = e.clientX;
+        dragDirection = currentX >= dragStartX ? "left center" : "right center";
         if (!pendingFrame) {
           pendingFrame = true;
           requestAnimationFrame(updateDrag);
@@ -235,6 +210,13 @@ export const app = {
       const onPointerUp = (e) => {
         if (!dragging || e.pointerId !== pointerId) return;
         dragging = false;
+        document.documentElement.classList.remove("button-stretching");
+        document.body.classList.remove("button-stretching");
+        nav.classList.remove("is-dragging");
+        buttons.forEach((button) => {
+          button.classList.remove("drag-target");
+          button.style.removeProperty("--drag-origin");
+        });
         try {
           nav.releasePointerCapture?.(pointerId);
         } catch (_) {}
@@ -254,8 +236,6 @@ export const app = {
         const tab = nearest.btn.dataset.tab;
         if (tab) this.nav(tab, nearest.btn);
         updatePosition(nearest.btn, true);
-        highlight.style.transition =
-          "transform 220ms cubic-bezier(.2,.9,.2,1), width 180ms ease, height 180ms ease";
       };
 
       nav.addEventListener("pointerdown", onPointerDown);
@@ -265,6 +245,249 @@ export const app = {
     } catch (err) {
       // silent
     }
+  },
+
+  bindResultDetailsToggle() {
+    const toggle = document.querySelector(".result-details-toggle");
+    if (!toggle || toggle.dataset.bound === "true") return;
+
+    toggle.dataset.bound = "true";
+    let pointerId = null;
+    let startX = 0;
+    let startY = 0;
+    let dragged = false;
+
+    toggle.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+
+      pointerId = event.pointerId;
+      startX = event.clientX;
+      startY = event.clientY;
+      dragged = false;
+      toggle.classList.add("is-stretching");
+      document.documentElement.classList.add("button-stretching");
+      document.body.classList.add("button-stretching");
+      toggle.style.transformOrigin = "center";
+      toggle.style.transition =
+        "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
+      toggle.style.transform = "scale(0.975)";
+      try {
+        toggle.setPointerCapture?.(pointerId);
+      } catch (error) {}
+    });
+
+    toggle.addEventListener("pointermove", (event) => {
+      if (event.pointerId !== pointerId) return;
+
+      const deltaX = event.clientX - startX;
+      const deltaY = event.clientY - startY;
+      const distance = Math.hypot(deltaX, deltaY);
+      if (distance > 8) dragged = true;
+
+      const offsetX = Math.max(-3, Math.min(3, deltaX * 0.035));
+      const offsetY = Math.max(-2, Math.min(2, deltaY * 0.025));
+      const scale = 0.975 + Math.min(distance * 0.0025, 0.045);
+      const dragDirection = deltaX >= 0 ? "left center" : "right center";
+
+      toggle.style.transformOrigin = dragDirection;
+      toggle.style.transition =
+        "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)";
+      toggle.style.transform = `translate(${offsetX}px, ${offsetY}px) scaleX(${scale})`;
+    });
+
+    const resetToggle = (event) => {
+      if (event.pointerId !== pointerId) return;
+
+      try {
+        toggle.releasePointerCapture?.(pointerId);
+      } catch (error) {}
+      toggle.classList.remove("is-stretching");
+      document.documentElement.classList.remove("button-stretching");
+      document.body.classList.remove("button-stretching");
+      toggle.style.transition =
+        "transform 560ms cubic-bezier(0.22, 1, 0.36, 1)";
+      toggle.style.transform = "translate(0, 0) scaleX(1)";
+
+      if (dragged) {
+        toggle.dataset.dragged = "true";
+        setTimeout(() => delete toggle.dataset.dragged, 0);
+      }
+
+      pointerId = null;
+      setTimeout(() => {
+        toggle.style.removeProperty("transform");
+        toggle.style.removeProperty("transition");
+        toggle.style.removeProperty("transform-origin");
+      }, 600);
+    };
+
+    toggle.addEventListener("pointerup", resetToggle);
+    toggle.addEventListener("pointercancel", resetToggle);
+    toggle.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (toggle.dataset.dragged) {
+        delete toggle.dataset.dragged;
+        return;
+      }
+      this.toggleResultDetails();
+    });
+  },
+
+  bindGradesToggle() {
+    const toggle = document.querySelector(".grades-toggle");
+    if (!toggle || toggle.dataset.bound === "true") return;
+
+    toggle.dataset.bound = "true";
+    let pointerId = null;
+    let startX = 0;
+    let startY = 0;
+    let dragged = false;
+
+    toggle.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+
+      pointerId = event.pointerId;
+      startX = event.clientX;
+      startY = event.clientY;
+      dragged = false;
+      toggle.classList.add("is-stretching");
+      document.documentElement.classList.add("button-stretching");
+      document.body.classList.add("button-stretching");
+      toggle.style.transformOrigin = "center";
+      toggle.style.transition =
+        "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
+      toggle.style.transform = "scale(0.98)";
+      try {
+        toggle.setPointerCapture?.(pointerId);
+      } catch (error) {}
+    });
+
+    toggle.addEventListener("pointermove", (event) => {
+      if (event.pointerId !== pointerId) return;
+
+      const deltaX = event.clientX - startX;
+      const deltaY = event.clientY - startY;
+      const distance = Math.hypot(deltaX, deltaY);
+      if (distance > 8) dragged = true;
+
+      const offsetX = Math.max(-3, Math.min(3, deltaX * 0.04));
+      const offsetY = Math.max(-2, Math.min(2, deltaY * 0.025));
+      const scale = 0.98 + Math.min(distance * 0.003, 0.05);
+      const dragDirection = deltaX >= 0 ? "left center" : "right center";
+
+      toggle.style.transformOrigin = dragDirection;
+      toggle.style.transition =
+        "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)";
+      toggle.style.transform = `translate(${offsetX}px, ${offsetY}px) scaleX(${scale})`;
+    });
+
+    const resetToggle = (event) => {
+      if (event.pointerId !== pointerId) return;
+
+      try {
+        toggle.releasePointerCapture?.(pointerId);
+      } catch (error) {}
+      toggle.classList.remove("is-stretching");
+      document.documentElement.classList.remove("button-stretching");
+      document.body.classList.remove("button-stretching");
+      toggle.style.transition =
+        "transform 560ms cubic-bezier(0.22, 1, 0.36, 1)";
+      toggle.style.transform = "translate(0, 0) scaleX(1)";
+
+      if (dragged) {
+        toggle.dataset.dragged = "true";
+        setTimeout(() => delete toggle.dataset.dragged, 0);
+      }
+
+      pointerId = null;
+      setTimeout(() => {
+        toggle.style.removeProperty("transform");
+        toggle.style.removeProperty("transition");
+        toggle.style.removeProperty("transform-origin");
+      }, 600);
+    };
+
+    toggle.addEventListener("pointerup", resetToggle);
+    toggle.addEventListener("pointercancel", resetToggle);
+  },
+
+  bindExportActionStretch() {
+    const button = document.querySelector(".export-action");
+    if (!button || button.dataset.stretchBound === "true") return;
+
+    button.dataset.stretchBound = "true";
+    let pointerId = null;
+    let startX = 0;
+    let startY = 0;
+    let dragged = false;
+
+    button.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+
+      pointerId = event.pointerId;
+      startX = event.clientX;
+      startY = event.clientY;
+      dragged = false;
+      button.classList.add("is-stretching");
+      document.documentElement.classList.add("button-stretching");
+      document.body.classList.add("button-stretching");
+      button.style.transformOrigin = "center";
+      button.style.transition =
+        "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
+      button.style.transform = "scale(0.985)";
+      try {
+        button.setPointerCapture?.(pointerId);
+      } catch (error) {}
+    });
+
+    button.addEventListener("pointermove", (event) => {
+      if (event.pointerId !== pointerId) return;
+
+      const deltaX = event.clientX - startX;
+      const deltaY = event.clientY - startY;
+      const distance = Math.hypot(deltaX, deltaY);
+      if (distance > 8) dragged = true;
+
+      const offsetX = Math.max(-4, Math.min(4, deltaX * 0.035));
+      const offsetY = Math.max(-2, Math.min(2, deltaY * 0.02));
+      const scale = 0.985 + Math.min(distance * 0.0025, 0.05);
+      const dragDirection = deltaX >= 0 ? "left center" : "right center";
+
+      button.style.transformOrigin = dragDirection;
+      button.style.transition =
+        "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)";
+      button.style.transform = `translate(${offsetX}px, ${offsetY}px) scaleX(${scale})`;
+    });
+
+    const resetButton = (event) => {
+      if (event.pointerId !== pointerId) return;
+
+      try {
+        button.releasePointerCapture?.(pointerId);
+      } catch (error) {}
+      button.classList.remove("is-stretching");
+      document.documentElement.classList.remove("button-stretching");
+      document.body.classList.remove("button-stretching");
+      button.style.transition =
+        "transform 560ms cubic-bezier(0.22, 1, 0.36, 1)";
+      button.style.transform = "translate(0, 0) scaleX(1)";
+
+      if (dragged) {
+        button.dataset.dragged = "true";
+        setTimeout(() => delete button.dataset.dragged, 0);
+      }
+
+      pointerId = null;
+      setTimeout(() => {
+        button.style.removeProperty("transform");
+        button.style.removeProperty("transition");
+        button.style.removeProperty("transform-origin");
+      }, 600);
+    };
+
+    button.addEventListener("pointerup", resetButton);
+    button.addEventListener("pointercancel", resetButton);
   },
 
   bind(info = {}) {
@@ -299,12 +522,255 @@ export const app = {
 
     document.addEventListener("click", (event) => {
       const actionButton = event.target.closest("[data-action]");
+      if (actionButton?.dataset.dragged) {
+        delete actionButton.dataset.dragged;
+        return;
+      }
       if (actionButton)
         this.action(actionButton.dataset.action, actionButton.dataset);
 
       const tabButton = event.target.closest("[data-tab]");
       if (tabButton) this.nav(tabButton.dataset.tab, tabButton);
     });
+
+    document
+      .querySelectorAll(".mobile-subview-header .btn-back")
+      .forEach((headerControl) => {
+        let startX = 0;
+        let startY = 0;
+        let dragged = false;
+
+        headerControl.addEventListener("pointerdown", (event) => {
+          startX = event.clientX;
+          startY = event.clientY;
+          dragged = false;
+          document.documentElement.classList.add("button-stretching");
+          document.body.classList.add("button-stretching");
+          try {
+            headerControl.setPointerCapture?.(event.pointerId);
+          } catch (error) {}
+          headerControl.classList.add("is-dragging");
+          headerControl.style.transformOrigin = "center";
+          headerControl.style.transition =
+            "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
+          headerControl.style.transform = "scale(0.97)";
+        });
+
+        headerControl.addEventListener("pointermove", (event) => {
+          if (!headerControl.classList.contains("is-dragging")) return;
+
+          const deltaX = event.clientX - startX;
+          const deltaY = event.clientY - startY;
+          const distance = Math.hypot(deltaX, deltaY);
+          if (distance > 8) dragged = true;
+
+          const angle = Math.max(
+            -1.5,
+            Math.min(1.5, (Math.atan2(deltaY, deltaX) * 180) / Math.PI),
+          );
+          const offsetX = Math.max(-3, Math.min(3, deltaX * 0.035));
+          const offsetY = Math.max(-3, Math.min(3, deltaY * 0.02));
+          const scale = 0.97 + Math.min(distance * 0.004, 0.04);
+          const dragDirection = deltaX >= 0 ? "left center" : "right center";
+          headerControl.style.transformOrigin = dragDirection;
+          headerControl.style.transition =
+            "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)";
+          headerControl.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg) scaleX(${scale})`;
+        });
+
+        const resetDrag = (event) => {
+          if (!headerControl.classList.contains("is-dragging")) return;
+          try {
+            headerControl.releasePointerCapture?.(event.pointerId);
+          } catch (error) {}
+          headerControl.classList.remove("is-dragging");
+          document.documentElement.classList.remove("button-stretching");
+          document.body.classList.remove("button-stretching");
+          headerControl.style.transition =
+            "transform 560ms cubic-bezier(0.22, 1, 0.36, 1)";
+          headerControl.style.transform =
+            "translate(0, 0) rotate(0deg) scaleX(1)";
+          setTimeout(() => {
+            headerControl.style.removeProperty("transition");
+            headerControl.style.removeProperty("transform");
+            headerControl.style.removeProperty("transform-origin");
+          }, 600);
+          if (dragged) {
+            headerControl.dataset.dragged = "true";
+            setTimeout(() => delete headerControl.dataset.dragged, 0);
+          }
+        };
+
+        headerControl.addEventListener("pointerup", resetDrag);
+        headerControl.addEventListener("pointercancel", resetDrag);
+      });
+
+    const clearBackButtonDrags = () => {
+      document
+        .querySelectorAll(".mobile-subview-header .btn-back.is-dragging")
+        .forEach((headerControl) => {
+          headerControl.classList.remove("is-dragging");
+          headerControl.style.transition =
+            "transform 560ms cubic-bezier(0.22, 1, 0.36, 1)";
+          headerControl.style.transform =
+            "translate(0, 0) rotate(0deg) scaleX(1)";
+          setTimeout(() => {
+            headerControl.style.removeProperty("transition");
+            headerControl.style.removeProperty("transform");
+            headerControl.style.removeProperty("transform-origin");
+          }, 600);
+        });
+      document.documentElement.classList.remove("button-stretching");
+      document.body.classList.remove("button-stretching");
+    };
+
+    document.addEventListener("pointerup", clearBackButtonDrags);
+    document.addEventListener("pointercancel", clearBackButtonDrags);
+
+    const clearPercentButtons = document.querySelectorAll(".clear-percent-btn");
+
+    clearPercentButtons.forEach((clearButton) => {
+      let startX = 0;
+      let startY = 0;
+      let pointerId = null;
+      let dragged = false;
+
+      clearButton.addEventListener("pointerdown", (event) => {
+        if (event.pointerType === "mouse" && event.button !== 0) return;
+
+        startX = event.clientX;
+        startY = event.clientY;
+        pointerId = event.pointerId;
+        dragged = false;
+        clearButton.classList.add("is-pressing");
+        document.documentElement.classList.add("button-stretching");
+        document.body.classList.add("button-stretching");
+        clearButton.style.transformOrigin = "center";
+        clearButton.style.transition =
+          "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
+        clearButton.style.transform = "translateY(-1px) scaleX(1.015)";
+        clearButton.setPointerCapture?.(pointerId);
+      });
+
+      clearButton.addEventListener("pointermove", (event) => {
+        if (event.pointerId !== pointerId) return;
+
+        const deltaX = event.clientX - startX;
+        const deltaY = event.clientY - startY;
+        const distance = Math.hypot(deltaX, deltaY);
+        if (distance > 8) dragged = true;
+
+        const offsetX = Math.max(-4, Math.min(4, deltaX * 0.04));
+        const offsetY = Math.max(-2, Math.min(2, deltaY * 0.02));
+        const scale = 1.015 + Math.min(Math.abs(deltaX) * 0.003, 0.05);
+        const dragDirection = deltaX >= 0 ? "left center" : "right center";
+
+        clearButton.style.transformOrigin = dragDirection;
+        clearButton.style.transition =
+          "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)";
+        clearButton.style.transform = `translate(${offsetX}px, ${offsetY - 1}px) scaleX(${scale})`;
+      });
+
+      const resetClearButton = (event) => {
+        if (event.pointerId !== pointerId) return;
+
+        clearButton.releasePointerCapture?.(pointerId);
+        clearButton.classList.remove("is-pressing");
+        document.documentElement.classList.remove("button-stretching");
+        document.body.classList.remove("button-stretching");
+        clearButton.style.transition =
+          "transform 560ms cubic-bezier(0.22, 1, 0.36, 1)";
+        clearButton.style.transform = "translate(0, 0) scaleX(1)";
+
+        if (dragged) {
+          clearButton.dataset.dragged = "true";
+          setTimeout(() => delete clearButton.dataset.dragged, 0);
+        }
+
+        pointerId = null;
+        setTimeout(() => {
+          clearButton.style.removeProperty("transform");
+          clearButton.style.removeProperty("transition");
+          clearButton.style.removeProperty("transform-origin");
+        }, 600);
+      };
+
+      clearButton.addEventListener("pointerup", resetClearButton);
+      clearButton.addEventListener("pointercancel", resetClearButton);
+    });
+
+    document
+      .querySelectorAll(".journal-floating-btn, .floating-add-note")
+      .forEach((floatingButton) => {
+        let pointerId = null;
+        let startX = 0;
+        let startY = 0;
+        let dragged = false;
+
+        floatingButton.addEventListener("pointerdown", (event) => {
+          if (event.pointerType === "mouse" && event.button !== 0) return;
+
+          pointerId = event.pointerId;
+          startX = event.clientX;
+          startY = event.clientY;
+          dragged = false;
+          floatingButton.classList.add("is-stretching");
+          document.documentElement.classList.add("button-stretching");
+          document.body.classList.add("button-stretching");
+          floatingButton.style.transformOrigin = "center";
+          floatingButton.style.transition =
+            "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
+          floatingButton.style.transform = "scale(0.98)";
+          floatingButton.setPointerCapture?.(pointerId);
+        });
+
+        floatingButton.addEventListener("pointermove", (event) => {
+          if (event.pointerId !== pointerId) return;
+
+          const deltaX = event.clientX - startX;
+          const deltaY = event.clientY - startY;
+          const distance = Math.hypot(deltaX, deltaY);
+          if (distance > 8) dragged = true;
+
+          const offsetX = Math.max(-4, Math.min(4, deltaX * 0.035));
+          const offsetY = Math.max(-4, Math.min(4, deltaY * 0.035));
+          const scaleX = 0.98 + Math.min(distance * 0.003, 0.06);
+          const scaleY = 0.98 + Math.min(distance * 0.0015, 0.025);
+          const dragDirection = deltaX >= 0 ? "left center" : "right center";
+
+          floatingButton.style.transformOrigin = dragDirection;
+          floatingButton.style.transition =
+            "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)";
+          floatingButton.style.transform = `translate(${offsetX}px, ${offsetY}px) scaleX(${scaleX}) scaleY(${scaleY})`;
+        });
+
+        const resetFloatingButton = (event) => {
+          if (event.pointerId !== pointerId) return;
+
+          floatingButton.releasePointerCapture?.(pointerId);
+          floatingButton.classList.remove("is-stretching");
+          document.documentElement.classList.remove("button-stretching");
+          document.body.classList.remove("button-stretching");
+          floatingButton.style.transition =
+            "transform 560ms cubic-bezier(0.22, 1, 0.36, 1)";
+          floatingButton.style.transform = "translate(0, 0) scale(1)";
+
+          if (dragged) {
+            floatingButton.dataset.dragged = "true";
+            setTimeout(() => delete floatingButton.dataset.dragged, 0);
+          }
+
+          pointerId = null;
+          setTimeout(() => {
+            floatingButton.style.removeProperty("transform");
+            floatingButton.style.removeProperty("transition");
+            floatingButton.style.removeProperty("transform-origin");
+          }, 600);
+        };
+
+        floatingButton.addEventListener("pointerup", resetFloatingButton);
+        floatingButton.addEventListener("pointercancel", resetFloatingButton);
+      });
 
     qs("notesList")?.addEventListener("click", (event) => {
       const noteCard = event.target.closest(".note-item");
@@ -539,8 +1005,10 @@ export const app = {
   checkFirstRun() {
     const { name, surname, school } = this.profile;
     if (!name || !surname || !school) {
-      window.location.replace("profile.html");
-      return true;
+      if (window.location.protocol !== "file:") {
+        window.location.assign("profile.html");
+        return true;
+      }
     }
     return false;
   },
@@ -571,7 +1039,11 @@ export const app = {
     const actions = {
       deleteLast: () => this.deleteLast(),
       clearAll: () => this.clearAll(),
-      clearAllPercentages: () => { this.vibrate?.(40); this.clearAllPercentages(true); },
+      toggleGradesView: () => this.toggleGradesView(),
+      clearAllPercentages: () => {
+        this.vibrate?.(26);
+        this.clearAllPercentages(true);
+      },
       clearPupilCount: () => this.clearPupilCount(),
       downloadResult: () => this.ensureInfo(),
       closeModal: () => this.closeModal(),
@@ -580,6 +1052,7 @@ export const app = {
       toggleSound: () => this.toggleSound(payload),
       toggleFS: () => this.toggleFS(payload),
       toggleDiagram: () => this.toggleDiagram(payload),
+      toggleResultDetails: () => this.toggleResultDetails(),
       editProfile: () => this.showSubView("more-profile-view"),
       saveProfile: () => this.saveProfile(),
       goToProfile: () => this.showSubView("more-profile-view"),
@@ -611,6 +1084,15 @@ export const app = {
     };
 
     actions[name]?.(payload);
+  },
+
+  toggleResultDetails() {
+    const hero = document.querySelector(".hero");
+    const toggle = document.querySelector(".result-details-toggle");
+    if (!hero || !toggle) return;
+
+    const isOpen = hero.classList.toggle("result-details-open");
+    toggle.setAttribute("aria-expanded", String(isOpen));
   },
 
   keyboard(event) {
@@ -693,11 +1175,11 @@ export const app = {
     buildKeypad(qs("keypad"), {
       onAdd: (value) => this.add(value),
       onDelete: () => {
-        this.vibrate?.(30);
+        this.vibrate?.(26);
         this.deleteLast(true);
       },
       onClear: () => {
-        this.vibrate?.(40);
+        this.vibrate?.(26);
         this.clearAll(true);
       },
     });
@@ -723,6 +1205,34 @@ export const app = {
 
     this.tone(450 + value * 30);
     this.scheduleUpdate(true);
+  },
+
+  toggleGradesView() {
+    const container = qs("blocksContainer");
+    const toggle = document.querySelector(".grades-toggle");
+    if (!container || !toggle) return;
+
+    const expanded = container.classList.toggle("grades-expanded");
+    toggle.setAttribute("aria-expanded", String(expanded));
+    toggle.setAttribute(
+      "aria-label",
+      expanded ? "Пинҳон кардани баъзе баллҳо" : "Намоиши ҳамаи баллҳо",
+    );
+
+    if (expanded) {
+      container.style.height = `${Math.min(container.scrollHeight, 520)}px`;
+    } else {
+      container.style.height = "168px";
+    }
+
+    if (!expanded) {
+      requestAnimationFrame(() => {
+        container.scrollTo({
+          top: container.scrollHeight - container.clientHeight,
+          behavior: "smooth",
+        });
+      });
+    }
   },
 
   deleteLast(silent = false) {
@@ -763,8 +1273,13 @@ export const app = {
 
   clearPupilCount() {
     this.pct.total = 0;
+    this.pct.counts = {};
     const pupilInput = qs("pupilCountInput");
     if (pupilInput) pupilInput.value = "";
+    for (let grade = 10; grade >= 1; grade -= 1) {
+      const input = qs(`gradeCount${grade}`);
+      if (input) input.value = "";
+    }
     this.percentUpdate();
     this.save();
     this.toast.show("Шумораи хонандагон тоза шуд.");
@@ -837,6 +1352,16 @@ export const app = {
     renderGradeBlocks(qs("blocksContainer"), this.grades, GRADE_LABELS, (id) =>
       this.toggleGrade(id),
     );
+    const gradesToggle = document.querySelector(".grades-toggle");
+    if (gradesToggle) {
+      const hasGrades = this.grades.length > 0;
+      gradesToggle.classList.toggle("is-visible", hasGrades);
+      gradesToggle.disabled = !hasGrades;
+      gradesToggle.setAttribute("aria-hidden", String(!hasGrades));
+      gradesToggle.style.opacity = hasGrades ? "1" : "0";
+      gradesToggle.style.visibility = hasGrades ? "visible" : "hidden";
+      gradesToggle.style.pointerEvents = hasGrades ? "auto" : "none";
+    }
     renderGradeChart(qs("gradeChart"), this.grades);
     this.percentUpdate();
 
@@ -851,7 +1376,7 @@ export const app = {
     const number = element.querySelector?.(".large-number");
     if (number) {
       number.classList.add("scrolling");
-      setTimeout(() => number.classList.remove("scrolling"), 220);
+      setTimeout(() => number.classList.remove("scrolling"), 100);
       return;
     }
 
@@ -1322,12 +1847,6 @@ export const app = {
 
     // update draggable highlight if present
     try {
-      // hide draggable highlight when journal tab is active
-      const navHighlight = document.querySelector('.nav-highlight');
-      if (navHighlight) {
-        navHighlight.style.display = id === 'tab-journal' ? 'none' : '';
-      }
-
       this.updateNavHighlight &&
         this.updateNavHighlight(
           button || document.querySelector(`[data-tab="${id}"]`),
@@ -1342,6 +1861,10 @@ export const app = {
       view.classList.remove("active");
     });
     qs(viewId)?.classList.add("active");
+    document.body.classList.toggle(
+      "more-subview-open",
+      viewId !== "more-home-view",
+    );
     this.tone(550, "sine", 0.05);
   },
 
@@ -1745,6 +2268,22 @@ export const app = {
     // eyebrow shows fixed label; put school number into headerSchoolNumber
     setText("headerSchoolNumber", school ? `№${school}` : "");
     setText("headerFallback", fallback);
+    setText("moreProfileName", fullName || "Чоряк");
+    setText(
+      "moreProfileSchool",
+      school ? `Мактаби №${school}` : "Рақами мактаб илова нашудааст",
+    );
+
+    const moreProfilePhoto = qs("moreProfilePhoto");
+    const moreProfileFallback = qs("moreProfileFallback");
+    if (avatar && moreProfilePhoto) {
+      moreProfilePhoto.src = avatar;
+      moreProfilePhoto.style.display = "block";
+      if (moreProfileFallback) moreProfileFallback.style.display = "none";
+    } else if (moreProfilePhoto) {
+      moreProfilePhoto.style.display = "none";
+      if (moreProfileFallback) moreProfileFallback.style.display = "block";
+    }
 
     const headerPhoto = qs("headerPhoto");
     const headerFallbackEl = qs("headerFallback");

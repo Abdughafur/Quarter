@@ -5,8 +5,10 @@
   z-index: 9999;
   display: grid;
   place-items: center;
-  background: #ffffff;
-  transition: opacity 0.36s ease, visibility 0.36s ease;
+  background: var(--bg, #ffffff);
+  transition:
+    opacity 0.48s ease,
+    visibility 0.48s ease;
 }
 
 .splash.hide {
@@ -19,25 +21,56 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  width: min(230px, 72vw);
 }
 
 .splash-logo {
-  width: 88px;
-  height: 88px;
+  width: 96px;
+  height: 96px;
   object-fit: contain;
-  transform: translateY(-48px) scale(0.86);
+  transform: translateY(-18px) scale(0.86);
   opacity: 0;
-  transition: transform 600ms cubic-bezier(0.22,0.9,0.24,1), opacity 600ms ease;
+  filter: drop-shadow(0 14px 22px rgba(14, 43, 77, 0.16));
+  transition:
+    transform 620ms cubic-bezier(0.22, 0.9, 0.24, 1),
+    opacity 620ms ease;
 }
 
 .splash-title {
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 900;
   color: var(--text);
-  transform: translateY(36px) scale(0.98);
+  letter-spacing: 0.02em;
+  transform: translateY(8px) scale(0.98);
   opacity: 0;
-  transition: transform 600ms cubic-bezier(0.22,0.9,0.24,1), opacity 600ms ease;
+  transition:
+    transform 620ms cubic-bezier(0.22, 0.9, 0.24, 1),
+    opacity 620ms ease;
+}
+
+.splash-progress {
+  width: 178px;
+  height: 4px;
+  margin-top: 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 14%, transparent);
+  opacity: 0;
+  transform: scaleX(0.7);
+  transition:
+    opacity 480ms ease 180ms,
+    transform 620ms cubic-bezier(0.22, 0.9, 0.24, 1) 180ms;
+}
+
+.splash-progress-fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  box-shadow: 0 0 12px rgba(14, 165, 233, 0.28);
+  transition: width 2.35s cubic-bezier(0.22, 0.8, 0.24, 1);
 }
 
 .splash.showing .splash-logo {
@@ -46,8 +79,17 @@
 }
 
 .splash.showing .splash-title {
-  transform: translateY(6px) scale(1);
+  transform: translateY(0) scale(1);
   opacity: 1;
+}
+
+.splash.showing .splash-progress {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.splash.showing .splash-progress-fill {
+  width: 88%;
 }
 
 /* brief white fade after animation */
