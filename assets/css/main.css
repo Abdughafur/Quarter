@@ -1,4 +1,4 @@
-/* main.css - Чоряк v4.3
+/* main.css - Чоряк v4.4
  Copyright (c) 2026 Abdughafur. All rights reserved.
 */
 @import url("./core/reset.css");
@@ -18,7 +18,7 @@
 @import url("./components/cards.css");
 @import url("./components/inputs.css");
 @import url("./components/switches.css");
-@import url("./components/modal.css");
+@import url("./components/modal.css?v=2");
 @import url("./components/toast.css");
 @import url("./components/charts.css");
 @import url("./components/keypad.css");
@@ -36,3 +36,40 @@
 @import url("./utilities/shadows.css");
 @import url("./utilities/radius.css");
 @import url("./utilities/helpers.css");
+
+/* v4.4 responsive workspace widths */
+@media (min-width: 761px) {
+  main.container {
+    width: min(100% - 48px, 960px);
+    max-width: none;
+    padding: 24px 0 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  main.container {
+    width: min(100% - 80px, 1280px);
+    padding-top: 30px;
+  }
+}
+
+@media (min-width: 1600px) {
+  main.container {
+    width: min(100% - 120px, 1480px);
+  }
+
+  main.container > .tab.active {
+    animation: workspace-in 260ms var(--ease) both;
+  }
+}
+
+@keyframes workspace-in {
+  from {
+    opacity: 0.7;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

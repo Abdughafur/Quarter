@@ -1,43 +1,68 @@
-import {
-  calculateStats,
-  getBalanceAdvice,
-  getNeededPlan,
-  getTrend,
-  gradeLabel,
-} from "../core/stats.js";
 import { escapeHtml } from "../utils/helpers.js";
+import { buildStudentContext } from "./context.js?v=chat2";
+import { detectIntent } from "./intent.js?v=chat2";
+import { generateAIResponse } from "./provider.js?v=beta2";
+import { createMinAITools } from "./tools.js?v=beta2";
 
-export function renderMinAI({ box, text, grades }) {
-  if (!box || !text) return;
+let renderVersion = 0;
 
-  const stats = calculateStats(grades);
-
-  if (!grades.length) {
-    text.textContent = "Барои гирифтани таҳлил аввал баллҳоро ворид кунед.";
-    box.style.display = "none";
-    return;
-  }
-
-  const final = stats.final;
-  const trend = getTrend(grades);
-  const needed = getNeededPlan(grades);
-  const balance = getBalanceAdvice(stats);
-  const low = grades.filter((grade) => grade.val <= 5).length;
-  const mid = grades.filter((grade) => grade.val >= 6 && grade.val <= 7).length;
-  const high = grades.filter((grade) => grade.val >= 8).length;
-
-  let advice = "-------------------";
-
-  if (final < 6.5) {
-    advice =
-      "Натиҷа паст аст. Аввал хонанда бояд баллҳои 5 ва аз 5 поёнро кам кунед, баъд баллҳои 8–10 бештар гиред.";
-  } else if (low > 0 && low >= high) {
-    advice =
-      "Баллҳои паст ба баллҳои миёна таъсири калон доранд. Ҳатто 2–3 балли 8 ё 9 метавонад натиҷаро боло барад.";
-  }
-
-  box.style.display = "block";
-  text.innerHTML = `<b>MinAI:</b><br>Натиҷаи ҳозира <b>${escapeHtml(final.toFixed(2))}</b> — <b>${escapeHtml(gradeLabel(final))}</b>.<br>Сатҳи таҳсил: <b>${escapeHtml(trend)}</b>.<br>${escapeHtml(balance)}<br>${escapeHtml(advice)}<br><br>${escapeHtml(needed)}`;
+function renderMessage(message) {
+  const role = message.role === "assistant" ? "ai" : "user";
+  const image =
+    role === "ai"
+      ? "assets/images/logoLight.png"
+      : message.avatar || "assets/images/logoLight.png";
+  return `<div class="minai-message minai-message--${role}"><img class="minai-message-avatar" src="${escapeHtml(image)}" alt="" /><div class="minai-message-body"><div class="minai-message-role">${role === "ai" ? "MinAI" : "Шумо"}</div><div class="minai-message-content">${escapeHtml(message.content)}</div></div></div>`;
 }
 
-// MinAI v1.0
+function renderChat(messages, loading = false) {
+  return `${messages.map(renderMessage).join("")}${loading ? '<div class="minai-message minai-message--ai minai-message--loading"><div class="minai-message-role">MinAI</div><div class="minai-typing" aria-label="MinAI ҷавоб омода мекунад"><span></span><span></span><span></span></div></div>' : ""}`;
+}
+
+export function renderMinAI({
+  messages = [],
+  loading = false,
+  userAvatar = "",
+}) {
+  const chat = document.querySelector("#aiChatMessages");
+  if (!chat) return;
+  chat.innerHTML = messages.length
+    ? renderChat(
+        messages.map((message) => ({
+          ...message,
+          avatar: message.avatar || userAvatar,
+        })),
+        loading,
+      )
+    : '<div class="minai-empty">Салом. Ман барои таҳлили баллҳо ва беҳтар кардани натиҷаи таҳсил омодаам.</div>';
+  chat.scrollTop = chat.scrollHeight;
+}
+
+export async function askMinAI({
+  grades,
+  profile,
+  info,
+  target,
+  question,
+  history,
+  app,
+}) {
+  const currentVersion = ++renderVersion;
+  const intent = detectIntent(question);
+  const context = buildStudentContext({
+    grades,
+    profile,
+    info,
+    target: intent.target || target,
+    history,
+  });
+  const response = await generateAIResponse({
+    context,
+    question,
+    history: context.conversationHistory,
+    intent,
+    tools: createMinAITools(app),
+  });
+  return currentVersion === renderVersion ? response : null;
+}
+// MinAI v1.1: offline provider + student context + intent + reasoning.

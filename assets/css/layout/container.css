@@ -12,3 +12,40 @@
 .tab.active {
   display: block;
 }
+
+/* Responsive workspace widths for phones, laptops, and large desktop displays. */
+@media (min-width: 761px) {
+  .container {
+    width: min(100% - 48px, 960px);
+    max-width: none;
+    padding: 24px 0 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  .container {
+    width: min(100% - 80px, 1280px);
+    padding-top: 30px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .container {
+    width: min(100% - 120px, 1480px);
+  }
+
+  .tab.active {
+    animation: workspace-in 260ms var(--ease) both;
+  }
+}
+
+@keyframes workspace-in {
+  from {
+    opacity: 0.7;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

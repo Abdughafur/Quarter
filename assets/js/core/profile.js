@@ -1,7 +1,8 @@
 ﻿/* profile.js */
-/* Created by Abdughafur - ЧОРЯК 4.3.1 */
+/* Created by Abdughafur - ЧОРЯК 4.4 */
 import { clean, qs, setInputValue } from "../utils/helpers.js";
 import { saveState, loadState, DEFAULT_PROFILE } from "./storage.js";
+import { bindAvatarPicker } from "../ui/avatar-picker.js";
 
 async function loadProfile() {
   const state = await loadState();
@@ -86,6 +87,19 @@ async function init() {
     reader.readAsDataURL(file);
   });
 
+  bindAvatarPicker({
+    inputId: "profileAvatarInput",
+    triggerSelector: "[data-avatar-picker-trigger]",
+    onSelect: (avatar) => {
+      if (avatarImg) {
+        avatarImg.src = avatar;
+        avatarImg.style.display = "block";
+      }
+      if (avatarFallback) avatarFallback.style.display = "none";
+      profile.avatar = avatar;
+    },
+  });
+
   qs("saveProfileButton")?.addEventListener("click", async () => {
     const name = clean(qs("profileNameInput")?.value || "");
     const surname = clean(qs("profileSurnameInput")?.value || "");
@@ -114,4 +128,4 @@ async function init() {
 
 void init();
 
-/* Created by Abdughafur - ЧОРЯК 4.3.1 */
+/* Created by Abdughafur - ЧОРЯК 4.4 */

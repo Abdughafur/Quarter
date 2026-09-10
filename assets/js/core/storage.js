@@ -19,6 +19,13 @@ export const DEFAULT_PCT = Object.freeze({
   counts: {},
 });
 
+export const DEFAULT_NOTE_CATEGORIES = Object.freeze([
+  "lesson",
+  "task",
+  "idea",
+  "other",
+]);
+
 export const DEFAULT_PROFILE = Object.freeze({
   name: "",
   surname: "",
@@ -78,7 +85,22 @@ function normalizePct(value) {
   };
 }
 
-function normalizeNotes(value) {
+function normalizeCategories(value) {
+  const categories = Array.isArray(value) ? value : [];
+  return Array.from(
+    new Set(
+      [...DEFAULT_NOTE_CATEGORIES, ...categories]
+        .map((category) =>
+          String(category || "")
+            .trim()
+            .slice(0, 32),
+        )
+        .filter(Boolean),
+    ),
+  ).slice(0, 30);
+}
+
+function normalizeNotes(value, categories = DEFAULT_NOTE_CATEGORIES) {
   if (!Array.isArray(value)) return [];
 
   return value
@@ -87,9 +109,7 @@ function normalizeNotes(value) {
       id: String(note.id || uid()),
       title: String(note.title || "").slice(0, 128),
       body: String(note.body || "").slice(0, 1024),
-      category: ["lesson", "task", "idea", "important", "other"].includes(note.category)
-        ? note.category
-        : "other",
+      category: categories.includes(note.category) ? note.category : "other",
       important: Boolean(note.important),
       createdAt: Number(note.createdAt) || Date.now(),
       updatedAt: Number(note.updatedAt) || Date.now(),
@@ -97,8 +117,24 @@ function normalizeNotes(value) {
     .slice(0, 200);
 }
 
+function normalizeTasks(value) {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .filter((task) => task && typeof task === "object")
+    .map((task) => ({
+      id: String(task.id || uid()),
+      title: String(task.title || "").slice(0, 160),
+      completed: Boolean(task.completed),
+      createdAt: Number(task.createdAt) || Date.now(),
+    }))
+    .filter((task) => task.title)
+    .slice(0, 200);
+}
+
 function normalizeState(value) {
   const payload = value && typeof value === "object" ? value : {};
+  const categories = normalizeCategories(payload.noteCategories);
 
   return {
     grades: normalizeGrades(payload.grades ?? []),
@@ -106,7 +142,9 @@ function normalizeState(value) {
     pct: normalizePct(payload.pct ?? null),
     info: payload.info && typeof payload.info === "object" ? payload.info : {},
     profile: normalizeProfile(payload.profile ?? null),
-    notes: normalizeNotes(payload.notes ?? []),
+    notes: normalizeNotes(payload.notes ?? [], categories),
+    tasks: normalizeTasks(payload.tasks ?? []),
+    noteCategories: categories,
   };
 }
 
@@ -219,8 +257,26 @@ export async function loadState() {
   return normalized;
 }
 
-export async function saveState({ grades, settings, pct, info, profile, notes }) {
-  const payload = normalizeState({ grades, settings, pct, info, profile, notes });
+export async function saveState({
+  grades,
+  settings,
+  pct,
+  info,
+  profile,
+  notes,
+  tasks,
+  noteCategories,
+}) {
+  const payload = normalizeState({
+    grades,
+    settings,
+    pct,
+    info,
+    profile,
+    notes,
+    tasks,
+    noteCategories,
+  });
 
   try {
     localStorage.setItem(FALLBACK_STORAGE_KEY, JSON.stringify(payload));

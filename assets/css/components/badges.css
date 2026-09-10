@@ -60,13 +60,10 @@
   display: inline-flex;
 }
 
-/* keep MinAI analysis capsule centered */
-#aiAnalysisBox {
+.ai-analysis-box {
   text-align: center;
-  border-radius: 999px;
-  padding: 10px 18px;
-  display: inline-block;
-  margin: 12px auto;
+  padding: 10px 8px 2px;
+  display: block;
 }
 
 /* light, cheap transitions for smooth feel on modern browsers, low cost on old ones */

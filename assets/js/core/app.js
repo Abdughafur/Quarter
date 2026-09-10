@@ -1,7 +1,12 @@
 /* app.js */
-import { renderMinAI } from "../ai/minai.js";
+import { askMinAI, renderMinAI } from "../ai/minai.js?v=beta2";
 import { calculateStats, gradeLabel, GRADE_LABELS } from "./stats.js";
-import { loadState, saveState, clearState } from "./storage.js";
+import {
+  DEFAULT_NOTE_CATEGORIES,
+  loadState,
+  saveState,
+  clearState,
+} from "./storage.js";
 import { promptInstallPwa } from "./pwa.js";
 import {
   buildKeypad,
@@ -11,6 +16,7 @@ import {
 } from "../ui/chart.js";
 import { closeInfoModal, openInfoModal } from "../ui/modal.js";
 import { Toast } from "../ui/toast.js";
+import { bindAvatarPicker } from "../ui/avatar-picker.js";
 import {
   clean,
   clamp,
@@ -63,10 +69,21 @@ export const app = {
   shouldBump: false,
   initialized: false,
   notes: [],
+  tasks: [],
+  noteCategories: [...DEFAULT_NOTE_CATEGORIES],
+  selectedNoteId: null,
+  editingNoteId: null,
+  creatingNoteInline: false,
+  noteDetailDirty: false,
+  pendingNoteCategoryDelete: null,
   noteFilter: "all",
   activeNoteId: null,
   noteHistory: [],
   noteHistoryIndex: -1,
+  aiChatBound: false,
+  aiHistory: [],
+  aiGenerating: false,
+  info: {},
   profile: {
     name: "",
     surname: "",
@@ -83,6 +100,10 @@ export const app = {
     this.pct = state.pct;
     this.settings = state.settings;
     this.notes = Array.isArray(state.notes) ? state.notes : [];
+    this.tasks = Array.isArray(state.tasks) ? state.tasks : [];
+    this.noteCategories = Array.isArray(state.noteCategories)
+      ? state.noteCategories
+      : [...DEFAULT_NOTE_CATEGORIES];
     this.noteFilter = "all";
     this.activeNoteId = null;
 
@@ -100,18 +121,87 @@ export const app = {
     }
 
     this.bind(state.info);
+    this.info = state.info || {};
     this.profile = state.profile || this.profile;
     if (this.checkFirstRun()) return;
     this.bindProfile();
+    this.bindAIChat();
     this.updateProfileUI(this.profile);
     this.buildKeypad();
     this.buildPercentRows();
     this.applySettings();
     this.updateAll();
     this.renderNotes();
+    this.renderNoteCategories();
+    this.bindNoteFilterDrag();
+    this.bindNoteCategoryReorder();
 
     // initialize nav highlight and draggable behavior
     this.setupNavDrag();
+  },
+
+  bindAIChat() {
+    if (this.aiChatBound) return;
+    this.aiChatBound = true;
+    const form = qs("aiChatForm");
+    const input = qs("aiQuestionInput");
+    form?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      void this.askAI();
+    });
+    input?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        void this.askAI();
+      }
+    });
+  },
+
+  async askAI() {
+    if (this.aiGenerating) return;
+    const input = qs("aiQuestionInput");
+    const question = clean(input?.value || "", 500);
+    if (!question) return;
+
+    this.aiGenerating = true;
+    this.aiHistory.push({ role: "user", content: question });
+    renderMinAI({
+      messages: this.aiHistory,
+      loading: true,
+      userAvatar: this.profile.avatar,
+    });
+    if (input) input.value = "";
+    setText("aiAskButton", "Ҷавоб...");
+
+    try {
+      const response = await askMinAI({
+        grades: this.grades,
+        profile: this.profile,
+        info: this.info,
+        target: qs("aiGoalInput")?.value || null,
+        question,
+        history: this.aiHistory,
+        app: this,
+      });
+      if (response?.answer) {
+        this.aiHistory.push({ role: "assistant", content: response.answer });
+      }
+    } catch {
+      this.aiHistory.push({
+        role: "assistant",
+        content:
+          "Ҳоло ҷавоб омода карда нашуд. Лутфан саволро бори дигар фиристед.",
+      });
+    } finally {
+      this.aiHistory = this.aiHistory.slice(-12);
+      this.aiGenerating = false;
+      setText("aiAskButton", "Фиристодан");
+      renderMinAI({
+        messages: this.aiHistory,
+        userAvatar: this.profile.avatar,
+      });
+      input?.focus();
+    }
   },
 
   setupNavDrag() {
@@ -539,6 +629,62 @@ export const app = {
     button.addEventListener("pointercancel", resetButton);
   },
 
+  bindChartScrollButtonStretch() {
+    document.querySelectorAll(".chart-scroll-button").forEach((button) => {
+      if (button.dataset.stretchBound === "true") return;
+      button.dataset.stretchBound = "true";
+
+      let pointerId = null;
+      let startX = 0;
+      let startY = 0;
+      let moved = false;
+
+      button.addEventListener("pointerdown", (event) => {
+        if (event.pointerType === "mouse" && event.button !== 0) return;
+        pointerId = event.pointerId;
+        startX = event.clientX;
+        startY = event.clientY;
+        moved = false;
+        button.classList.add("is-stretching");
+        button.setPointerCapture?.(pointerId);
+      });
+
+      button.addEventListener("pointermove", (event) => {
+        if (event.pointerId !== pointerId) return;
+        const deltaX = event.clientX - startX;
+        const deltaY = event.clientY - startY;
+        const distance = Math.hypot(deltaX, deltaY);
+        if (distance > 5) moved = true;
+        setStretchState(
+          button,
+          Math.max(-5, Math.min(5, deltaX * 0.08)),
+          Math.max(-3, Math.min(3, deltaY * 0.06)),
+          Math.atan2(deltaY, deltaX) * (180 / Math.PI),
+          1 + Math.min(distance * 0.002, 0.075),
+        );
+      });
+
+      const finish = (event) => {
+        if (event.pointerId !== pointerId) return;
+        button.releasePointerCapture?.(pointerId);
+        button.classList.remove("is-stretching");
+        button.classList.add("is-releasing");
+        if (moved) {
+          button.dataset.dragged = "true";
+          setTimeout(() => delete button.dataset.dragged, 260);
+        }
+        pointerId = null;
+        setTimeout(() => {
+          button.classList.remove("is-releasing");
+          clearStretchState(button);
+        }, 360);
+      };
+
+      button.addEventListener("pointerup", finish);
+      button.addEventListener("pointercancel", finish);
+    });
+  },
+
   bind(info = {}) {
     setInputValue("modalPupilInput", info.pupil || "");
     setInputValue("modalSubjectInput", info.subject || "");
@@ -581,6 +727,8 @@ export const app = {
       const tabButton = event.target.closest("[data-tab]");
       if (tabButton) this.nav(tabButton.dataset.tab, tabButton);
     });
+
+    this.bindNotesSwitcherGesture();
 
     document
       .querySelectorAll(".mobile-subview-header .btn-back")
@@ -746,7 +894,9 @@ export const app = {
     });
 
     document
-      .querySelectorAll(".journal-floating-btn, .floating-add-note")
+      .querySelectorAll(
+        ".journal-floating-btn, .floating-add-note, .more-actions-row .capsule-btn",
+      )
       .forEach((floatingButton) => {
         let pointerId = null;
         let startX = 0;
@@ -831,7 +981,8 @@ export const app = {
       const noteCard = event.target.closest(".note-item");
       if (!noteCard) return;
       const noteId = noteCard.dataset.noteId;
-      if (noteId) this.openNoteModal(noteId);
+      if (!noteId) return;
+      this.selectNote(noteId);
     });
 
     qs("noteCategoryRow")?.addEventListener("click", (event) => {
@@ -843,6 +994,26 @@ export const app = {
       }
       const category = button.dataset.category;
       this.setNoteCategory(category);
+    });
+
+    qs("noteCategoryRow")?.addEventListener("keydown", (event) => {
+      const button = event.target.closest(".note-category-pill");
+      if (!button || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+      const buttons = [
+        ...event.currentTarget.querySelectorAll(".note-category-pill"),
+      ];
+      const offset = event.key === "ArrowRight" ? 1 : -1;
+      const next =
+        buttons[
+          (buttons.indexOf(button) + offset + buttons.length) % buttons.length
+        ];
+      event.preventDefault();
+      next?.focus();
+      next?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
     });
 
     document
@@ -1092,6 +1263,16 @@ export const app = {
       };
       reader.readAsDataURL(file);
     });
+
+    bindAvatarPicker({
+      inputId: "profileAvatarInput",
+      triggerSelector: "[data-avatar-picker-trigger]",
+      onSelect: (avatar) => {
+        this.profile.avatar = avatar;
+        this.updateProfileUI(this.profile);
+        this.save();
+      },
+    });
   },
 
   bindSetupOverlay() {
@@ -1183,6 +1364,7 @@ export const app = {
       showMoreProfile: () => this.showSubView("more-profile-view"),
       showMoreShortcuts: () => this.showSubView("more-shortcuts-view"),
       showMoreAbout: () => this.showSubView("more-about-view"),
+      showInstallPwa: () => this.showSubView("more-install-view"),
       hideSubviews: () => this.showSubView("more-home-view"),
       showLogoutConfirm: () => this.showLogoutConfirm(),
       showLogoutFinalConfirm: () => this.showLogoutFinalConfirm(),
@@ -1192,16 +1374,42 @@ export const app = {
       scrollToShortcuts: () => this.showSubView("more-shortcuts-view"),
       shareApp: () => this.shareApp(),
       installPwa: () => this.installPwa(),
-      openNoteModal: (payload) => this.openNoteModal(payload?.noteId),
+      installPwaNow: () => this.installPwa(),
+      openNoteModal: (payload) => this.openNoteEntry(payload?.noteId),
       closeNoteModal: () => this.closeNoteModal(),
       saveNote: () => this.saveNote(),
       deleteNote: () => this.deleteNote(),
       showDeleteConfirm: () => this.showDeleteConfirm(),
       cancelDeleteNote: () => this.cancelDeleteNote(),
       confirmDeleteNote: () => this.confirmDeleteNote(),
+      editSelectedNote: () => this.startInlineNoteEdit(),
+      saveSelectedNoteEdit: () => this.saveSelectedNoteEdit(),
+      cancelSelectedNoteEdit: () => this.cancelSelectedNoteEdit(),
+      clearSelectedNote: () => this.requestClearSelectedNote(),
+      cancelUnsavedNote: () => qs("noteUnsavedModal")?.classList.remove("open"),
+      discardUnsavedNote: () => this.discardUnsavedNote(),
+      deleteSelectedNote: () => {
+        this.activeNoteId = this.selectedNoteId;
+        this.showDeleteConfirm();
+      },
+      createNoteCategory: () => this.createNoteCategory(),
+      openNoteCategoryCreateModal: () => this.openNoteCategoryCreateModal(),
+      openNoteCategoryManageModal: () => this.openNoteCategoryManageModal(),
+      closeNoteCategoryModal: () => this.closeNoteCategoryModal(),
+      saveNoteCategory: () => this.saveNoteCategory(),
+      showNoteCategoryDeleteConfirm: (payload) =>
+        this.showNoteCategoryDeleteConfirm(payload?.category),
+      cancelNoteCategoryDelete: () => this.cancelNoteCategoryDelete(),
+      confirmNoteCategoryDelete: () => this.confirmNoteCategoryDelete(),
 
       setNoteCategory: (payload) => this.setNoteCategory(payload?.category),
       setNoteFilter: (payload) => this.setNoteFilter(payload),
+      toggleNotesSwitcher: () => this.toggleNotesSwitcher(),
+      selectNotesWorkspace: (payload) =>
+        this.selectNotesWorkspace(payload?.view),
+      addNoteTask: () => this.addNoteTask(),
+      toggleNoteTask: (payload) => this.toggleNoteTask(payload?.taskId),
+      deleteNoteTask: (payload) => this.deleteNoteTask(payload?.taskId),
     };
 
     actions[name]?.(payload);
@@ -1448,7 +1656,7 @@ export const app = {
 
     setText("regularAvgUI", stats.avgR.toFixed(2));
     setText("examAvgUI", stats.avgE.toFixed(2));
-    setText("preciseAvgUI", String(Math.round(stats.final)));
+    setText("preciseAvgUI", stats.final.toFixed(2));
     // countUI and chartHint removed — keep UI minimal
 
     const avgLarge = qs("avgLarge");
@@ -1484,12 +1692,13 @@ export const app = {
       gradesToggle.style.pointerEvents = hasGrades ? "auto" : "none";
     }
     renderGradeChart(qs("gradeChart"), this.grades);
+    this.bindChartScrollButtonStretch();
     this.percentUpdate();
 
     renderMinAI({
-      box: qs("aiAnalysisBox"),
-      text: qs("aiText"),
-      grades: this.grades,
+      messages: this.aiHistory,
+      loading: this.aiGenerating,
+      userAvatar: this.profile.avatar,
     });
   },
 
@@ -2172,6 +2381,7 @@ export const app = {
   deleteNote() {
     if (!this.activeNoteId) return;
     this.notes = this.notes.filter((item) => item.id !== this.activeNoteId);
+    if (this.selectedNoteId === this.activeNoteId) this.selectedNoteId = null;
     this.save();
     this.renderNotes();
     this.closeNoteModal();
@@ -2184,9 +2394,431 @@ export const app = {
     qs("noteCategoryRow")
       ?.querySelectorAll(".note-category-pill")
       .forEach((pill) => {
-        pill.classList.toggle("active", pill.dataset.category === category);
+        const active = pill.dataset.category === category;
+        pill.classList.toggle("active", active);
+        if (active) {
+          pill.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+            inline: "center",
+          });
+        }
       });
     this.recordNoteChange("category");
+  },
+
+  selectNote(noteId) {
+    if (!this.notes.some((note) => note.id === noteId)) return;
+    this.selectedNoteId = noteId;
+    this.editingNoteId = null;
+    this.creatingNoteInline = false;
+    this.noteDetailDirty = false;
+    this.renderNotes();
+  },
+
+  openNoteEntry(noteId = null) {
+    if (!noteId) {
+      this.selectedNoteId = null;
+      this.editingNoteId = null;
+      this.creatingNoteInline = true;
+      this.noteDetailDirty = false;
+      this.renderNoteDetail();
+      return;
+    }
+    this.openNoteModal(noteId);
+  },
+
+  startInlineNoteEdit() {
+    if (!this.selectedNoteId) return;
+    this.editingNoteId = this.selectedNoteId;
+    this.noteDetailDirty = false;
+    this.renderNoteDetail();
+  },
+
+  saveSelectedNoteEdit() {
+    const note = this.notes.find((item) => item.id === this.editingNoteId);
+    const title = clean(qs("noteDetailTitleInput")?.value || "");
+    const body = clean(qs("noteDetailBodyInput")?.value || "", 512);
+    const category =
+      qs("noteDetailCategoryInput")?.value || note?.category || "other";
+    if (!title && !body) {
+      this.toast.show("Лутфан ёддоштро холӣ нагузоред.");
+      return;
+    }
+
+    if (this.creatingNoteInline) {
+      const created = {
+        id: uid(),
+        title: title || "Ёддошт",
+        body,
+        category,
+        important: false,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+      this.notes.unshift(created);
+      this.selectedNoteId = created.id;
+      this.creatingNoteInline = false;
+      this.noteDetailDirty = false;
+      this.save();
+      this.renderNotes();
+      this.toast.show("Ёддошт сабт шуд.");
+      return;
+    }
+
+    if (!note) return;
+    note.title = title || "Ёддошт";
+    note.body = body;
+    note.category = category;
+    note.updatedAt = Date.now();
+    this.editingNoteId = null;
+    this.noteDetailDirty = false;
+    this.save();
+    this.renderNotes();
+    this.toast.show("Ёддошт навсозӣ шуд.");
+  },
+
+  cancelSelectedNoteEdit() {
+    this.discardUnsavedNote();
+  },
+
+  requestClearSelectedNote() {
+    if (
+      (this.editingNoteId || this.creatingNoteInline) &&
+      this.noteDetailDirty
+    ) {
+      qs("noteUnsavedModal")?.classList.add("open");
+      return;
+    }
+    this.discardUnsavedNote();
+  },
+
+  discardUnsavedNote() {
+    qs("noteUnsavedModal")?.classList.remove("open");
+    this.selectedNoteId = null;
+    this.editingNoteId = null;
+    this.creatingNoteInline = false;
+    this.noteDetailDirty = false;
+    this.renderNoteDetail();
+    this.renderNotes();
+  },
+
+  createNoteCategory() {
+    this.openNoteCategoryCreateModal();
+  },
+
+  openNoteCategoryCreateModal() {
+    setText("noteCategoryModalTitle", "Категорияи нав");
+    qs("noteCategoryModal")?.classList.remove("manage-mode");
+    qs("noteCategoryCreateView")?.classList.remove("is-hidden");
+    qs("noteCategoryManageView")?.classList.add("is-hidden");
+    qs("noteCategorySaveButton")?.classList.remove("is-hidden");
+    setInputValue("noteCategoryNameInput", "");
+    qs("noteCategoryModal")?.classList.add("open");
+    qs("noteCategoryNameInput")?.focus();
+  },
+
+  openNoteCategoryManageModal() {
+    setText("noteCategoryModalTitle", "Идоракунии категорияҳо");
+    qs("noteCategoryModal")?.classList.add("manage-mode");
+    qs("noteCategoryCreateView")?.classList.add("is-hidden");
+    qs("noteCategoryManageView")?.classList.remove("is-hidden");
+    qs("noteCategorySaveButton")?.classList.add("is-hidden");
+    this.renderNoteCategoryModalList();
+    qs("noteCategoryModal")?.classList.add("open");
+  },
+
+  closeNoteCategoryModal() {
+    qs("noteCategoryModal")?.classList.remove("open");
+  },
+
+  saveNoteCategory() {
+    const category = clean(qs("noteCategoryNameInput")?.value || "").slice(
+      0,
+      32,
+    );
+    if (!category) return;
+    if (
+      this.noteCategories.some(
+        (item) => item.toLowerCase() === category.toLowerCase(),
+      )
+    ) {
+      this.toast.show("Ин категория аллакай вуҷуд дорад.");
+      return;
+    }
+
+    this.noteCategories.push(category);
+    this.save();
+    this.renderNoteCategories();
+    this.closeNoteCategoryModal();
+    this.toast.show("Категория илова шуд.");
+  },
+
+  deleteNoteCategory(category) {
+    if (!category || DEFAULT_NOTE_CATEGORIES.includes(category)) return;
+
+    this.noteCategories = this.noteCategories.filter(
+      (item) => item !== category,
+    );
+    this.notes.forEach((note) => {
+      if (note.category === category) note.category = "other";
+    });
+    if (this.noteFilter === category) this.noteFilter = "all";
+    this.save();
+    this.renderNoteCategories();
+    this.renderNoteCategoryModalList();
+    this.renderNotes();
+    this.toast.show("Категория пок карда шуд.");
+  },
+
+  showNoteCategoryDeleteConfirm(category) {
+    if (!category || DEFAULT_NOTE_CATEGORIES.includes(category)) return;
+    this.pendingNoteCategoryDelete = category;
+    setText(
+      "noteCategoryDeleteMessage",
+      `Категорияи «${this.noteCategoryLabel(category)}» пок карда шавад?`,
+    );
+    qs("noteCategoryDeleteModal")?.classList.add("open");
+  },
+
+  cancelNoteCategoryDelete() {
+    this.pendingNoteCategoryDelete = null;
+    qs("noteCategoryDeleteModal")?.classList.remove("open");
+  },
+
+  confirmNoteCategoryDelete() {
+    const category = this.pendingNoteCategoryDelete;
+    this.cancelNoteCategoryDelete();
+    this.deleteNoteCategory(category);
+  },
+
+  bindNoteFilterDrag() {
+    const container = qs("noteFilters");
+    if (!container || container.dataset.dragBound) return;
+    container.dataset.dragBound = "true";
+    let pointerId = null;
+    let startX = 0;
+    let startScroll = 0;
+    let dragged = false;
+
+    container.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      pointerId = event.pointerId;
+      startX = event.clientX;
+      startScroll = container.scrollLeft;
+      dragged = false;
+    });
+
+    container.addEventListener("pointermove", (event) => {
+      if (event.pointerId !== pointerId) return;
+      const distance = event.clientX - startX;
+      if (Math.abs(distance) > 6) dragged = true;
+      if (dragged) {
+        event.preventDefault();
+        container.scrollLeft = startScroll - distance;
+      }
+    });
+
+    const finish = (event) => {
+      if (event.pointerId !== pointerId) return;
+      if (dragged) {
+        const button = event.target.closest("button");
+        if (button) {
+          button.dataset.dragged = "true";
+          setTimeout(() => delete button.dataset.dragged, 260);
+        }
+      }
+      pointerId = null;
+    };
+
+    container.addEventListener("pointerup", finish);
+    container.addEventListener("pointercancel", finish);
+  },
+
+  bindNoteCategoryReorder() {
+    const list = qs("noteCategoryModalList");
+    if (!list || list.dataset.dragBound) return;
+    list.dataset.dragBound = "true";
+    let draggedItem = null;
+    let pointerId = null;
+    let startY = 0;
+    let moved = false;
+
+    const finishDrag = (event) => {
+      if (!draggedItem || event.pointerId !== pointerId) return;
+      draggedItem.releasePointerCapture?.(pointerId);
+      draggedItem.classList.remove("is-dragging");
+
+      if (moved) {
+        this.noteCategories = Array.from(
+          list.querySelectorAll(".note-category-modal-item"),
+          (item) => item.dataset.category,
+        );
+        this.save();
+        this.renderNoteCategories();
+        this.renderNoteCategoryModalList();
+      }
+
+      draggedItem = null;
+      pointerId = null;
+      moved = false;
+    };
+
+    list.addEventListener("pointerdown", (event) => {
+      const item = event.target.closest(".note-category-modal-item");
+      if (!item || event.target.closest(".note-category-delete")) return;
+      draggedItem = item;
+      pointerId = event.pointerId;
+      startY = event.clientY;
+      moved = false;
+      item.setPointerCapture?.(pointerId);
+    });
+
+    list.addEventListener("pointermove", (event) => {
+      if (!draggedItem || event.pointerId !== pointerId) return;
+      if (Math.abs(event.clientY - startY) > 6) moved = true;
+      if (!moved) return;
+
+      event.preventDefault();
+      draggedItem.classList.add("is-dragging");
+      const target = Array.from(
+        list.querySelectorAll(".note-category-modal-item"),
+      ).find((item) => {
+        if (item === draggedItem) return false;
+        const rect = item.getBoundingClientRect();
+        return event.clientY >= rect.top && event.clientY <= rect.bottom;
+      });
+      if (!target) return;
+      const before =
+        event.clientY <
+        target.getBoundingClientRect().top + target.offsetHeight / 2;
+      list.insertBefore(draggedItem, before ? target : target.nextSibling);
+    });
+
+    list.addEventListener("pointerup", finishDrag);
+    list.addEventListener("pointercancel", finishDrag);
+  },
+
+  noteCategoryLabel(category) {
+    return (
+      {
+        lesson: "Дарс",
+        task: "Вазифа",
+        idea: "Идея",
+        other: "Дигар",
+      }[category] || category
+    );
+  },
+
+  noteCategoryIcon(category) {
+    const icons = {
+      all: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 6h14M5 12h14M5 18h14" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="3.5" cy="6" r=".8" fill="currentColor"/><circle cx="3.5" cy="12" r=".8" fill="currentColor"/><circle cx="3.5" cy="18" r=".8" fill="currentColor"/></svg>',
+      lesson:
+        '<svg viewBox="0 0 24 24" fill="none"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H19v17H7.5A2.5 2.5 0 0 0 5 21.5v-17Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M5 5h12M9 7.5h5M9 11h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+      task: '<svg viewBox="0 0 24 24" fill="none"><rect x="5" y="3" width="14" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M9 3.5h6M8.5 10.5h7M8.5 14h4M8.5 17.5h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+      idea: '<svg viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 21h4M8.5 14.5A6 6 0 1 1 16 14c-.9.7-1.3 1.5-1.5 2.5h-5c-.2-1-.5-1.4-1-2Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 4V2M4.9 6.1 3.5 4.7M19.1 6.1l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+      other:
+        '<svg viewBox="0 0 24 24" fill="none"><path d="m20.5 13-7.5 7.5-9.5-9.5V4h7l10 9Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor"/></svg>',
+    };
+    return icons[category] || icons.other;
+  },
+
+  renderNoteCategories() {
+    const filters = qs("noteFilters");
+    const modalCategories = qs("noteCategoryRow");
+    const categories = this.noteCategories.length
+      ? this.noteCategories
+      : [...DEFAULT_NOTE_CATEGORIES];
+
+    if (filters) {
+      filters.innerHTML = "";
+      const all = document.createElement("button");
+      all.className = `pill${this.noteFilter === "all" ? " active" : ""}`;
+      all.type = "button";
+      all.dataset.action = "setNoteFilter";
+      all.dataset.filter = "all";
+      all.classList.add("system-category-pill");
+      all.innerHTML = `<span class="note-system-icon" aria-hidden="true">${this.noteCategoryIcon("all")}</span><span>Ҳама</span>`;
+      filters.appendChild(all);
+      categories.forEach((category) => {
+        const button = document.createElement("button");
+        button.className = `pill${this.noteFilter === category ? " active" : ""}`;
+        button.type = "button";
+        button.dataset.action = "setNoteFilter";
+        button.dataset.filter = category;
+        if (DEFAULT_NOTE_CATEGORIES.includes(category)) {
+          button.classList.add("system-category-pill");
+          button.innerHTML = `<span class="note-system-icon" aria-hidden="true">${this.noteCategoryIcon(category)}</span><span>${escapeHtml(this.noteCategoryLabel(category))}</span>`;
+        } else {
+          button.innerHTML = `<span class="note-system-icon" aria-hidden="true">${this.noteCategoryIcon(category)}</span><span>${escapeHtml(this.noteCategoryLabel(category))}</span>`;
+        }
+        filters.appendChild(button);
+      });
+
+      const add = document.createElement("button");
+      add.className = "note-category-control";
+      add.type = "button";
+      add.dataset.action = "openNoteCategoryCreateModal";
+      add.setAttribute("aria-label", "Илова кардани категория");
+      add.title = "Категорияи нав";
+      add.textContent = "+";
+      filters.appendChild(add);
+
+      const edit = document.createElement("button");
+      edit.className = "note-category-control";
+      edit.type = "button";
+      edit.dataset.action = "openNoteCategoryManageModal";
+      edit.setAttribute("aria-label", "Таҳрири категорияҳо");
+      edit.title = "Таҳрири категорияҳо";
+      edit.textContent = "✎";
+      filters.appendChild(edit);
+    }
+
+    if (modalCategories) {
+      modalCategories.innerHTML = "";
+      categories.forEach((category) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "note-category-pill";
+        button.dataset.category = category;
+        button.textContent = this.noteCategoryLabel(category);
+        modalCategories.appendChild(button);
+      });
+    }
+  },
+
+  renderNoteCategoryModalList() {
+    const list = qs("noteCategoryModalList");
+    if (!list) return;
+    list.innerHTML = "";
+    this.noteCategories.forEach((category) => {
+      const item = document.createElement("div");
+      item.className = "note-category-modal-item";
+      item.dataset.category = category;
+      item.draggable = false;
+      item.innerHTML = `<span class="note-category-modal-name">${escapeHtml(this.noteCategoryLabel(category))}</span><span class="note-category-drag-handle" aria-hidden="true">⋮⋮</span>`;
+      if (!DEFAULT_NOTE_CATEGORIES.includes(category)) {
+        const remove = document.createElement("button");
+        remove.className = "note-category-delete";
+        remove.type = "button";
+        remove.dataset.action = "showNoteCategoryDeleteConfirm";
+        remove.dataset.category = category;
+        remove.setAttribute("aria-label", `Пок кардани категорияи ${category}`);
+        remove.textContent = "×";
+        item.appendChild(remove);
+      } else {
+        const systemIcon = document.createElement("span");
+        systemIcon.className = "note-category-system-icon";
+        systemIcon.setAttribute("aria-hidden", "true");
+        systemIcon.innerHTML = `<svg viewBox="0 0 24 24" fill="none"><path d="M12 3 5 6v5c0 4.5 2.8 8.2 7 10 4.2-1.8 7-5.5 7-10V6l-7-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        item.insertBefore(systemIcon, item.firstChild);
+        const fixed = document.createElement("span");
+        fixed.className = "note-category-fixed";
+        fixed.textContent = "Системавӣ";
+        item.appendChild(fixed);
+      }
+      list.appendChild(item);
+    });
   },
 
   recordNoteChange(field) {
@@ -2246,6 +2878,167 @@ export const app = {
     this.renderNotes();
   },
 
+  toggleNotesSwitcher() {
+    const popover = qs("notesSwitcher");
+    const trigger = document.querySelector(".notes-switcher-trigger");
+    if (!popover || !trigger) return;
+    popover.dataset.view = popover.dataset.view || "notes";
+    const isOpen = popover.classList.toggle("is-open");
+    trigger.setAttribute("aria-expanded", String(isOpen));
+    if (isOpen) this.renderTasks();
+  },
+
+  bindNotesSwitcherGesture() {
+    const trigger = document.querySelector(".notes-switcher-trigger");
+    const popover = qs("notesSwitcher");
+    if (!trigger || !popover || trigger.dataset.gestureBound) return;
+    trigger.dataset.gestureBound = "true";
+
+    let pointerId = null;
+    let longPressTimer = null;
+    let gestureOpen = false;
+
+    const clearTarget = () => {
+      popover
+        .querySelectorAll(".is-drag-target")
+        .forEach((option) => option.classList.remove("is-drag-target"));
+    };
+
+    const closeFromGesture = () => {
+      clearTarget();
+      popover.classList.remove("is-open");
+      trigger.setAttribute("aria-expanded", "false");
+      gestureOpen = false;
+    };
+
+    trigger.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      pointerId = event.pointerId;
+      gestureOpen = false;
+      clearTimeout(longPressTimer);
+      longPressTimer = setTimeout(() => {
+        popover.dataset.view = popover.dataset.view || "notes";
+        popover.classList.add("is-open");
+        trigger.setAttribute("aria-expanded", "true");
+        gestureOpen = true;
+        this.renderTasks();
+      }, 260);
+    });
+
+    window.addEventListener("pointermove", (event) => {
+      if (event.pointerId !== pointerId || !gestureOpen) return;
+      const target = document.elementFromPoint(event.clientX, event.clientY);
+      const option = target?.closest?.(".notes-switcher-option");
+      clearTarget();
+      option?.classList.add("is-drag-target");
+    });
+
+    window.addEventListener(
+      "pointerup",
+      (event) => {
+        if (event.pointerId !== pointerId) return;
+        clearTimeout(longPressTimer);
+        if (!gestureOpen) {
+          pointerId = null;
+          return;
+        }
+        const target = document.elementFromPoint(event.clientX, event.clientY);
+        const option = target?.closest?.(".notes-switcher-option");
+        if (option) this.selectNotesWorkspace(option.dataset.view);
+        else closeFromGesture();
+        trigger.dataset.suppressClick = "true";
+        pointerId = null;
+      },
+      true,
+    );
+
+    trigger.addEventListener("pointercancel", () => {
+      clearTimeout(longPressTimer);
+      pointerId = null;
+      if (gestureOpen) closeFromGesture();
+    });
+
+    trigger.addEventListener("click", (event) => {
+      if (!trigger.dataset.suppressClick) return;
+      delete trigger.dataset.suppressClick;
+      event.stopPropagation();
+    });
+
+    qs("notesTaskInput")?.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter") return;
+      event.preventDefault();
+      this.addNoteTask();
+    });
+  },
+
+  selectNotesWorkspace(view = "notes") {
+    const popover = qs("notesSwitcher");
+    const trigger = document.querySelector(".notes-switcher-trigger");
+    if (!popover || !trigger) return;
+    const selectedView = view === "tasks" ? "tasks" : "notes";
+    popover.dataset.view = selectedView;
+    popover
+      .querySelectorAll(".notes-switcher-option")
+      .forEach((option) =>
+        option.classList.toggle("active", option.dataset.view === selectedView),
+      );
+    popover.classList.remove("is-open");
+    trigger.setAttribute("aria-expanded", "false");
+    this.renderTasks();
+  },
+
+  renderTasks() {
+    const list = qs("notesTaskList");
+    if (!list) return;
+    setText("notesTaskCount", this.tasks.length);
+    list.innerHTML = "";
+    if (!this.tasks.length) {
+      list.innerHTML = `<div class="notes-task-empty"><span>✓</span><p>Ҳоло вазифа нест.<br>Вазифаи аввалро илова кунед.</p></div>`;
+      return;
+    }
+    this.tasks.forEach((task) => {
+      const item = document.createElement("div");
+      item.className = `notes-task-item${task.completed ? " is-complete" : ""}`;
+      item.innerHTML = `
+        <button class="notes-task-check" type="button" data-action="toggleNoteTask" data-task-id="${escapeHtml(task.id)}" aria-label="Иваз кардани ҳолати вазифа" aria-pressed="${task.completed}">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6.5 12.5 3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </button>
+        <span class="notes-task-title">${escapeHtml(task.title)}</span>
+        <button class="notes-task-delete" type="button" data-action="deleteNoteTask" data-task-id="${escapeHtml(task.id)}" aria-label="Пок кардани вазифа">×</button>`;
+      list.appendChild(item);
+    });
+  },
+
+  addNoteTask() {
+    const input = qs("notesTaskInput");
+    const title = clean(input?.value || "").slice(0, 160);
+    if (!title) return;
+    this.tasks.unshift({
+      id: uid(),
+      title,
+      completed: false,
+      createdAt: Date.now(),
+    });
+    if (input) input.value = "";
+    this.save();
+    this.renderTasks();
+    input?.focus();
+  },
+
+  toggleNoteTask(taskId) {
+    const task = this.tasks.find((item) => item.id === taskId);
+    if (!task) return;
+    task.completed = !task.completed;
+    this.save();
+    this.renderTasks();
+  },
+
+  deleteNoteTask(taskId) {
+    this.tasks = this.tasks.filter((task) => task.id !== taskId);
+    this.save();
+    this.renderTasks();
+  },
+
   renderNotes() {
     const list = qs("notesList");
     if (!list) return;
@@ -2267,15 +3060,24 @@ export const app = {
     });
 
     list.innerHTML = "";
+    this.renderNoteDetail();
 
     if (!filtered.length) {
       const empty = document.createElement("div");
       empty.className = "note-empty";
+      const image = document.createElement("img");
+      image.className = "note-empty-image";
+      image.alt = "";
       const queryRaw = String(qs("noteSearchInput")?.value || "").trim();
+      image.src =
+        queryRaw || (this.noteFilter && this.noteFilter !== "all")
+          ? "assets/images/minai/search.png"
+          : "assets/images/minai/write.png";
+      const message = document.createElement("p");
       if (queryRaw) {
         const snippet =
           queryRaw.length > 7 ? `${queryRaw.slice(0, 7)}...` : queryRaw;
-        empty.textContent = `Барои "${snippet}" чизе ёфт нашуд.`;
+        message.textContent = `Барои "${snippet}" чизе ёфт нашуд.`;
       } else if (this.noteFilter && this.noteFilter !== "all") {
         const labels = {
           lesson: "Дарс",
@@ -2284,11 +3086,12 @@ export const app = {
           other: "Дигар",
         };
         const label = labels[this.noteFilter] || this.noteFilter;
-        empty.textContent = `Дар "${label}" чизе ёфт нашуд.`;
+        message.textContent = `Дар "${label}" чизе ёфт нашуд.`;
       } else {
-        empty.textContent =
+        message.textContent =
           "Шумо ҳоло ягон ёддошт надоред. Барои оғоз ва осон кардани кори худ, ёддошти нав сабт кунед.";
       }
+      empty.append(image, message);
       list.appendChild(empty);
       return;
     }
@@ -2297,13 +3100,17 @@ export const app = {
       const item = document.createElement("article");
       item.className = "note-item";
       item.dataset.noteId = note.id;
+      if (note.id === this.selectedNoteId) item.classList.add("selected");
       item.innerHTML = `
         <div class="note-label-row">
           <div>
             <h4 class="note-item-title">${escapeHtml(note.title)}</h4>
             <p class="note-item-body">${escapeHtml(note.body)}</p>
           </div>
-          <span class="note-chip note-chip-${escapeHtml(note.category || "other")}">${note.category === "lesson" ? "Дарс" : note.category === "task" ? "Вазифа" : note.category === "idea" ? "Идея" : "Дигар"}</span>
+          <div class="note-item-badges">
+            ${note.important ? '<span class="note-important-mark" title="Муҳим" aria-label="Муҳим">★</span>' : ""}
+            <span class="note-chip note-chip-${escapeHtml(note.category || "other")}">${note.category === "lesson" ? "Дарс" : note.category === "task" ? "Вазифа" : note.category === "idea" ? "Идея" : "Дигар"}</span>
+          </div>
         </div>
         <div class="note-item-meta">
           <span class="note-time">${new Date(note.createdAt).toLocaleString("tg-TJ", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" })}</span>
@@ -2311,6 +3118,76 @@ export const app = {
       `;
       list.appendChild(item);
     });
+    this.renderNoteDetail();
+  },
+
+  renderNoteDetail() {
+    const panel = qs("noteDetailPanel");
+    if (!panel) return;
+    const note = this.notes.find((item) => item.id === this.selectedNoteId);
+    const workspace = panel.closest(".notes-workspace");
+    const inlineScreen = Boolean(note) || this.creatingNoteInline;
+    workspace?.classList.toggle("note-detail-open", inlineScreen);
+    document.body.classList.toggle("notes-detail-screen", inlineScreen);
+    panel.classList.toggle("has-note", inlineScreen);
+    if (!note && !this.creatingNoteInline) {
+      panel.innerHTML = `<div class="note-detail-empty"><span class="note-detail-empty-icon" aria-hidden="true">✦</span><h3>Ёддоштро интихоб кунед</h3><p>Барои дидани матни пурра аз рӯйхати чап як ёддоштро интихоб кунед.</p></div>`;
+      return;
+    }
+
+    if (this.creatingNoteInline || this.editingNoteId === note?.id) {
+      const title = note?.title || "";
+      const body = note?.body || "";
+      const activeCategory = note?.category || "other";
+      const options = this.noteCategories
+        .map(
+          (category) =>
+            `<option value="${escapeHtml(category)}"${category === activeCategory ? " selected" : ""}>${escapeHtml(this.noteCategoryLabel(category))}</option>`,
+        )
+        .join("");
+      panel.innerHTML = `
+        <button class="note-detail-back" type="button" data-action="clearSelectedNote" aria-label="Бозгашт">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l8 8-8 8 1.41 1.41L20 13v-2z" /></svg>
+        </button>
+        <div class="note-detail-edit-form">
+          <input id="noteDetailTitleInput" class="input-field" type="text" value="${escapeHtml(title)}" placeholder="Сарлавҳа" />
+          <select id="noteDetailCategoryInput" class="input-field">${options}</select>
+          <textarea id="noteDetailBodyInput" class="input-field note-detail-body-input" rows="9" placeholder="Матни ёддошт">${escapeHtml(body)}</textarea>
+          <div class="note-detail-actions">
+            <button class="btn" type="button" data-action="saveSelectedNoteEdit">Сабт</button>
+            <button class="btn secondary" type="button" data-action="cancelSelectedNoteEdit">Лағв</button>
+          </div>
+        </div>`;
+      qs("noteDetailTitleInput")?.focus();
+      [
+        "noteDetailTitleInput",
+        "noteDetailCategoryInput",
+        "noteDetailBodyInput",
+      ].forEach((id) => {
+        qs(id)?.addEventListener("input", () => {
+          this.noteDetailDirty = true;
+        });
+        qs(id)?.addEventListener("change", () => {
+          this.noteDetailDirty = true;
+        });
+      });
+      return;
+    }
+
+    panel.innerHTML = `
+      <button class="note-detail-back" type="button" data-action="clearSelectedNote" aria-label="Бозгашт">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l8 8-8 8 1.41 1.41L20 13v-2z" /></svg>
+      </button>
+      <div class="note-detail-header">
+        <span class="note-chip note-chip-${escapeHtml(note.category || "other")}">${escapeHtml(this.noteCategoryLabel(note.category || "other"))}</span>
+        <span class="note-time">${new Date(note.updatedAt || note.createdAt).toLocaleString("tg-TJ", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" })}</span>
+      </div>
+      <h3 class="note-detail-title">${escapeHtml(note.title)}</h3>
+      <div class="note-detail-body">${escapeHtml(note.body).replace(/\n/g, "<br>") || "Матни ёддошт холӣ аст."}</div>
+      <div class="note-detail-actions">
+        <button class="btn" type="button" data-action="editSelectedNote">Таҳрир</button>
+        <button class="btn secondary" type="button" data-action="deleteSelectedNote">Пок кардан</button>
+      </div>`;
   },
 
   toggleFS(value) {
@@ -2435,6 +3312,8 @@ export const app = {
       },
       profile: this.profile,
       notes: this.notes,
+      tasks: this.tasks,
+      noteCategories: this.noteCategories,
     });
     this.updateProfileUI(this.profile);
   },

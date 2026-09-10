@@ -29,19 +29,16 @@
   box-shadow: 0 10px 22px rgba(220, 38, 38, 0.2);
 }
 
-#tab-prosent > .card {
-  padding: 8px 0 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
+#tab-prosent .percent-board-card {
+  padding: 18px;
 }
 
-#tab-prosent > .card::before {
+#tab-prosent .percent-board-card::before {
   display: none;
 }
 
 #tab-prosent .settings-title {
-  margin: 0 14px 14px;
+  margin: 0 0 14px;
   font-size: 1.65rem;
   letter-spacing: 0;
 }
@@ -105,14 +102,41 @@
   transform: translateY(-50%) scale(0.92);
 }
 
+#tab-prosent .percent-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin-top: 18px;
+}
+
+#tab-prosent .percent-column {
+  min-width: 0;
+}
+
 #tab-prosent .percent-table {
   gap: 0;
-  margin: 14px 2px 0;
+  margin: 0;
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 18px;
   background: var(--card);
   box-shadow: 0 12px 30px rgba(14, 43, 77, 0.06);
+}
+
+@media (max-width: 1099px) {
+  #tab-prosent .percent-row {
+    border-bottom: 0;
+  }
+
+  #tab-prosent .percent-column + .percent-column .percent-table {
+    border-top: 0;
+    border-radius: 0 0 18px 18px;
+  }
+
+  #tab-prosent .percent-column:first-child .percent-table {
+    border-bottom: 0;
+    border-radius: 18px 18px 0 0;
+  }
 }
 
 .percent-table {
@@ -183,6 +207,34 @@
   border-radius: 14px;
   background: var(--card);
   box-shadow: 0 8px 20px rgba(14, 43, 77, 0.05);
+}
+
+#tab-prosent .percent-range-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+@media (min-width: 1100px) {
+  main.container:has(> #tab-prosent.active) {
+    max-width: 1180px;
+  }
+
+  #tab-prosent .percent-columns {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 32px;
+    align-items: start;
+  }
+
+  #tab-prosent .percent-column + .percent-column {
+    padding-left: 32px;
+    border-left: 1px solid var(--border);
+  }
+
+  #tab-prosent .percent-range-summary {
+    gap: 32px;
+  }
 }
 
 .percent-row .input-field:focus {

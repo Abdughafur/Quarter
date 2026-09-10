@@ -1,5 +1,5 @@
 /* sw.js */
-const CACHE_NAME = "choryak-cache-v4.3.1";
+const CACHE_NAME = "choryak-cache-v4.4.5";
 
 const PRECACHE = [
   "./",
@@ -7,8 +7,7 @@ const PRECACHE = [
   "./landing.html",
   "./profile.html",
   "./startup.html",
-  // download.html intentionally not precached to keep it online-only
-  "./support.html",
+  "./privacy.html",
   "./manifest.json",
   "./assets/images/logoLight.png",
   "./assets/images/abdughafur.png",
@@ -46,24 +45,31 @@ const PRECACHE = [
   "./assets/css/utilities/shadows.css",
   "./assets/css/utilities/radius.css",
   "./assets/css/utilities/helpers.css",
-  "./assets/js/core/app.js",
+  "./assets/js/core/app.js?v=beta2",
   "./assets/js/core/entry.js",
   "./assets/js/core/profile.js",
   "./assets/js/core/storage.js",
   "./assets/js/core/startup.js",
-  "./assets/js/core/stats.js",
+  "./assets/js/core/stats.js?v=chat1",
   "./assets/js/core/pwa.js",
-  "./assets/js/ai/minai.js",
+  "./assets/js/ai/minai.js?v=beta2",
+  "./assets/js/ai/context.js?v=chat2",
+  "./assets/js/ai/intent.js?v=chat2",
+  "./assets/js/ai/reasoning.js?v=chat2",
+  "./assets/js/ai/provider.js?v=beta2",
+  "./assets/js/ai/tools.js?v=beta2",
+  "./assets/js/ai/config.js?v=beta1",
   "./assets/js/ui/toast.js",
   "./assets/js/ui/modal.js",
   "./assets/js/ui/chart.js",
+  "./assets/js/ui/avatar-picker.js",
   "./assets/js/utils/helpers.js",
-  "./minai/ai.png",
+  "./assets/css/components/modal.css?v=2",
+  "./assets/images/minai/ai.png",
+  "./assets/images/minai/hello.png",
+  "./assets/images/minai/search.png",
+  "./assets/images/minai/write.png",
 ];
-
-function isDownloadPage(url) {
-  return /\/download\.html(?:$|[?#])/.test(url.pathname);
-}
 
 function isSameOrigin(request) {
   try {
@@ -144,11 +150,6 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET" || !isSameOrigin(event.request)) return;
 
   const url = new URL(event.request.url);
-
-  if (isDownloadPage(url)) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
 
   if (isNavigationRequest(event.request)) {
     event.respondWith(networkFirst(event.request));

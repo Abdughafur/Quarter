@@ -323,6 +323,11 @@ function bindChartDragging(container) {
     startX = event.clientX;
     startScrollLeft = container.scrollLeft;
     container.classList.add("is-dragging");
+    container.classList.add("is-stretching");
+    container.style.setProperty("--chart-stretch-x", "0px");
+    container.style.setProperty("--chart-stretch-y", "0px");
+    container.style.setProperty("--chart-stretch-angle", "0deg");
+    container.style.setProperty("--chart-stretch-scale", "1");
     container.setPointerCapture?.(event.pointerId);
   });
 
@@ -335,6 +340,23 @@ function bindChartDragging(container) {
 
     event.preventDefault();
     container.scrollLeft = startScrollLeft - distance;
+    const offsetX = Math.max(-8, Math.min(8, distance * -0.04));
+    const offsetY = Math.max(
+      -3,
+      Math.min(
+        3,
+        (event.clientY -
+          container.getBoundingClientRect().top -
+          container.clientHeight / 2) *
+          0.02,
+      ),
+    );
+    const angle = Math.max(-2.5, Math.min(2.5, distance * -0.035));
+    const scale = 1 + Math.min(Math.abs(distance) * 0.0012, 0.045);
+    container.style.setProperty("--chart-stretch-x", `${offsetX}px`);
+    container.style.setProperty("--chart-stretch-y", `${offsetY}px`);
+    container.style.setProperty("--chart-stretch-angle", `${angle}deg`);
+    container.style.setProperty("--chart-stretch-scale", String(scale));
   });
 
   const stopDragging = (event) => {
@@ -342,7 +364,16 @@ function bindChartDragging(container) {
 
     dragging = false;
     container.classList.remove("is-dragging");
+    container.classList.remove("is-stretching");
     container.releasePointerCapture?.(event.pointerId);
+    setTimeout(() => {
+      [
+        "--chart-stretch-x",
+        "--chart-stretch-y",
+        "--chart-stretch-angle",
+        "--chart-stretch-scale",
+      ].forEach((property) => container.style.removeProperty(property));
+    }, 360);
   };
 
   container.addEventListener("pointerup", stopDragging);
@@ -352,10 +383,18 @@ function bindChartDragging(container) {
 export function buildPercentRows(container, labels, onInput) {
   if (!container) return;
 
-  container.textContent = "";
-  const fragment = document.createDocumentFragment();
+  const groupContainers = container.querySelectorAll("[data-percent-group]");
+  groupContainers.forEach((groupContainer) => {
+    groupContainer.textContent = "";
+  });
 
   for (let grade = 10; grade >= 1; grade -= 1) {
+    const group = grade >= 6 ? "10-6" : "5-1";
+    const groupContainer = container.querySelector(
+      `[data-percent-group="${group}"]`,
+    );
+    if (!groupContainer) continue;
+
     const row = document.createElement("div");
     row.className = "percent-row";
 
@@ -382,10 +421,9 @@ export function buildPercentRows(container, labels, onInput) {
     output.textContent = "0%";
 
     row.append(title, input, output);
-    fragment.append(row);
+    groupContainer.append(row);
   }
 
-  container.append(fragment);
   container.addEventListener("input", (event) => {
     if (event.target.matches(".pct-count")) onInput(event.target);
   });

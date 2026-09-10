@@ -66,6 +66,12 @@
   scroll-behavior: auto;
 }
 
+.chart-viewport.is-stretching {
+  transform: translate(var(--chart-stretch-x), var(--chart-stretch-y))
+    rotate(var(--chart-stretch-angle)) scaleX(var(--chart-stretch-scale));
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .chart-scroll-controls {
   position: absolute;
   right: 10px;
@@ -98,6 +104,15 @@
 
 .chart-scroll-button:active {
   transform: scale(0.9);
+}
+
+.chart-scroll-button.is-stretching {
+  transform: translate(var(--stretch-x), var(--stretch-y))
+    rotate(var(--stretch-angle)) scaleX(var(--stretch-scale));
+}
+
+.chart-scroll-button.is-releasing {
+  animation: stretch-release 360ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .trend-grid line {
