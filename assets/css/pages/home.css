@@ -48,7 +48,7 @@
   place-items: center;
   padding: 0;
   border: 1px solid var(--border);
-  border-radius: 50%;
+  border-radius: 999px;
   color: var(--primary);
   background: var(--card2);
   box-shadow: 0 5px 12px rgba(14, 43, 77, 0.08);

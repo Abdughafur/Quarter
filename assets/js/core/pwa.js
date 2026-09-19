@@ -25,6 +25,28 @@ function isSafari() {
   );
 }
 
+function setOfflineState(isOffline) {
+  document.body?.setAttribute("data-offline", String(isOffline));
+  document.body?.setAttribute(
+    "data-network",
+    isOffline ? "offline" : "online",
+  );
+
+  const offlineBadge = document.getElementById("offlineBadge");
+  if (offlineBadge) {
+    offlineBadge.hidden = !isOffline;
+    offlineBadge.setAttribute("aria-live", "polite");
+  }
+
+  if (typeof window.dispatchEvent === "function") {
+    window.dispatchEvent(
+      new CustomEvent("app:network-state", {
+        detail: { isOffline },
+      }),
+    );
+  }
+}
+
 function updateInstallButton() {
   const button = document.getElementById("installPwaBtn");
   if (!button) return;
@@ -75,8 +97,18 @@ window.addEventListener("appinstalled", () => {
 
 const canUseServiceWorker =
   "serviceWorker" in navigator &&
+  typeof window !== "undefined" &&
   (window.location.protocol === "http:" ||
     window.location.protocol === "https:");
+
+if (typeof window !== "undefined") {
+  const initialOffline =
+    typeof navigator.onLine === "boolean" ? !navigator.onLine : false;
+  setOfflineState(initialOffline);
+
+  window.addEventListener("online", () => setOfflineState(false));
+  window.addEventListener("offline", () => setOfflineState(true));
+}
 
 if (canUseServiceWorker) {
   navigator.serviceWorker.addEventListener("controllerchange", () => {
@@ -99,7 +131,12 @@ if (canUseServiceWorker) {
       })
       .catch((error) => {
         console.warn("Service worker registration failed:", error);
+        setOfflineState(typeof navigator.onLine === "boolean" ? !navigator.onLine : false);
       });
+  });
+} else {
+  window.addEventListener("load", () => {
+    setOfflineState(typeof navigator.onLine === "boolean" ? !navigator.onLine : false);
   });
 }
 

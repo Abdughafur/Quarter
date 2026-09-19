@@ -33,7 +33,7 @@
 .small {
   color: var(--muted);
   font-size: 0.72rem;
-  font-weight: 950;
+  font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.7px;
 }
@@ -42,6 +42,6 @@
   margin-top: 10px;
   color: var(--primary);
   font-size: 0.95rem;
-  font-weight: 950;
+  font-weight: 800;
   line-height: 1.45;
 }

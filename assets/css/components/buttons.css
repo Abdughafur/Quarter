@@ -1,7 +1,7 @@
 /* buttons.css */
 .btn {
   min-height: 46px;
-  border-radius: 17px;
+  border-radius: 999px;
   padding: 0 14px;
   background: linear-gradient(135deg, var(--primary), var(--accent));
   color: white;
@@ -55,7 +55,7 @@
   max-width: 100%;
   color: #ffffff;
   padding: 0 16px;
-  border-radius: 12px;
+  border-radius: 999px;
   background: rgba(34, 211, 238, 0.12);
   border: 1px solid rgba(142, 219, 240, 0.28);
   box-shadow:

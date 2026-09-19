@@ -29,6 +29,7 @@ import {
   toInt,
   uid,
   whenReady,
+  safeParseStorage,
 } from "../utils/helpers.js";
 
 const setStretchState = (element, offsetX, offsetY, angle, scale) => {
@@ -127,6 +128,12 @@ export const app = {
     this.bindProfile();
     this.bindAIChat();
     this.updateProfileUI(this.profile);
+    // load persisted MinAI history so chat survives refresh unless user restarts
+    try {
+      const stored = safeParseStorage("minai_history", []);
+      this.aiHistory = Array.isArray(stored) ? stored.slice(-12) : [];
+      renderMinAI({ messages: this.aiHistory, userAvatar: this.profile.avatar, userName: `${this.profile.name || ''}` });
+    } catch {}
     this.buildKeypad();
     this.buildPercentRows();
     this.applySettings();
@@ -155,6 +162,83 @@ export const app = {
         void this.askAI();
       }
     });
+    // bind quick question chips (if present)
+    const quickChips = Array.from(document.querySelectorAll('[data-action="askAIQuick"]'));
+    quickChips.forEach((chip) => {
+      chip.addEventListener("click", (e) => {
+        const q = chip.dataset.question;
+        if (q) void this.askAIQuick(q);
+      });
+    });
+    // randomize question chips order and apply slight random transforms
+    const questionList = document.querySelector('.minai-question-list');
+    if (questionList) {
+      const chips = Array.from(questionList.children);
+      // shuffle order
+      for (let i = chips.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [chips[i], chips[j]] = [chips[j], chips[i]];
+      }
+      // clear and re-append in shuffled order (no skew/rotation)
+      questionList.innerHTML = "";
+      chips.forEach((chip, idx) => {
+        chip.style.transform = '';
+        chip.style.opacity = '0';
+        chip.style.transitionDelay = `${idx * 25}ms`;
+        questionList.appendChild(chip);
+        // fade in without rotation
+        requestAnimationFrame(() => {
+          chip.style.opacity = '1';
+        });
+      });
+    }
+    // bind clear/restart chat button
+    const clearBtn = document.querySelector('[data-action="clearAIChat"]');
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        this.aiHistory = [];
+        try {
+          localStorage.removeItem("minai_history");
+        } catch {}
+        const chat = document.querySelector("#aiChatMessages");
+        if (chat) chat.innerHTML = "";
+        renderMinAI({ messages: [], userAvatar: this.profile.avatar, userName: `${this.profile.name || ''}` });
+      });
+    }
+  },
+
+  async askAIQuick(question) {
+    if (this.aiGenerating) return;
+    this.aiGenerating = true;
+    this.aiHistory.push({ role: "user", content: question });
+    renderMinAI({
+      messages: this.aiHistory,
+      loading: true,
+      userAvatar: this.profile.avatar,
+    });
+    try { localStorage.setItem('minai_history', JSON.stringify(this.aiHistory)); } catch {}
+
+    try {
+      const response = await askMinAI({
+        grades: this.grades,
+        profile: this.profile,
+        info: this.info,
+        target: null,
+        question,
+        history: this.aiHistory,
+        app: this,
+      });
+      if (response?.answer) {
+        this.aiHistory.push({ role: "assistant", content: response.answer });
+        try { localStorage.setItem('minai_history', JSON.stringify(this.aiHistory)); } catch {}
+      }
+    } catch {
+      this.aiHistory.push({ role: "assistant", content: "Ҳоло ҷавоб омода карда нашуд. Лутфан баъдтар кӯшиш кунед." });
+    } finally {
+      this.aiHistory = this.aiHistory.slice(-12);
+      this.aiGenerating = false;
+      renderMinAI({ messages: this.aiHistory, userAvatar: this.profile.avatar });
+    }
   },
 
   async askAI() {
@@ -172,6 +256,7 @@ export const app = {
     });
     if (input) input.value = "";
     setText("aiAskButton", "Ҷавоб...");
+    try { localStorage.setItem('minai_history', JSON.stringify(this.aiHistory)); } catch {}
 
     try {
       const response = await askMinAI({
@@ -185,6 +270,7 @@ export const app = {
       });
       if (response?.answer) {
         this.aiHistory.push({ role: "assistant", content: response.answer });
+        try { localStorage.setItem('minai_history', JSON.stringify(this.aiHistory)); } catch {}
       }
     } catch {
       this.aiHistory.push({
@@ -1541,6 +1627,24 @@ export const app = {
     const toggle = document.querySelector(".grades-toggle");
     if (!container || !toggle) return;
 
+    const hasOverflow = container.scrollHeight > container.clientHeight + 1;
+    const isCompactView = window.innerWidth <= 520;
+    const expandedBeforeToggle = container.classList.contains("grades-expanded");
+    const shouldShowToggle =
+      isCompactView && this.grades.length > 0 && (hasOverflow || expandedBeforeToggle);
+
+    if (!shouldShowToggle) {
+      toggle.classList.remove("is-visible");
+      toggle.setAttribute("aria-hidden", "true");
+      toggle.style.opacity = "0";
+      toggle.style.visibility = "hidden";
+      toggle.style.pointerEvents = "none";
+      toggle.setAttribute("aria-expanded", "false");
+      container.classList.remove("grades-expanded");
+      container.style.height = "168px";
+      return;
+    }
+
     const expanded = container.classList.toggle("grades-expanded");
     toggle.setAttribute("aria-expanded", String(expanded));
     toggle.setAttribute(
@@ -1678,18 +1782,37 @@ export const app = {
         : "Баллҳоро ворид кунед",
     );
 
-    renderGradeBlocks(qs("blocksContainer"), this.grades, GRADE_LABELS, (id) =>
+    const blocksContainer = qs("blocksContainer");
+    renderGradeBlocks(blocksContainer, this.grades, GRADE_LABELS, (id) =>
       this.toggleGrade(id),
     );
     const gradesToggle = document.querySelector(".grades-toggle");
     if (gradesToggle) {
-      const hasGrades = this.grades.length > 0;
-      gradesToggle.classList.toggle("is-visible", hasGrades);
-      gradesToggle.disabled = !hasGrades;
-      gradesToggle.setAttribute("aria-hidden", String(!hasGrades));
-      gradesToggle.style.opacity = hasGrades ? "1" : "0";
-      gradesToggle.style.visibility = hasGrades ? "visible" : "hidden";
-      gradesToggle.style.pointerEvents = hasGrades ? "auto" : "none";
+      const hasOverflow = Boolean(
+        blocksContainer &&
+          blocksContainer.scrollHeight > blocksContainer.clientHeight + 1,
+      );
+      const isCompactView = window.innerWidth <= 520;
+      const expandedState = Boolean(
+        blocksContainer && blocksContainer.classList.contains("grades-expanded"),
+      );
+      const shouldShowToggle =
+        isCompactView && this.grades.length > 0 && (hasOverflow || expandedState);
+
+      gradesToggle.classList.toggle("is-visible", shouldShowToggle);
+      gradesToggle.disabled = !shouldShowToggle;
+      gradesToggle.setAttribute("aria-hidden", String(!shouldShowToggle));
+      gradesToggle.style.opacity = shouldShowToggle ? "1" : "0";
+      gradesToggle.style.visibility = shouldShowToggle ? "visible" : "hidden";
+      gradesToggle.style.pointerEvents = shouldShowToggle ? "auto" : "none";
+
+      if (!shouldShowToggle) {
+        gradesToggle.setAttribute("aria-expanded", "false");
+        if (blocksContainer) {
+          blocksContainer.classList.remove("grades-expanded");
+          blocksContainer.style.height = "168px";
+        }
+      }
     }
     renderGradeChart(qs("gradeChart"), this.grades);
     this.bindChartScrollButtonStretch();
