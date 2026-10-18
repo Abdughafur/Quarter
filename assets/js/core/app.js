@@ -124,6 +124,7 @@ export const app = {
     this.bind(state.info);
     this.info = state.info || {};
     this.profile = state.profile || this.profile;
+    this.bindStartupNotice();
     if (this.checkFirstRun()) return;
     this.bindProfile();
     this.bindAIChat();
@@ -1388,6 +1389,34 @@ export const app = {
       };
       reader.readAsDataURL(file);
     });
+  },
+
+  bindStartupNotice() {
+    const modal = document.getElementById("startupNoticeModal");
+    if (!modal) return;
+
+    const key = "choryak_startup_notice_count";
+    let count = 0;
+
+    try {
+      count = Number(localStorage.getItem(key) || 0);
+    } catch {}
+
+    if (count >= 3) return;
+
+    const closeModal = () => modal.classList.remove("open");
+    const closeButton = modal.querySelector("[data-action='closeStartupNotice']");
+
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) closeModal();
+    });
+    closeButton?.addEventListener("click", closeModal);
+    modal.classList.add("open");
+
+    count += 1;
+    try {
+      localStorage.setItem(key, String(count));
+    } catch {}
   },
 
   checkFirstRun() {
