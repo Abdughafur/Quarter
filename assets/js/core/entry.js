@@ -9,27 +9,17 @@ function hasProfile(profile) {
 async function route() {
   const state = await loadState();
   const profileReady = hasProfile(state.profile);
-  const onboardingDone =
-    localStorage.getItem("choryak_onboarding_done") === "true";
 
   if (!profileReady) {
-    if (currentPage !== "landing.html" && currentPage !== "profile.html") {
+    if (currentPage !== "landing.html" && currentPage !== "login.html") {
       window.location.replace("landing.html");
-    }
-    return;
-  }
-
-  if (!onboardingDone) {
-    if (currentPage !== "startup.html") {
-      window.location.replace("startup.html");
     }
     return;
   }
 
   if (
     currentPage === "landing.html" ||
-    currentPage === "profile.html" ||
-    currentPage === "startup.html"
+    currentPage === "login.html"
   ) {
     window.location.replace("index.html");
   }

@@ -76,6 +76,9 @@ export function renderGradeBlocks(container, grades, labels, onToggle) {
 export function renderGradeChart(container, grades) {
   if (!container) return;
 
+  const previousPointCount = Number(container.dataset.pointCount || 0);
+  const previousScrollLeft =
+    container.querySelector(".chart-viewport")?.scrollLeft || 0;
   container.dataset.pointCount = String(grades.length);
 
   container.textContent = "";
@@ -92,7 +95,9 @@ export function renderGradeChart(container, grades) {
   const left = 0;
   const right = 18;
   const pointGap = 54;
-  const width = Math.max(560, 30 + Math.max(0, grades.length - 1) * pointGap);
+  const viewportWidth = Math.max(0, container.clientWidth - 30);
+  const pointSpan = Math.max(0, grades.length - 1) * pointGap;
+  const width = Math.max(viewportWidth, 30 + pointSpan);
   const height = 252;
   const plotTop = 30;
   const plotBottom = 170;
@@ -104,9 +109,11 @@ export function renderGradeChart(container, grades) {
     ((Math.min(maxGrade, Math.max(minGrade, Number(value))) - minGrade) /
       (maxGrade - minGrade)) *
       plotHeight;
-  const pointStep = grades.length > 1 ? (width - 30) / (grades.length - 1) : 0;
   const points = grades.map((grade, index) => ({
-    x: grades.length > 1 ? 15 + index * pointStep : width / 2,
+    x:
+      grades.length > 1
+        ? (width - pointSpan) / 2 + index * pointGap
+        : width / 2,
     y: chartValue(grade.val),
     value: grade.val,
   }));
@@ -114,7 +121,6 @@ export function renderGradeChart(container, grades) {
   const svg = document.createElementNS(svgNS, "svg");
   svg.classList.add("trend-chart");
   svg.style.width = `${width}px`;
-  svg.style.minWidth = `${width}px`;
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", "Диаграммаи ҳаракати баллҳо");
@@ -181,7 +187,7 @@ export function renderGradeChart(container, grades) {
           : "trend-down";
     const column = document.createElementNS(svgNS, "rect");
     column.classList.add(direction);
-    const columnWidth = Math.min(18, Math.max(6, pointStep * 0.42 || 12));
+    const columnWidth = Math.min(18, Math.max(6, pointGap * 0.42));
     column.setAttribute("x", String(point.x - columnWidth / 2));
     column.setAttribute("y", String(point.y + 8));
     column.setAttribute("width", String(columnWidth));
@@ -287,7 +293,7 @@ export function renderGradeChart(container, grades) {
           direction === "left"
             ? -viewport.clientWidth * 0.72
             : viewport.clientWidth * 0.72,
-        behavior: "smooth",
+        behavior: chartScrollBehavior(),
       });
     });
     return button;
@@ -298,86 +304,35 @@ export function renderGradeChart(container, grades) {
     createScrollButton("right", "Ба нуқтаҳои баъдӣ"),
   );
   container.append(viewport, controls);
-  bindChartDragging(viewport);
+  viewport.scrollLeft = previousScrollLeft;
+
+  requestAnimationFrame(() => {
+    const maxScroll = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+    if (grades.length > previousPointCount) {
+      viewport.scrollTo({
+        left: maxScroll,
+        behavior: previousPointCount ? chartScrollBehavior() : "auto",
+      });
+      return;
+    }
+
+    viewport.scrollLeft = Math.min(previousScrollLeft, maxScroll);
+  });
 }
 
 function scrollToPoint(container, pointX) {
-  const target = Math.max(0, pointX - container.clientWidth / 2);
-  container.scrollTo({ left: target, behavior: "smooth" });
+  const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth);
+  const target = Math.min(
+    maxScroll,
+    Math.max(0, pointX - container.clientWidth / 2),
+  );
+  container.scrollTo({ left: target, behavior: chartScrollBehavior() });
 }
 
-function bindChartDragging(container) {
-  if (container.dataset.dragBound === "true") return;
-
-  container.dataset.dragBound = "true";
-  let dragging = false;
-  let moved = false;
-  let startX = 0;
-  let startScrollLeft = 0;
-
-  container.addEventListener("pointerdown", (event) => {
-    if (container.scrollWidth <= container.clientWidth) return;
-
-    dragging = true;
-    moved = false;
-    startX = event.clientX;
-    startScrollLeft = container.scrollLeft;
-    container.classList.add("is-dragging");
-    container.classList.add("is-stretching");
-    container.style.setProperty("--chart-stretch-x", "0px");
-    container.style.setProperty("--chart-stretch-y", "0px");
-    container.style.setProperty("--chart-stretch-angle", "0deg");
-    container.style.setProperty("--chart-stretch-scale", "1");
-    container.setPointerCapture?.(event.pointerId);
-  });
-
-  container.addEventListener("pointermove", (event) => {
-    if (!dragging) return;
-
-    const distance = event.clientX - startX;
-    if (Math.abs(distance) > 3) moved = true;
-    if (!moved) return;
-
-    event.preventDefault();
-    container.scrollLeft = startScrollLeft - distance;
-    const offsetX = Math.max(-8, Math.min(8, distance * -0.04));
-    const offsetY = Math.max(
-      -3,
-      Math.min(
-        3,
-        (event.clientY -
-          container.getBoundingClientRect().top -
-          container.clientHeight / 2) *
-          0.02,
-      ),
-    );
-    const angle = Math.max(-2.5, Math.min(2.5, distance * -0.035));
-    const scale = 1 + Math.min(Math.abs(distance) * 0.0012, 0.045);
-    container.style.setProperty("--chart-stretch-x", `${offsetX}px`);
-    container.style.setProperty("--chart-stretch-y", `${offsetY}px`);
-    container.style.setProperty("--chart-stretch-angle", `${angle}deg`);
-    container.style.setProperty("--chart-stretch-scale", String(scale));
-  });
-
-  const stopDragging = (event) => {
-    if (!dragging) return;
-
-    dragging = false;
-    container.classList.remove("is-dragging");
-    container.classList.remove("is-stretching");
-    container.releasePointerCapture?.(event.pointerId);
-    setTimeout(() => {
-      [
-        "--chart-stretch-x",
-        "--chart-stretch-y",
-        "--chart-stretch-angle",
-        "--chart-stretch-scale",
-      ].forEach((property) => container.style.removeProperty(property));
-    }, 360);
-  };
-
-  container.addEventListener("pointerup", stopDragging);
-  container.addEventListener("pointercancel", stopDragging);
+function chartScrollBehavior() {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    ? "auto"
+    : "smooth";
 }
 
 export function buildPercentRows(container, labels, onInput) {

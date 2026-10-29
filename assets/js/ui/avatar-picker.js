@@ -1,3 +1,5 @@
+const AVATAR_COUNT = 10;
+
 function buildModal() {
   let modal = document.querySelector("#avatarPickerModal");
   if (modal) return modal;
@@ -17,7 +19,7 @@ function buildModal() {
         </div>
         <button class="avatar-picker-close" type="button" aria-label="Пӯшидан">&times;</button>
       </div>
-      <div class="avatar-picker-meta"><span>Аватарҳои системавӣ</span><span>33 интихоб</span></div>
+      <div class="avatar-picker-meta"><span>Аватарҳои системавӣ</span><span>${AVATAR_COUNT} интихоб</span></div>
       <div class="avatar-picker-grid" aria-label="Аватарҳои системавӣ">
         <button class="avatar-option avatar-gallery-btn" type="button" aria-label="Гирифтан аз галерия">
           <span aria-hidden="true">+</span>
@@ -27,7 +29,7 @@ function buildModal() {
   document.body.append(modal);
 
   const grid = modal.querySelector(".avatar-picker-grid");
-  for (let index = 0; index < 33; index += 1) {
+  for (let index = 0; index < AVATAR_COUNT; index += 1) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "avatar-option";

@@ -28,6 +28,8 @@
     bottom: 18px;
     top: auto;
     width: min(700px, calc(100vw - 36px));
+    max-width: 700px;
+    box-sizing: border-box;
     height: 64px;
     margin: 0;
     padding: 7px;
@@ -112,9 +114,10 @@
   }
 
   /* slightly smaller on very small screens */
-  @media (max-width: 360px) {
-    .nav-btn {
-      height: 46px !important;
-    }
+}
+
+@media (max-width: 360px) {
+  nav .nav-btn {
+    height: 46px !important;
   }
 }

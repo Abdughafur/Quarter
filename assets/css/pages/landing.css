@@ -1,5 +1,4 @@
-.landing-page,
-.startup-page {
+.landing-page {
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -51,8 +50,7 @@
   text-decoration: none;
   box-shadow: 0 15px 30px rgba(14, 165, 233, 0.2);
 }
-.landing-cta span,
-.startup-button span {
+.landing-cta span {
   font-size: 1.3rem;
 }
 .landing-note {

@@ -1,4 +1,4 @@
-/* main.css - Чоряк v4.4
+/* main.css - Чоряк v4.5 S (Stable)
  Copyright (c) 2026 Abdughafur. All rights reserved.
 */
 @import url("./core/reset.css");
@@ -18,7 +18,7 @@
 @import url("./components/cards.css");
 @import url("./components/inputs.css");
 @import url("./components/switches.css");
-@import url("./components/modal.css?v=3");
+@import url("./components/modal.css?v=4.5-s");
 @import url("./components/toast.css");
 @import url("./components/charts.css");
 @import url("./components/keypad.css");
@@ -28,16 +28,15 @@
 @import url("./pages/percent.css");
 @import url("./pages/ai.css");
 @import url("./pages/settings.css");
-@import url("./pages/profile.css");
+@import url("./pages/login.css");
 @import url("./pages/landing.css");
-@import url("./pages/startup.css");
 @import url("./utilities/spacing.css");
 @import url("./utilities/colors.css");
 @import url("./utilities/shadows.css");
 @import url("./utilities/radius.css");
 @import url("./utilities/helpers.css");
 
-/* v4.4 responsive workspace widths */
+/* Responsive workspace widths */
 @media (min-width: 761px) {
   main.container {
     width: min(100% - 48px, 960px);
@@ -56,6 +55,15 @@
 @media (min-width: 1600px) {
   main.container {
     width: min(100% - 120px, 1480px);
+  }
+
+  body[data-active-tab="tab-home"] main.container,
+  body[data-active-tab="tab-prosent"] main.container {
+    max-width: 1480px;
+  }
+
+  body[data-active-tab="tab-more"] main.container {
+    max-width: 1440px;
   }
 
   main.container > .tab.active {

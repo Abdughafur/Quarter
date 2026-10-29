@@ -10,21 +10,18 @@ const LEGACY_PREFIXES = ["chorak_v4.2", "chorak_v4.1", "chorak_v4.0"];
 export const DEFAULT_SETTINGS = Object.freeze({
   theme: "light",
   sound: true,
+  vibration: true,
   fs: true,
   diagram: true,
+  uiKit: "medium",
+  minaiCalculator: true,
+  minaiPercent: true,
 });
 
 export const DEFAULT_PCT = Object.freeze({
   total: 0,
   counts: {},
 });
-
-export const DEFAULT_NOTE_CATEGORIES = Object.freeze([
-  "lesson",
-  "task",
-  "idea",
-  "other",
-]);
 
 export const DEFAULT_PROFILE = Object.freeze({
   name: "",
@@ -50,13 +47,21 @@ function normalizeSettings(value) {
   const settings = value && typeof value === "object" ? value : {};
 
   return {
-    theme: settings.theme === "dark" ? "dark" : "light",
+    theme: ["light", "dark", "system"].includes(settings.theme)
+      ? settings.theme
+      : DEFAULT_SETTINGS.theme,
     sound: settings.sound !== false,
+    vibration: settings.vibration !== false,
     fs: Boolean(settings.fs),
     diagram:
       settings.diagram === undefined
         ? DEFAULT_SETTINGS.diagram
         : Boolean(settings.diagram),
+    uiKit: ["low", "medium", "perfect"].includes(settings.uiKit)
+      ? settings.uiKit
+      : DEFAULT_SETTINGS.uiKit,
+    minaiCalculator: settings.minaiCalculator !== false,
+    minaiPercent: settings.minaiPercent !== false,
   };
 }
 
@@ -85,22 +90,7 @@ function normalizePct(value) {
   };
 }
 
-function normalizeCategories(value) {
-  const categories = Array.isArray(value) ? value : [];
-  return Array.from(
-    new Set(
-      [...DEFAULT_NOTE_CATEGORIES, ...categories]
-        .map((category) =>
-          String(category || "")
-            .trim()
-            .slice(0, 32),
-        )
-        .filter(Boolean),
-    ),
-  ).slice(0, 30);
-}
-
-function normalizeNotes(value, categories = DEFAULT_NOTE_CATEGORIES) {
+function normalizeNotes(value) {
   if (!Array.isArray(value)) return [];
 
   return value
@@ -109,7 +99,6 @@ function normalizeNotes(value, categories = DEFAULT_NOTE_CATEGORIES) {
       id: String(note.id || uid()),
       title: String(note.title || "").slice(0, 128),
       body: String(note.body || "").slice(0, 1024),
-      category: categories.includes(note.category) ? note.category : "other",
       important: Boolean(note.important),
       createdAt: Number(note.createdAt) || Date.now(),
       updatedAt: Number(note.updatedAt) || Date.now(),
@@ -134,7 +123,6 @@ function normalizeTasks(value) {
 
 function normalizeState(value) {
   const payload = value && typeof value === "object" ? value : {};
-  const categories = normalizeCategories(payload.noteCategories);
 
   return {
     grades: normalizeGrades(payload.grades ?? []),
@@ -142,9 +130,8 @@ function normalizeState(value) {
     pct: normalizePct(payload.pct ?? null),
     info: payload.info && typeof payload.info === "object" ? payload.info : {},
     profile: normalizeProfile(payload.profile ?? null),
-    notes: normalizeNotes(payload.notes ?? [], categories),
+    notes: normalizeNotes(payload.notes ?? []),
     tasks: normalizeTasks(payload.tasks ?? []),
-    noteCategories: categories,
   };
 }
 
@@ -265,7 +252,6 @@ export async function saveState({
   profile,
   notes,
   tasks,
-  noteCategories,
 }) {
   const payload = normalizeState({
     grades,
@@ -275,7 +261,6 @@ export async function saveState({
     profile,
     notes,
     tasks,
-    noteCategories,
   });
 
   try {

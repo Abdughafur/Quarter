@@ -1,23 +1,19 @@
 ﻿<!doctype html>
-<html lang="tg">
+<html lang="tg" manifest="offline.appcache">
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#06b6d4" />
   <meta name="msapplication-navbutton-color" content="#06b6d4" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Чоряк" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
   <title>Чоряк</title>
-  <link rel="icon" href="assets/images/logoLight.png" type="image/png" />
-  <link rel="apple-touch-icon" href="assets/images/logoLight.png" />
+  <link rel="icon" href="assets/images/pics/logo.png" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/images/pics/logo.png" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="manifest" href="offline.appcache" />
-  <link rel="stylesheet" href="assets/css/main.css?v=4.4.1">
+  <link rel="stylesheet" href="assets/css/main.css?v=4.5-s">
 
 </head>
 
@@ -42,7 +38,7 @@
   </svg>
   <div id="splash" class="splash" aria-hidden="false">
     <div class="splash-inner">
-      <img class="splash-logo" src="assets/images/logoLight.png" alt="App logo" />
+      <img class="splash-logo" src="assets/images/pics/logo.png" alt="App logo" />
       <div class="splash-progress" role="progressbar" aria-label="Боркунии барнома">
         <span class="splash-progress-fill"></span>
       </div>
@@ -59,89 +55,6 @@
       </div>
     </div>
   </div>
-
-  
-<div
-  id="startupNoticeModal"
-  class="modal-backdrop startup-notice-backdrop"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="startupNoticeTitle"
-  aria-describedby="startupNoticeDescription"
->
-  <div class="ios-modal startup-notice-modal">
-
-    <div class="startup-notice-icon" aria-hidden="true">
-      <svg
-        viewBox="0 0 24 24"
-        width="30"
-        height="30"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.7"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="M12 8v4" />
-        <path d="M12 16h.01" />
-        <circle cx="12" cy="12" r="9" />
-      </svg>
-    </div>
-
-    <span class="startup-notice-tag">
-      ЧОРЯК · НАВСОЗӢ
-    </span>
-
-    <h3 id="startupNoticeTitle">
-      Қадами нав ба сӯи версияи 5.0 S
-    </h3>
-
-    <div id="startupNoticeDescription">
-      <p>
-        Барномаи «Чоряк» ҳоло дар версияи
-        <strong>4.4.1 B</strong> қарор дорад. Ман барои омода кардани версияи нави
-        <strong>5.0 S</strong> кор карда истодаам.
-      </p>
-
-      <p>
-        Ҳадафи ман беҳтар кардани суръат, намуди зоҳирӣ ва осонии истифодаи барнома мебошад.
-        Ман кӯшиш мекунам, ки ҳамаи имкониятҳои ба нақша гирифташуда дуруст татбиқ шаванд
-        ва устувории барнома нигоҳ дошта шавад.
-      </p>
-
-      <p>
-        Ҳангоми гузариш ба версияи нав эҳтимоли қатъшавии муваққатии дастрасӣ вуҷуд дорад.
-        Ман саъй мекунам, ки чунин ҳолатҳоро пешгирӣ карда, хатогиҳои эҳтимолиро то ҳадди имкон
-        кам намоям.
-      </p>
-    </div>
-
-    <div class="startup-notice-footer">
-      <p class="startup-notice-thanks">
-        Ташаккур барои фаҳмиш ва истифодаи барномаи «Чоряк».
-      </p>
-
-      <div class="startup-notice-signature">
-        Бо эҳтиром,<br />
-        <strong>Абдуғафур Хуҷзода</strong>
-        <span>Таҳиягари «Чоряк»</span>
-      </div>
-    </div>
-
-    <div class="modal-actions">
-      <button
-        class="btn startup-notice-confirm"
-        type="button"
-        data-action="closeStartupNotice"
-        autofocus
-      >
-        Фаҳмидам
-      </button>
-    </div>
-
-  </div>
-</div>
-
 
   <main class="container">
     <section id="tab-home" class="tab active">
@@ -249,38 +162,26 @@
             <div class="chart" id="gradeChart"></div>
           </div>
 
-          <!--
-          <div class="card minai-card minai-quick-card minai-comment-card" aria-label="MinAI">
-            <button class="minai-chat-clear" type="button" data-action="clearAIChat" aria-label="Пок кардани суҳбат" title="Пок кардани суҳбат" hidden>
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M20 11a8 8 0 1 0 1 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                <path d="M20 5v6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </button>
-            <div class="minai-version-badge" aria-label="MinAI version 1.1 Beta">MinAI v 1.1 Beta</div>
-            <div id="aiChatMessages" class="minai-chat-messages" aria-live="polite"></div>
-            <div class="minai-question-list" aria-label="Саволҳои тайёри MinAI">
-              <button type="button" class="minai-question-chip" data-action="askAIQuick" data-question="Ба ман статистика лозим аст.">Статистика лозим</button>
-              <button type="button" class="minai-question-chip" data-action="askAIQuick" data-question="Чӣ гуна натиҷаро баланд кардан мумкин?">Чӣ гуна натиҷаро баланд кардан мумкин?</button>
-              <button type="button" class="minai-question-chip" data-action="askAIQuick" data-question="Чаро натиҷа паст аст?">Чаро натиҷа паст аст?</button>
-              <button type="button" class="minai-question-chip" data-action="askAIQuick" data-question="Ба хонанда чӣ гуна баҳо гузорам?">Ба хонанда чӣ гуна баҳо гузорам?</button>
-              <button type="button" class="minai-question-chip" data-action="askAIQuick" data-question="Бо журнал чӣ гуна кор кунам?">Бо журнал чӣ гуна кор кунам?</button>
-              <button type="button" class="minai-question-chip" data-action="askAIQuick" data-question="Чӣ гуна фоизҳоро ҳисоб кунам?">Чӣ гуна фоизҳоро ҳисоб кунам?</button>
-              <button type="button" class="minai-question-chip" data-action="askAIQuick" data-question="Дар бораи худат маълумот деҳ.">Дар бораи худат маълумот деҳ.</button>
-              <button type="button" class="minai-question-chip" data-action="askAIQuick" data-question="Дар бораи низоми баҳогузорӣ маълумот деҳ.">Дар бораи низоми баҳогузорӣ</button>
-              <button type="button" class="minai-question-chip" data-action="askAIQuick" data-question="Мехоҳам барнома беҳтар шавад.">Мехоҳам барнома беҳтар шавад.</button>
-            </div>
-          </div>
-          -->
-
-          <div class="card minai-card minai-coming-soon" aria-label="MinAI coming soon">
+          <div class="card minai-card minai-coming-soon minai-status-card" aria-label="MinAI: маълумоти хонанда">
             <div class="minai-coming-soon-art" aria-hidden="true">
-              <img src="assets/images/minai/ai.png" alt="" />
+              <img src="assets/images/minai/smile.png" alt="" />
             </div>
-            <div class="minai-coming-soon-badge">MinAI v1.1T</div>
-            <div class="minai-coming-soon-title">Омода шудааст</div>
-            <div class="minai-coming-soon-copy">Ҳоло MinAI дар раванди санҷиш аст. Пас аз санҷиши бомуваффақият ба шумо
-              MinAI v1.1B дастрас хоҳад шуд.</div>
+            <div class="minai-coming-soon-badge">MinAI v1.1S</div>
+            <h3 class="minai-coming-soon-title">Маълумоти воридшуда оиди хонанда</h3>
+            <div class="minai-status-list" aria-live="polite">
+              <div class="minai-status-item">
+                <span>Натиҷаи чоряк</span>
+                <strong id="minaiQuarterResult">—</strong>
+              </div>
+              <div class="minai-status-item">
+                <span>Сатҳ</span>
+                <strong id="minaiStudentLevel">—</strong>
+              </div>
+              <div class="minai-status-item minai-status-progress">
+                <span>Пешравӣ</span>
+                <strong id="minaiProgress">Барои хулоса баровардани сатҳи пешравии хонанда маълумоти воридшуда кам аст.</strong>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -322,20 +223,28 @@
           <div class="mini-stat"><span>4–10</span><strong id="range4to10UI">0%</strong></div>
         </div>
       </div>
-      <button class="btn clear-percent-btn" type="button" data-action="clearAllPercentages">
-        Тоза кардани фоизҳо
-      </button>
+      <div class="percent-actions">
+        <button class="btn percent-export-btn" type="button" data-action="openPercentExport">
+          Экспорт
+        </button>
+        <button class="btn clear-percent-btn" type="button" data-action="clearAllPercentages">
+          Тоза кардани фоизҳо
+        </button>
+      </div>
+      <div class="card minai-card minai-coming-soon minai-status-card percent-minai-card"
+        aria-label="MinAI: сатҳи фоизии синф">
+        <div class="minai-coming-soon-art" aria-hidden="true">
+          <img src="assets/images/minai/smile.png" alt="" />
+        </div>
+        <div class="minai-coming-soon-badge">MinAI v1.1S</div>
+        <h3 class="minai-coming-soon-title">Сатҳи таҳсили синф</h3>
+        <p id="percentMinaiStatus" class="minai-status-message" aria-live="polite">
+          Шумораи умумии хонандагонро ворид кунед, баъд шумораи баллҳоро пур намоед.
+        </p>
+      </div>
     </section>
 
     <section id="tab-notes" class="tab">
-      <div class="notes-mobile-header">
-        <button class="btn-back" type="button" data-action="clearSelectedNote" aria-label="Бозгашт">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M20 11H7.83l5.59-5.59L12 4l8 8-8 8 1.41 1.41L7.83 13H20v-2z" />
-          </svg>
-        </button>
-      </div>
-
       <!-- Notes workspace switcher is temporarily disabled.
       <div class="workspace-segmented-bar">
         <div class="workspace-segmented-control" role="tablist">
@@ -386,7 +295,6 @@
                 <input id="noteSearchInput" class="input-field" type="search" placeholder="Ҷустуҷӯ..." />
                 <kbd>/</kbd>
               </div>
-              <div id="noteFilters" class="notes-filters"></div>
             </div>
 
             <div id="notesList" class="notes-list"></div>
@@ -499,7 +407,8 @@
             </span>
             <span class="more-profile-arrow" aria-hidden="true">›</span>
           </button>
-          <div class="option-list">
+          <div class="more-options-container">
+            <div class="option-list">
             <button class="option-item" type="button" data-action="showMoreProfile">
               <span class="option-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"
@@ -630,9 +539,9 @@
               </span>
               <span class="option-arrow">›</span>
             </button>
-          </div>
+            </div>
 
-          <div class="more-actions-row">
+            <div class="more-actions-row">
             <button class="btn capsule-btn" type="button" data-action="shareApp">
               <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
                 width="40" height="40" viewBox="0 0 17 17">
@@ -653,6 +562,7 @@
               </svg>
               Махфият
             </a>
+            </div>
           </div>
         </div>
       </div>
@@ -674,27 +584,54 @@
               Бозгашт
             </button>
           </div>
-          <h3 class="settings-title">Профил</h3>
-          <div class="profile-card" style="display:grid;gap:16px;">
+          <div class="profile-menu" id="profileMenu">
+            <button id="profileMenuToggle" class="profile-menu-toggle" type="button" aria-label="Менюи профил"
+              aria-haspopup="menu" aria-expanded="false" aria-controls="profileMenuPanel"
+              data-action="toggleProfileMenu">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="5" cy="12" r="1.7"></circle>
+                <circle cx="12" cy="12" r="1.7"></circle>
+                <circle cx="19" cy="12" r="1.7"></circle>
+              </svg>
+            </button>
+            <div id="profileMenuPanel" class="profile-menu-panel" role="menu" hidden>
+              <button class="profile-menu-item" type="button" role="menuitem"
+                data-avatar-picker-trigger data-action="closeProfileMenu">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="4"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <path d="m21 15-5-5L5 21"></path>
+                </svg>
+                <span>Иваз кардани акс</span>
+              </button>
+              <button class="profile-menu-item" type="button" role="menuitem"
+                data-action="openProfileNameModal">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path>
+                </svg>
+                <span>Иваз кардани ном</span>
+              </button>
+              <button class="profile-menu-item profile-menu-item-danger" type="button" role="menuitem"
+                data-action="showLogoutConfirm">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M10 17l5-5-5-5M15 12H3"></path>
+                  <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"></path>
+                </svg>
+                <span>Баромадан</span>
+              </button>
+            </div>
+          </div>
+          <div class="profile-card">
+            <input id="profileAvatarInput" type="file" accept="image/*" hidden />
             <div class="profile-avatar-preview">
               <div id="profileAvatarView" class="avatar-circle">
-                <img id="profileAvatarPreview" src="" alt=""
-                  style="display:none; width:100%; height:100%; object-fit:cover; object-position:center;" />
+                <img id="profileAvatarPreview" src="" alt="" />
                 <span id="profileAvatarPreviewFallback">Ч</span>
               </div>
-              <label class="btn secondary avatar-upload-btn" data-avatar-picker-trigger>
-                <span>Иваз кардани аватар</span>
-                <input id="profileAvatarInput" type="file" accept="image/*" />
-              </label>
             </div>
-            <input id="profileNameInput" class="input-field" type="text" placeholder="Номи шумо" autocomplete="off"
-              inputmode="text" />
-            <input id="profileSurnameInput" class="input-field" type="text" placeholder="Насаби шумо" autocomplete="off"
-              inputmode="text" />
-            <input id="profileSchoolInput" class="input-field" type="number" placeholder="Рақами мактаб"
-              autocomplete="off" />
-            <button class="btn" type="button" data-action="saveProfile">Сабт кардан</button>
-            <button class="btn secondary" type="button" data-action="showLogoutConfirm">Баромадан</button>
+            <h2 id="profileDisplayName" class="profile-display-name">Чоряк</h2>
+            <p id="profileDisplaySchool" class="profile-display-school">Рақами мактаб илова нашудааст</p>
           </div>
         </div>
       </div>
@@ -720,15 +657,15 @@
           <div class="dev-profile-header">
             <div class="dev-avatar-large">
               <span>A</span>
-              <img src="assets/images/abdughafur.png" alt="Abdughafur"
-                onload="this.style.display='block'; this.previousElementSibling.style.display='none'" />
+              <img src="assets/images/pics/abdughafur.png" alt="Abdughafur"
+                onload="this.style.display='block'; this.previousElementSibling.style.display='none'"
+                onerror="this.style.display='none'; this.previousElementSibling.style.display='block'" />
             </div>
-            <h2 class="dev-name">Abdughafur Khujzoda</h2>
-            <p class="dev-title">Creator & Software Developer</p>
+            <h2 class="dev-name">Абдуғафур Хуҷзода</h2>
+            <p class="dev-title">Таҳиягари барномаи «Чоряк»</p>
           </div>
           <div class="dev-bio">
-            <b>Чоряк</b> барои ҳисобу таҳлили осони натиҷаҳои таҳсил сохта шудааст — содда, равшан ва ҳамеша наздик ба
-            ниёзҳои шумо.
+            Салом, ман Абдуғафур Хуҷзода, таҳиягари барномаи «Чоряк». Бо роҳҳои зер метавонед бо ман тамос гиред.
           </div>
 
           <div class="contact-section">
@@ -771,7 +708,7 @@
             </svg>
           </button>
         </div>
-        <div class="card">
+        <div class="card settings-card">
           <div class="back-nav">
             <button class="btn-back" data-action="hideSubviews" type="button">
               <svg viewBox="0 0 24 24" fill="currentColor">
@@ -781,23 +718,44 @@
             </button>
           </div>
           <h3 class="settings-title">Танзимот</h3>
+          <h4 class="settings-card-title">Мавзӯъ</h4>
+          <div id="themeOptions" class="theme-options" role="group" aria-label="Интихоби мавзӯъ">
+            <button class="theme-option" type="button" data-action="setTheme" data-theme-value="light">
+              Равшан
+            </button>
+            <button class="theme-option" type="button" data-action="setTheme" data-theme-value="dark">
+              Торик
+            </button>
+            <button class="theme-option" type="button" data-action="setTheme" data-theme-value="system">
+              Системавӣ
+            </button>
+          </div>
+        </div>
+
+        <div class="card settings-card">
+          <h4 class="settings-card-title">Овоз ва ларзиш</h4>
           <label class="setting-row">
             <span class="setting-text">
-              <strong>Ҳолати торик</strong>
-            </span>
-            <input type="checkbox" id="themeToggle" data-action="toggleTheme" />
-          </label>
-          <label class="setting-row">
-            <span class="setting-text">
-              <strong>Садои тугмаҳо</strong>
-              <span>Садо ҳангоми пахшкунии тугмаҳо</span>
+              <strong>Овоз</strong>
+              <span>Садо ҳангоми пахш кардани тугмаҳо</span>
             </span>
             <input type="checkbox" id="soundToggle" data-action="toggleSound" />
           </label>
           <label class="setting-row">
             <span class="setting-text">
+              <strong>Ларзиш</strong>
+              <span>Ларзиши дастгоҳ ҳангоми амалҳо</span>
+            </span>
+            <input type="checkbox" id="vibrationToggle" data-action="toggleVibration" />
+          </label>
+        </div>
+
+        <div class="card settings-card">
+          <h4 class="settings-card-title">Интерфейс</h4>
+          <label class="setting-row">
+            <span class="setting-text">
               <strong>Экрани пурра</strong>
-              <span>Fullscreen</span>
+              <span>Истифодаи тамоми экран</span>
             </span>
             <input type="checkbox" id="fsToggle" data-action="toggleFS" />
           </label>
@@ -807,6 +765,40 @@
               <span>Намоиш ё пинҳон кардани диаграмма</span>
             </span>
             <input type="checkbox" id="diagramToggle" data-action="toggleDiagram" />
+          </label>
+          <div class="ui-kit-control">
+            <div class="ui-kit-heading">
+              <span class="setting-text">
+                <strong>Сатҳи интерфейс</strong>
+                <span>Барои мутобиқ кардани барнома ба суръати дастгоҳ</span>
+              </span>
+              <strong id="uiKitValue" class="ui-kit-value">Миёна</strong>
+            </div>
+            <input id="uiKitRange" class="ui-kit-range" type="range" min="0" max="100" step="1" value="50"
+              aria-label="Сатҳи интерфейс" aria-valuetext="Миёна" />
+            <div class="ui-kit-labels" aria-hidden="true">
+              <span>Сабук</span>
+              <span>Миёна</span>
+              <span>Олӣ</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card settings-card">
+          <h4 class="settings-card-title">MinAI</h4>
+          <label class="setting-row">
+            <span class="setting-text">
+              <strong>MinAI дар ҳисобкунак</strong>
+              <span>Корти MinAI дар саҳифаи ҳисобкунак</span>
+            </span>
+            <input type="checkbox" id="minaiCalculatorToggle" data-action="toggleMinaiCalculator" />
+          </label>
+          <label class="setting-row">
+            <span class="setting-text">
+              <strong>MinAI дар фоизҳо</strong>
+              <span>Корти MinAI дар саҳифаи фоизҳо</span>
+            </span>
+            <input type="checkbox" id="minaiPercentToggle" data-action="toggleMinaiPercent" />
           </label>
         </div>
       </div>
@@ -897,36 +889,30 @@
             </button>
           </div>
           <h3 class="settings-title">Дар бораи барнома</h3>
-          <div class="app-info">
+          <div class="app-info about-app-info">
             <div class="big-app-icon">
-              <img src="assets/images/logoLight.png" alt="Чоряк logo" />
+              <img src="assets/images/pics/logo.png" alt="Чоряк logo" />
             </div>
             <div class="about">
               <p class="about-app-name"><strong>Чоряк</strong></p>
-              <p><strong>Версия:</strong> 4.4.1 B</p>
-
-              <!-- T = Testing — барои санҷиш
-    B = Beta — версияи Beta
-    S = Stable — версияи устувор
-Масалан:
-v1.0T → Testing
-v1.0B → Beta
-v1.0S → Stable -->
+              <p><strong>Версия:</strong> 4.5 S (Stable)</p>
               <p><strong>Таҳиягар:</strong> Abdughafur (Абдуғафур)</p>
             </div>
-
           </div>
-          <div class="card" style="text-align: start;">
-            <p><strong>Барнома айни замон пурра фаъол буда, система дуруст кор мекунад ва санҷишҳо бомуваффақият анҷом
-                дода шудаанд.
-                <br>
-                Навсозии барнома муваққатан қатъ шудааст. Аз ин сабаб баъзе функсияҳои нави дар нақша буда, аз ҷумла
-                «Дарсҳои ман», «Вазифаҳо», «Журнал» ва MinAI 1.1B, ҳоло дастрас нестанд.
-                <br>
-                Пас аз барқарор шудани раванди навсозӣ, ин функсияҳо ба барнома илова карда мешаванд.
-                <br>
-                Ташаккур барои фаҳмиш!
-              </strong></p>
+          <div class="about-overview">
+            <h4>Дар бораи Чоряк</h4>
+            <p>
+              Барномаи «Чоряк» муосир, зебо ва дақиқ буда, барои ҳисоб кардани ҷамъбасти чорякҳо дар мактабҳои миёна
+              сохта шудааст. Барнома барои ҳамаи омӯзгорон ройгон пешниҳод мегардад.
+            </p>
+            <p>
+              Айни замон барнома дар версияи 4.5 S (Stable) қарор дорад. Дар ин версия ба устуворӣ ва кори барнома
+              диққати махсус дода шудааст. Системаи барнома аз ҷониби мутахассисон ва корбарон санҷида шудааст.
+            </p>
+            <p>
+              Агар хурдтарин хатогиро пайдо кунед ё барои беҳтар кардани «Чоряк» идея дошта бошед, ба бахши
+              «Таҳиягар» гузаред ва мустақиман бо таҳиягари барнома тамос гиред.
+            </p>
           </div>
         </div>
       </div>
@@ -935,7 +921,7 @@ v1.0S → Stable -->
         <div class="mobile-subview-header">
           <button class="btn-back" data-action="hideSubviews" type="button" aria-label="Бозгашт">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M20 11H7.83l5.59-5.59L12 4l8 8-8 8 1.41-1.41L7.83 13H20v-2z" />
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
             </svg>
           </button>
         </div>
@@ -943,24 +929,31 @@ v1.0S → Stable -->
           <div class="back-nav">
             <button class="btn-back" data-action="hideSubviews" type="button">
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M20 11H7.83l5.59-5.59L12 4l8 8-8 8 1.41-1.41L7.83 13H20v-2z" />
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
               </svg>
               Бозгашт
             </button>
           </div>
           <div class="install-screen-content">
-            <div class="install-screen-image">
-              <img src="assets/images/logoLight.png" alt="Нишонаи барномаи Чоряк" />
+            <div class="app-info about-app-info install-screen-app-info">
+              <div class="big-app-icon install-screen-image">
+                <img src="assets/images/pics/logo.png" alt="Нишонаи барномаи Чоряк" loading="lazy" decoding="async" />
+              </div>
+              <div class="about">
+                <span class="install-screen-kicker">Чоряк · PWA</span>
+                <h3 class="settings-title">Барномаро насб кунед</h3>
+                <p class="install-screen-description">Чорякро ба экрани асосӣ илова кунед, то онро зудтар кушоед ва мисли
+                  барномаи оддӣ истифода баред.</p>
+              </div>
             </div>
-            <span class="install-screen-kicker">Чоряк · PWA</span>
-            <h3 class="settings-title">Барномаро насб кунед</h3>
-            <p class="install-screen-description">Чорякро ба экрани асосӣ илова кунед, то онро зудтар кушоед ва мисли
-              барномаи оддӣ истифода баред.</p>
-            <ul class="install-screen-benefits">
-              <li>Кушодани зуд аз экрани асосӣ</li>
-              <li>Намоиши қулай дар равзанаи алоҳида</li>
-              <li>Маълумот дар ҳамин дастгоҳ нигоҳ дошта мешавад</li>
-            </ul>
+            <div class="about-overview install-screen-overview">
+              <h4>Бартариҳои насб</h4>
+              <ul class="install-screen-benefits">
+                <li>Кушодани зуд аз экрани асосӣ</li>
+                <li>Намоиши қулай дар равзанаи алоҳида</li>
+                <li>Маълумот дар ҳамин дастгоҳ нигоҳ дошта мешавад</li>
+              </ul>
+            </div>
             <button class="btn install-screen-action" type="button" data-action="installPwaNow">Насб кардан</button>
           </div>
         </div>
@@ -968,6 +961,28 @@ v1.0S → Stable -->
 
     </section>
   </main>
+
+  <div id="shareModal" class="modal-backdrop share-modal-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="shareModalTitle">
+    <div class="ios-modal share-modal">
+      <button class="share-modal-close" type="button" data-action="closeShareModal"
+        aria-label="Пӯшидан">&times;</button>
+      <span class="share-modal-kicker">Чоряк · 4.5 S (Stable)</span>
+      <h3 id="shareModalTitle">Мубодилаи барнома</h3>
+      <p>Рамзи QR-ро скан кунед ё пайвандро фиристед.</p>
+      <div class="share-qr-frame">
+        <img id="shareQrCode" class="share-qr-code" src="assets/images/pics/share-qr.svg"
+          alt="QR code барои кушодани Чоряк" loading="lazy" decoding="async" />
+        <img class="share-qr-logo" src="assets/images/pics/abdughafur.png" alt="Таҳиягари Чоряк"
+          loading="lazy" decoding="async" />
+        <span id="shareQrFallback" class="share-qr-fallback" hidden>QR муваққатан дастрас нест</span>
+      </div>
+      <div class="share-modal-actions">
+        <button class="btn secondary capsule-btn" type="button" data-action="copyShareLink">Нусхабардорӣ</button>
+        <button class="btn capsule-btn" type="button" data-action="sendShareLink">Ирсол</button>
+      </div>
+    </div>
+  </div>
 
   <div id="infoModal" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="ios-modal">
@@ -985,6 +1000,32 @@ v1.0S → Stable -->
     </div>
   </div>
 
+  <div id="percentExportModal" class="modal-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="percentExportTitle">
+    <div class="ios-modal percent-export-modal">
+      <h3 id="percentExportTitle">Экспорти фоизҳои синф</h3>
+      <p>Барои сохтани расми натиҷа ҳамаи маълумотро пур кунед.</p>
+      <div class="percent-export-fields">
+        <label for="percentExportClass">Синф (1–11)</label>
+        <input id="percentExportClass" class="input-field" type="number" inputmode="numeric" min="1" max="11"
+          step="1" placeholder="Масалан, 7" required />
+        <label for="percentExportTeacher">Номи роҳбари синф</label>
+        <input id="percentExportTeacher" class="input-field" type="text" autocomplete="name" maxlength="80"
+          placeholder="Ному насаби роҳбари синф" required />
+        <label for="percentExportSchool">Рақами мактаб</label>
+        <input id="percentExportSchool" class="input-field" type="number" inputmode="numeric" min="1"
+          placeholder="Рақами мактаб" required />
+        <label for="percentExportSubject">Номи фан</label>
+        <input id="percentExportSubject" class="input-field" type="text" autocomplete="off" maxlength="80"
+          placeholder="Номи фан" required />
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" type="button" data-action="closePercentExport">Лағв</button>
+        <button class="btn" type="button" data-action="exportPercentCanvas">Сохтан ва экспорт</button>
+      </div>
+    </div>
+  </div>
+
   <div id="noteModal" class="note-modal-backdrop" role="dialog" aria-modal="true">
     <div class="note-modal">
       <div class="note-modal-header">
@@ -993,66 +1034,16 @@ v1.0S → Stable -->
       </div>
       <div class="note-modal-body">
         <input id="noteTitleInput" class="input-field" type="text" placeholder="Сарлавҳа" autocomplete="off" />
-        <input type="hidden" id="noteCategoryInput" value="lesson" />
         <textarea id="noteBodyInput" class="input-field note-body-input" rows="6"
           placeholder="Тавсиф ё маълумоти ёддошт"></textarea>
-        <h3 class="note-category-label">Категория</h3>
-        <div class="note-category-row" id="noteCategoryRow"></div>
       </div>
       <div class="note-modal-footer note-modal-footer-rows">
-        <div class="note-modal-actions note-modal-actions-row">
-        </div>
         <div class="note-modal-actions note-modal-actions-row">
           <button id="noteDeleteButton" class="btn secondary" type="button" data-action="showDeleteConfirm"
             style="display:none;">Пок кардан</button>
           <button class="btn secondary" type="button" data-action="closeNoteModal">Лағв</button>
           <button id="noteSaveButton" class="btn" type="button" data-action="saveNote">Сабт</button>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="noteCategoryModal" class="note-modal-backdrop" role="dialog" aria-modal="true">
-    <div class="note-modal note-category-modal">
-      <div class="note-modal-header">
-        <h3 id="noteCategoryModalTitle">Категорияи нав</h3>
-        <button class="note-modal-close" type="button" data-action="closeNoteCategoryModal">×</button>
-      </div>
-      <div class="note-modal-body">
-        <div id="noteCategoryCreateView" class="note-category-create-view">
-          <label class="note-category-modal-label" for="noteCategoryNameInput">Номи категория</label>
-          <input id="noteCategoryNameInput" class="input-field" type="text" maxlength="32" placeholder="Масалан: Муҳим"
-            autocomplete="off" />
-        </div>
-        <div id="noteCategoryManageView" class="note-category-manage-view">
-          <p class="note-category-modal-hint">Категорияҳои фармоиширо аз ин ҷо пок карда метавонед.</p>
-          <div id="noteCategoryModalList" class="note-category-modal-list"></div>
-        </div>
-      </div>
-      <div class="note-modal-footer">
-        <button id="noteCategorySaveButton" class="btn" type="button" data-action="saveNoteCategory">Сабт</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="noteCategoryDeleteModal" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="ios-modal">
-      <h3>Пок кардани категория</h3>
-      <p id="noteCategoryDeleteMessage">Шумо мутмаин ҳастед, ки ин категория пок карда шавад?</p>
-      <div class="modal-actions">
-        <button class="btn secondary" type="button" data-action="cancelNoteCategoryDelete">Не</button>
-        <button class="btn" type="button" data-action="confirmNoteCategoryDelete">Бале, пок кунед</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="noteUnsavedModal" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="ios-modal">
-      <h3>Тағйирот сабт нашудааст</h3>
-      <p>Шумо тағйиротро сабт накардаед. Аз экран баромадан мехоҳед?</p>
-      <div class="modal-actions">
-        <button class="btn secondary" type="button" data-action="cancelUnsavedNote">Баргаштан</button>
-        <button class="btn" type="button" data-action="discardUnsavedNote">Баромадан</button>
       </div>
     </div>
   </div>
@@ -1085,6 +1076,24 @@ v1.0S → Stable -->
         <button class="btn" type="button" data-action="showLogoutFinalConfirm">
           Бале, идома диҳед
         </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="profileNameModal" class="modal-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="profileNameModalTitle">
+    <div class="ios-modal">
+      <h3 id="profileNameModalTitle">Иваз кардани ном</h3>
+      <p>Ному насаби худро ворид кунед.</p>
+      <div class="profile-name-fields">
+        <input id="profileEditNameInput" class="input-field" type="text" autocomplete="given-name"
+          placeholder="Ном" />
+        <input id="profileEditSurnameInput" class="input-field" type="text" autocomplete="family-name"
+          placeholder="Насаб" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" type="button" data-action="closeProfileNameModal">Лағв</button>
+        <button class="btn" type="button" data-action="saveProfileName">Сабт</button>
       </div>
     </div>
   </div>
@@ -1136,6 +1145,7 @@ v1.0S → Stable -->
   </button>
 
   <nav>
+    <div class="nav-active-indicator" aria-hidden="true"></div>
     <button class="nav-btn active" data-tab="tab-home" aria-label="Ҳисобкунак">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"
         xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -1189,15 +1199,9 @@ v1.0S → Stable -->
 
   <script type="module" src="assets/js/core/entry.js"></script>
   <script type="module" src="assets/js/core/pwa.js"></script>
-  <script type="module" src="assets/js/core/app.js?v=beta2"></script>
-  <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516"
-    integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg=="
-    data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}'
-    crossorigin="anonymous"></script>
-  <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516"
-    integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg=="
-    data-cf-beacon='{"version":"2024.11.0","token":"75291395feba4690880e1012658beac0","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}'
-    crossorigin="anonymous"></script>
+  <script type="module" src="assets/js/core/app.js?v=4.5-s"></script>
 </body>
 
 </html>
+
+<!-- BELIEVE IN GOD -->

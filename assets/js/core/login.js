@@ -1,8 +1,9 @@
-﻿/* profile.js */
-/* Created by Abdughafur - ЧОРЯК 4.4 */
+﻿/* login.js */
+/* Created by Abdughafur - ЧОРЯК 4.5 S (Stable) */
 import { clean, qs, setInputValue } from "../utils/helpers.js";
 import { saveState, loadState, DEFAULT_PROFILE } from "./storage.js";
 import { bindAvatarPicker } from "../ui/avatar-picker.js";
+import { Toast } from "../ui/toast.js";
 
 async function loadProfile() {
   const state = await loadState();
@@ -38,7 +39,7 @@ async function init() {
 
   const avatarImg = qs("profileAvatarPreview");
   const avatarFallback = qs("profileAvatarPreviewFallback");
-  const notice = qs("profileNotice");
+  const toast = new Toast();
 
   if (profile.avatar && avatarImg) {
     avatarImg.src = profile.avatar;
@@ -47,21 +48,12 @@ async function init() {
   }
 
   function showNotice(message, type = "error") {
-    if (!notice) return;
-    notice.textContent = message;
-    notice.className = `profile-notice profile-notice--${type}`;
-  }
-
-  function clearNotice() {
-    if (!notice) return;
-    notice.textContent = "";
-    notice.className = "profile-notice";
+    toast.show(message, type === "success" ? 1600 : 3500);
   }
 
   ["profileNameInput", "profileSurnameInput"].forEach((id) => {
     qs(id)?.addEventListener("input", (event) => {
       sanitizeLettersOnly(event);
-      clearNotice();
     });
   });
 
@@ -113,6 +105,15 @@ async function init() {
       return;
     }
 
+    if (!qs("privacyAgreementInput")?.checked) {
+      showNotice(
+        "Барои идома бо сиёсати махфият розӣ шавед.",
+        "error",
+      );
+      qs("privacyAgreementInput")?.focus();
+      return;
+    }
+
     const updatedProfile = {
       ...profile,
       name,
@@ -122,10 +123,10 @@ async function init() {
 
     await saveProfile(updatedProfile);
     showNotice("Профил сабт шуд.", "success");
-    setTimeout(() => window.location.assign("startup.html"), 900);
+    setTimeout(() => window.location.assign("index.html"), 900);
   });
 }
 
 void init();
 
-/* Created by Abdughafur - ЧОРЯК 4.4 */
+/* Created by Abdughafur - ЧОРЯК 4.5 S (Stable) */

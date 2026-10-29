@@ -1,20 +1,21 @@
 CACHE MANIFEST
-# Choryak offline cache v1.0.0
+# Choryak offline cache v4.5.1 S (Stable)
 
 CACHE:
 ./
 ./index.html
 ./landing.html
-./profile.html
-./startup.html
+./login.html
 ./privacy.html
 ./manifest.json
-./assets/images/logoLight.png
-./assets/images/abdughafur.png
+./assets/images/pics/logo.png
+./assets/images/pics/abdughafur.png
+./assets/images/pics/share-qr.svg
 ./assets/images/minai/ai.png
 ./assets/images/minai/hello.png
 ./assets/images/minai/search.png
 ./assets/images/minai/write.png
+./assets/images/minai/smile.png
 ./assets/css/main.css
 ./assets/css/core/reset.css
 ./assets/css/core/variables.css
@@ -43,7 +44,8 @@ CACHE:
 ./assets/css/pages/percent.css
 ./assets/css/pages/ai.css
 ./assets/css/pages/settings.css
-./assets/css/pages/profile.css
+./assets/css/pages/login.css
+./assets/css/pages/landing.css
 ./assets/css/utilities/spacing.css
 ./assets/css/utilities/colors.css
 ./assets/css/utilities/shadows.css
@@ -51,18 +53,10 @@ CACHE:
 ./assets/css/utilities/helpers.css
 ./assets/js/core/app.js
 ./assets/js/core/entry.js
-./assets/js/core/profile.js
+./assets/js/core/login.js
 ./assets/js/core/storage.js
-./assets/js/core/startup.js
 ./assets/js/core/stats.js
 ./assets/js/core/pwa.js
-./assets/js/ai/minai.js
-./assets/js/ai/context.js
-./assets/js/ai/intent.js
-./assets/js/ai/reasoning.js
-./assets/js/ai/provider.js
-./assets/js/ai/tools.js
-./assets/js/ai/config.js
 ./assets/js/ui/toast.js
 ./assets/js/ui/modal.js
 ./assets/js/ui/chart.js

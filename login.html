@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="tg">
+<!-- Copyright 2026 - Abdughafur Khujzoda -->
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#4f46e5" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Чоряк" />
+    <title>Чоряк — Воридшавӣ</title>
+    <link rel="icon" href="assets/images/pics/logo.png" type="image/png" />
+    <link rel="apple-touch-icon" href="assets/images/pics/logo.png" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="assets/css/main.css?v=4.5-s" />
+</head>
+
+<body class="profile-page" data-theme="light">
+    <div class="profile-page-shell">
+        <aside class="profile-page-visual" aria-label="Манзараи кӯҳистон">
+            <img class="profile-page-visual-image" src="assets/images/pics/mountain.webp" alt="" />
+            <div class="profile-page-visual-overlay">
+                <span class="profile-page-visual-brand">Чоряк</span>
+                <p>Ҳисобу китобро дақиқтар ва осонтар иҷро кунед.</p>
+                <span class="profile-page-visual-caption">Барномаи ҳамроҳи омӯзгор</span>
+            </div>
+        </aside>
+
+        <main class="profile-page-content">
+            <section class="profile-setup-modal profile-page-modal" aria-labelledby="profilePageTitle">
+                <div class="profile-setup-header">
+                    <img class="profile-page-logo" src="assets/images/pics/logo.png" alt="Нишонаи Чоряк" />
+                    <h1 class="profile-setup-title" id="profilePageTitle">Чоряк</h1>
+                </div>
+
+                <p class="profile-setup-welcome">Ба Чоряк хуш омадед. Барои оғоз профили омӯзгории худро созед.</p>
+                <div id="toast" role="status" aria-live="polite"></div>
+
+                <div class="profile-setup-form">
+                    <label class="profile-setup-avatar-label profile-page-avatar-label" for="profileAvatarInput"
+                        data-avatar-picker-trigger>
+                        <div id="profileAvatarView" class="profile-setup-avatar-preview profile-page-avatar">
+                            <img id="profileAvatarPreview" src="" alt="Avatar" />
+                            <span id="profileAvatarPreviewFallback">Ч</span>
+                        </div>
+                        <div class="profile-page-avatar-copy">
+                            <span class="profile-setup-upload-text">Акси профил</span>
+                            <span class="profile-page-avatar-hint">Аксро интихоб кунед ё аз галерея илова намоед.</span>
+                            <span class="profile-page-avatar-action">Иваз кардани акс <span aria-hidden="true">→</span></span>
+                        </div>
+                        <input id="profileAvatarInput" type="file" accept="image/*" />
+                    </label>
+
+                    <input id="profileNameInput" class="input-field profile-setup-input" type="text" placeholder="Номи шумо"
+                        autocomplete="given-name" inputmode="text" aria-label="Номи шумо" />
+                    <input id="profileSurnameInput" class="input-field profile-setup-input" type="text"
+                        placeholder="Насаби шумо" autocomplete="family-name" inputmode="text" aria-label="Насаби шумо" />
+                    <input id="profileSchoolInput" class="input-field profile-setup-input" type="number"
+                        placeholder="Рақами мактаб" autocomplete="off" inputmode="numeric" min="0" step="1"
+                        pattern="[0-9]*" aria-label="Рақами мактаб" />
+
+                    <label class="login-privacy-agreement" for="privacyAgreementInput">
+                        <input id="privacyAgreementInput" type="checkbox" required />
+                        <span>Ман бо <a href="privacy.html" target="_blank" rel="noopener">сиёсати махфият</a> розӣ ҳастам.</span>
+                    </label>
+
+                    <button class="btn profile-setup-btn" type="button" id="saveProfileButton">Сабт ва идома</button>
+                </div>
+            </section>
+            <footer class="login-page-footer">© 2026 Abdughafur Khujzoda · “Чоряк” · Ҳамаи ҳуқуқҳо ҳифз карда шудаанд.</footer>
+        </main>
+    </div>
+
+    <script type="module" src="assets/js/core/entry.js"></script>
+    <script type="module" src="assets/js/core/pwa.js"></script>
+    <script type="module" src="assets/js/core/login.js"></script>
+</body>
+
+</html>
+
+<!-- by Abdughafur -->
+<!-- BELIEVE IN GOD -->

@@ -23,6 +23,55 @@
     box-shadow 320ms ease;
 }
 
+.percent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.percent-actions .clear-percent-btn {
+  margin: 0;
+}
+
+.percent-export-btn {
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-weight: 950;
+}
+
+.percent-minai-card {
+  margin-top: 18px;
+}
+
+.percent-minai-card .minai-coming-soon-art img {
+  width: min(100%, 88px);
+}
+
+.percent-export-fields {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.percent-export-fields label {
+  margin-top: 4px;
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.percent-export-fields .input-field {
+  min-height: 42px;
+}
+
+#percentExportModal .percent-export-modal {
+  max-height: min(720px, calc(100dvh - 32px));
+  overflow-y: auto;
+}
+
 #tab-prosent .clear-percent-btn:active,
 #tab-prosent .clear-percent-btn.is-pressing {
   transform: translateY(-1px) scaleX(1.015);
@@ -217,8 +266,8 @@
 }
 
 @media (min-width: 1100px) {
-  main.container:has(> #tab-prosent.active) {
-    max-width: 1180px;
+  body[data-active-tab="tab-prosent"] main.container {
+    max-width: 1480px;
   }
 
   #tab-prosent .percent-columns {

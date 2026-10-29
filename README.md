@@ -1,8 +1,8 @@
-# ✨ Чоряк v4.4
+# ✨ Чоряк v4.5 S (Stable)
 
-### AI-Powered Quarterly Grade Calculator
+### Quarterly Grade Calculator
 
-Modern web application for quarterly grade calculation, percentage analytics, and AI-powered student performance analysis.
+Modern web application for quarterly grade calculation and percentage analytics.
 
 ---
 
@@ -10,17 +10,19 @@ Modern web application for quarterly grade calculation, percentage analytics, an
 
 ## 📖 Дар бораи лоиҳа
 
-**Чоряк** — веб-барномаи муосир барои ҳисоб кардани натиҷаи чоряк, фоиз ва таҳлили сатҳи донишомӯз бо ёрии **MinAI**.
+**Чоряк** — веб-барномаи муосир барои ҳисоб кардани натиҷаи чоряк ва фоиз.
 
 ### ✨ Имкониятҳо
 
 - 📊 Ҳисоби автоматии чоряк
-- 🧠 Таҳлили AI (MinAI)
+- 📋 Таҳлили фоизҳои синф ва экспорти натиҷа
 - 📈 Диаграммаҳо
 - 📝 Ёддоштҳо
 - 🌙 Dark / Light Mode
 - 🖼 PNG Export
 - 📤 Share Image
+- 📱 Мубодилаи барнома бо QR-код
+- ⚡ Реҷаи сабук барои дастгоҳҳои камқувват
 - 💾 LocalStorage
 - 📱 Responsive Design
 
@@ -34,17 +36,19 @@ Modern web application for quarterly grade calculation, percentage analytics, an
 
 ## 📖 About
 
-**Чоряк** is a modern web application for quarterly grade calculation, percentage analytics, and AI-powered student analysis using **MinAI**.
+**Чоряк** is a modern web application for quarterly grade calculation and percentage analytics.
 
 ### ✨ Features
 
 - 📊 Automatic grade calculation
-- 🧠 MinAI analysis
+- 📋 Class percentage analysis and report export
 - 📈 Charts
 - 📝 Notes
 - 🌙 Dark / Light Mode
 - 🖼 PNG Export
 - 📤 Share Image
+- 📱 QR code app sharing
+- ⚡ Low-effects mode for low-end devices
 - 💾 LocalStorage
 - 📱 Responsive Design
 
@@ -58,17 +62,19 @@ Modern web application for quarterly grade calculation, percentage analytics, an
 
 ## 📖 О проекте
 
-**Чоряк** — современное веб-приложение для расчёта четвертных оценок, анализа процентов и AI-анализа успеваемости с помощью **MinAI**.
+**Чоряк** — современное веб-приложение для расчёта четвертных оценок и анализа процентов.
 
 ### ✨ Возможности
 
 - 📊 Автоматический расчёт
-- 🧠 AI-анализ MinAI
+- 📋 Анализ процентов класса и экспорт отчёта
 - 📈 Графики
 - 📝 Заметки
 - 🌙 Тёмная / светлая тема
 - 🖼 Экспорт PNG
 - 📤 Поделиться изображением
+- 📱 QR-код для ссылки на приложение
+- ⚡ Облегчённый режим для слабых устройств
 - 💾 LocalStorage
 - 📱 Адаптивный дизайн
 

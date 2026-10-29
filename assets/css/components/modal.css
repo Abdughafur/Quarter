@@ -42,92 +42,130 @@
   font-weight: 800;
 }
 
-.startup-notice-backdrop {
-  align-items: flex-end;
-  padding: 0;
+.share-modal-backdrop {
+  z-index: 2100;
+  padding: 16px;
 }
 
-.startup-notice-modal {
-  width: 100vw;
-  max-width: 100%;
-  max-height: min(82vh, 760px);
-  border-radius: 26px 26px 0 0;
-  padding: 12px 18px max(18px, env(safe-area-inset-bottom));
-  overflow-y: auto;
-  overscroll-behavior: contain;
+.share-modal {
+  position: relative;
+  width: min(420px, 100%);
+  padding: 24px;
+  color: var(--text);
+  text-align: center;
 }
 
-.startup-notice-modal::before {
-  content: "";
-  display: block;
-  width: 52px;
-  height: 5px;
-  margin: 2px auto 12px;
-  border-radius: 999px;
-  background: rgba(148, 163, 184, 0.7);
-}
-
-.startup-notice-icon {
-  display: inline-grid;
+.share-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  display: grid;
+  width: 36px;
+  height: 36px;
   place-items: center;
-  width: 48px;
-  height: 48px;
-  margin-bottom: 12px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(59, 130, 246, 0.22));
+  border-radius: 50%;
+  background: var(--soft);
+  color: var(--muted);
   font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
 }
 
-.startup-notice-tag {
-  display: inline-block;
-  margin-bottom: 8px;
+.share-modal-kicker {
+  display: block;
+  margin-bottom: 6px;
   color: var(--primary);
   font-size: 0.68rem;
-  font-weight: 900;
-  letter-spacing: 0.12em;
+  font-weight: 950;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-.startup-notice-modal h3 {
-  margin: 0;
-  font-size: clamp(1.35rem, 2vw, 1.8rem);
+.share-modal h3 {
+  padding-inline: 32px;
 }
 
-.startup-notice-modal p {
-  margin-top: 12px;
-  font-size: 0.98rem;
-  line-height: 1.72;
+.share-modal p {
+  margin-bottom: 16px;
+  font-size: 0.82rem;
 }
 
-.startup-notice-signature {
+.share-qr-frame {
+  position: relative;
+  display: grid;
+  width: min(240px, 72vw);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: #fff;
+}
+
+.share-qr-code {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.share-qr-code[hidden] {
+  display: none;
+}
+
+.share-qr-logo {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  padding: 4px;
+  border: 3px solid #fff;
+  border-radius: 15px;
+  background: #fff;
+  object-fit: cover;
+}
+
+.share-qr-fallback {
+  padding: 16px;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.share-modal-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
   margin-top: 18px;
-  color: var(--muted);
-  font-size: 0.9rem;
-  font-weight: 900;
-  text-align: right;
-  font-style: italic;
 }
 
-.startup-notice-modal .modal-actions {
-  grid-template-columns: 1fr;
-  margin-top: 18px;
+.share-modal-actions .btn {
+  min-width: 0;
+  min-height: 44px;
+  padding-inline: 8px;
 }
 
-@media (min-width: 768px) {
-  .startup-notice-backdrop {
-    align-items: center;
-    padding: 16px;
+.share-modal-backdrop .share-modal {
+  margin-bottom: env(safe-area-inset-bottom);
+}
+
+[data-ui-kit="low"] .share-modal-backdrop,
+[data-ui-kit="low"] .share-modal,
+[data-ui-kit="low"] .share-modal-close {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+@media (max-width: 760px) {
+  .share-modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
   }
 
-  .startup-notice-modal {
-    width: min(560px, 100%);
-    border-radius: 32px;
-    padding: 24px 22px 20px;
-    max-height: min(90vh, 760px);
-  }
-
-  .startup-notice-modal::before {
-    display: none;
+  .share-modal {
+    width: 100%;
+    padding: 22px 18px calc(18px + env(safe-area-inset-bottom));
+    border-radius: 28px 28px 0 0;
   }
 }
 
@@ -269,6 +307,14 @@
 }
 
 @media (max-width: 420px) {
+  .share-modal {
+    padding-inline: 16px;
+  }
+
+  .share-qr-frame {
+    width: min(220px, 68vw);
+  }
+
   .avatar-picker-modal {
     padding: 18px;
     border-radius: 26px;
@@ -281,5 +327,32 @@
   .avatar-picker-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 8px;
+  }
+}
+
+@media (max-width: 760px) {
+  .avatar-picker-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .avatar-picker-modal {
+    width: 100%;
+    max-height: min(720px, calc(100dvh - 20px));
+    margin: 0;
+    padding: 22px 18px calc(18px + env(safe-area-inset-bottom));
+    border-radius: 28px 28px 0 0;
+    transform: translateY(100%);
+    animation: avatarPickerSheetIn 260ms var(--ease) both;
+  }
+
+  @keyframes avatarPickerSheetIn {
+    from {
+      transform: translateY(100%);
+    }
+
+    to {
+      transform: translateY(0);
+    }
   }
 }

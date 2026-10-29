@@ -284,7 +284,10 @@
 
 .minai-coming-soon-badge {
   display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
   align-self: center;
+  justify-self: center;
   align-items: center;
   justify-content: center;
   padding: 7px 12px;
@@ -310,6 +313,67 @@
   color: #536a7c;
 }
 
+.minai-status-card {
+  text-align: left;
+}
+
+.minai-status-card .minai-coming-soon-art img {
+  width: min(100%, 88px);
+}
+
+.minai-status-card .minai-coming-soon-title {
+  text-align: center;
+}
+
+.minai-status-list {
+  display: grid;
+  gap: 8px;
+}
+
+.minai-status-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(14, 165, 233, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.58);
+  color: #536a7c;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.minai-status-item strong {
+  color: #17314a;
+  font-size: 0.86rem;
+  font-weight: 900;
+  text-align: right;
+}
+
+.minai-status-progress {
+  grid-template-columns: 1fr;
+  gap: 4px;
+}
+
+.minai-status-progress strong {
+  font-size: 0.76rem;
+  font-weight: 750;
+  text-align: left;
+}
+
+.minai-status-message {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid rgba(14, 165, 233, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.58);
+  color: #536a7c;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  text-align: left;
+}
+
 [data-theme="dark"] .minai-coming-soon {
   background:
     radial-gradient(circle at 50% 12%, rgba(45, 212, 191, 0.18), transparent 28%),
@@ -329,6 +393,22 @@
 }
 
 [data-theme="dark"] .minai-coming-soon-copy {
+  color: #a9c0cd;
+}
+
+[data-theme="dark"] .minai-status-item {
+  border-color: rgba(148, 196, 219, 0.14);
+  background: rgba(8, 20, 30, 0.48);
+  color: #a9c0cd;
+}
+
+[data-theme="dark"] .minai-status-item strong {
+  color: #edf9ff;
+}
+
+[data-theme="dark"] .minai-status-message {
+  border-color: rgba(148, 196, 219, 0.14);
+  background: rgba(8, 20, 30, 0.48);
   color: #a9c0cd;
 }
 

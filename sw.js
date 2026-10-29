@@ -1,16 +1,16 @@
 /* sw.js */
-const CACHE_NAME = "choryak-cache-v4.4.5";
+const CACHE_NAME = "choryak-cache-v4.5.1-s-stable";
 
 const PRECACHE = [
   "./",
   "./index.html",
   "./landing.html",
-  "./profile.html",
-  "./startup.html",
+  "./login.html",
   "./privacy.html",
   "./manifest.json",
-  "./assets/images/logoLight.png",
-  "./assets/images/abdughafur.png",
+  "./assets/images/pics/logo.png",
+  "./assets/images/pics/abdughafur.png",
+  "./assets/images/pics/share-qr.svg",
   "./assets/css/main.css",
   "./assets/css/core/reset.css",
   "./assets/css/core/variables.css",
@@ -39,36 +39,30 @@ const PRECACHE = [
   "./assets/css/pages/percent.css",
   "./assets/css/pages/ai.css",
   "./assets/css/pages/settings.css",
-  "./assets/css/pages/profile.css",
+  "./assets/css/pages/login.css",
+  "./assets/css/pages/landing.css",
   "./assets/css/utilities/spacing.css",
   "./assets/css/utilities/colors.css",
   "./assets/css/utilities/shadows.css",
   "./assets/css/utilities/radius.css",
   "./assets/css/utilities/helpers.css",
-  "./assets/js/core/app.js?v=beta2",
+  "./assets/js/core/app.js?v=4.5-s",
   "./assets/js/core/entry.js",
-  "./assets/js/core/profile.js",
+  "./assets/js/core/login.js",
   "./assets/js/core/storage.js",
-  "./assets/js/core/startup.js",
   "./assets/js/core/stats.js?v=chat1",
   "./assets/js/core/pwa.js",
-  "./assets/js/ai/minai.js?v=beta2",
-  "./assets/js/ai/context.js?v=chat2",
-  "./assets/js/ai/intent.js?v=chat2",
-  "./assets/js/ai/reasoning.js?v=chat2",
-  "./assets/js/ai/provider.js?v=beta2",
-  "./assets/js/ai/tools.js?v=beta2",
-  "./assets/js/ai/config.js?v=beta1",
   "./assets/js/ui/toast.js",
   "./assets/js/ui/modal.js",
   "./assets/js/ui/chart.js",
   "./assets/js/ui/avatar-picker.js",
   "./assets/js/utils/helpers.js",
-  "./assets/css/components/modal.css?v=2",
+  "./assets/css/components/modal.css?v=4.5-s",
   "./assets/images/minai/ai.png",
   "./assets/images/minai/hello.png",
   "./assets/images/minai/search.png",
   "./assets/images/minai/write.png",
+  "./assets/images/minai/smile.png",
 ];
 
 function isSameOrigin(request) {
@@ -89,7 +83,7 @@ async function networkFirst(request) {
   try {
     const response = await fetch(request);
     if (response && response.ok) {
-      cache.put(request, response.clone());
+      await cache.put(request, response.clone());
     }
     return response;
   } catch {
@@ -101,19 +95,21 @@ async function networkFirst(request) {
   }
 }
 
-async function staleWhileRevalidate(request) {
-  const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(request);
-
-  try {
-    const response = await fetch(request);
-    if (response && response.ok) {
-      cache.put(request, response.clone());
-    }
-    return response;
-  } catch {
-    return cached;
-  }
+function staleWhileRevalidate(event) {
+  const request = event.request;
+  const cachePromise = caches.open(CACHE_NAME);
+  const update = cachePromise.then((cache) =>
+    fetch(request).then((response) => {
+      if (response && response.ok) {
+        return cache.put(request, response.clone()).then(() => response);
+      }
+      return response;
+    }),
+  );
+  event.waitUntil(update.catch(() => undefined));
+  return cachePromise.then((cache) => cache.match(request)).then(
+    (cached) => cached || update,
+  );
 }
 
 self.addEventListener("install", (event) => {
@@ -138,7 +134,10 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== CACHE_NAME)
+            .filter(
+              (key) =>
+                key.startsWith("choryak-cache-") && key !== CACHE_NAME,
+            )
             .map((key) => caches.delete(key)),
         ),
       )
@@ -156,5 +155,5 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  event.respondWith(staleWhileRevalidate(event.request));
+  event.respondWith(staleWhileRevalidate(event));
 });

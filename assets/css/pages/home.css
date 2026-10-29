@@ -243,8 +243,8 @@
 }
 
 @media (min-width: 1100px) {
-  main.container:has(> #tab-home.active) {
-    max-width: 1180px;
+  body[data-active-tab="tab-home"] main.container {
+    max-width: 1480px;
   }
 
   .calculator-desktop-layout {

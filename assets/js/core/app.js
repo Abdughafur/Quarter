@@ -1,8 +1,11 @@
 /* app.js */
-import { askMinAI, renderMinAI } from "../ai/minai.js?v=beta2";
-import { calculateStats, gradeLabel, GRADE_LABELS } from "./stats.js";
 import {
-  DEFAULT_NOTE_CATEGORIES,
+  calculateStats,
+  getTrend,
+  gradeLabel,
+  GRADE_LABELS,
+} from "./stats.js";
+import {
   loadState,
   saveState,
   clearState,
@@ -29,8 +32,9 @@ import {
   toInt,
   uid,
   whenReady,
-  safeParseStorage,
 } from "../utils/helpers.js";
+
+const SHARE_URL = "https://abdughafur.github.io/Quarter/";
 
 const setStretchState = (element, offsetX, offsetY, angle, scale) => {
   element.style.setProperty("--stretch-x", `${offsetX}px`);
@@ -71,19 +75,13 @@ export const app = {
   initialized: false,
   notes: [],
   tasks: [],
-  noteCategories: [...DEFAULT_NOTE_CATEGORIES],
   selectedNoteId: null,
   editingNoteId: null,
   creatingNoteInline: false,
-  noteDetailDirty: false,
-  pendingNoteCategoryDelete: null,
-  noteFilter: "all",
+  noteAutosaveTimer: null,
   activeNoteId: null,
   noteHistory: [],
   noteHistoryIndex: -1,
-  aiChatBound: false,
-  aiHistory: [],
-  aiGenerating: false,
   info: {},
   profile: {
     name: "",
@@ -102,11 +100,32 @@ export const app = {
     this.settings = state.settings;
     this.notes = Array.isArray(state.notes) ? state.notes : [];
     this.tasks = Array.isArray(state.tasks) ? state.tasks : [];
-    this.noteCategories = Array.isArray(state.noteCategories)
-      ? state.noteCategories
-      : [...DEFAULT_NOTE_CATEGORIES];
-    this.noteFilter = "all";
     this.activeNoteId = null;
+
+    document.addEventListener(
+      "pointerdown",
+      (event) => {
+        if (
+          this.settings.uiKit !== "perfect" &&
+          !event.target.closest(".theme-options, #uiKitRange")
+        ) {
+          event.stopImmediatePropagation();
+        }
+      },
+      true,
+    );
+    this.systemThemeQuery =
+      typeof window.matchMedia === "function"
+        ? window.matchMedia("(prefers-color-scheme: dark)")
+        : null;
+    const handleSystemThemeChange = () => {
+      if (this.settings.theme === "system") this.applySettings();
+    };
+    if (this.systemThemeQuery?.addEventListener) {
+      this.systemThemeQuery.addEventListener("change", handleSystemThemeChange);
+    } else if (this.systemThemeQuery?.addListener) {
+      this.systemThemeQuery.addListener(handleSystemThemeChange);
+    }
 
     this.bindResultDetailsToggle();
     this.bindGradesToggle();
@@ -124,346 +143,218 @@ export const app = {
     this.bind(state.info);
     this.info = state.info || {};
     this.profile = state.profile || this.profile;
-    this.bindStartupNotice();
     if (this.checkFirstRun()) return;
     this.bindProfile();
-    this.bindAIChat();
     this.updateProfileUI(this.profile);
-    // load persisted MinAI history so chat survives refresh unless user restarts
-    try {
-      const stored = safeParseStorage("minai_history", []);
-      this.aiHistory = Array.isArray(stored) ? stored.slice(-12) : [];
-      renderMinAI({ messages: this.aiHistory, userAvatar: this.profile.avatar, userName: `${this.profile.name || ''}` });
-    } catch {}
     this.buildKeypad();
     this.buildPercentRows();
     this.applySettings();
     this.updateAll();
     this.renderNotes();
-    this.renderNoteCategories();
-    this.bindNoteFilterDrag();
-    this.bindNoteCategoryReorder();
 
     // initialize nav highlight and draggable behavior
     this.setupNavDrag();
   },
 
-  bindAIChat() {
-    if (this.aiChatBound) return;
-    this.aiChatBound = true;
-    const form = qs("aiChatForm");
-    const input = qs("aiQuestionInput");
-    form?.addEventListener("submit", (event) => {
-      event.preventDefault();
-      void this.askAI();
-    });
-    input?.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-        void this.askAI();
-      }
-    });
-    // bind quick question chips (if present)
-    const quickChips = Array.from(document.querySelectorAll('[data-action="askAIQuick"]'));
-    quickChips.forEach((chip) => {
-      chip.addEventListener("click", (e) => {
-        const q = chip.dataset.question;
-        if (q) void this.askAIQuick(q);
-      });
-    });
-    // randomize question chips order and apply slight random transforms
-    const questionList = document.querySelector('.minai-question-list');
-    if (questionList) {
-      const chips = Array.from(questionList.children);
-      // shuffle order
-      for (let i = chips.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [chips[i], chips[j]] = [chips[j], chips[i]];
-      }
-      // clear and re-append in shuffled order (no skew/rotation)
-      questionList.innerHTML = "";
-      chips.forEach((chip, idx) => {
-        chip.style.transform = '';
-        chip.style.opacity = '0';
-        chip.style.transitionDelay = `${idx * 25}ms`;
-        questionList.appendChild(chip);
-        // fade in without rotation
-        requestAnimationFrame(() => {
-          chip.style.opacity = '1';
-        });
-      });
-    }
-    // bind clear/restart chat button
-    const clearBtn = document.querySelector('[data-action="clearAIChat"]');
-    if (clearBtn) {
-      clearBtn.addEventListener("click", () => {
-        this.aiHistory = [];
-        try {
-          localStorage.removeItem("minai_history");
-        } catch {}
-        const chat = document.querySelector("#aiChatMessages");
-        if (chat) chat.innerHTML = "";
-        renderMinAI({ messages: [], userAvatar: this.profile.avatar, userName: `${this.profile.name || ''}` });
-      });
-    }
-  },
-
-  async askAIQuick(question) {
-    if (this.aiGenerating) return;
-    this.aiGenerating = true;
-    this.aiHistory.push({ role: "user", content: question });
-    renderMinAI({
-      messages: this.aiHistory,
-      loading: true,
-      userAvatar: this.profile.avatar,
-    });
-    try { localStorage.setItem('minai_history', JSON.stringify(this.aiHistory)); } catch {}
-
-    try {
-      const response = await askMinAI({
-        grades: this.grades,
-        profile: this.profile,
-        info: this.info,
-        target: null,
-        question,
-        history: this.aiHistory,
-        app: this,
-      });
-      if (response?.answer) {
-        this.aiHistory.push({ role: "assistant", content: response.answer });
-        try { localStorage.setItem('minai_history', JSON.stringify(this.aiHistory)); } catch {}
-      }
-    } catch {
-      this.aiHistory.push({ role: "assistant", content: "Ҳоло ҷавоб омода карда нашуд. Лутфан баъдтар кӯшиш кунед." });
-    } finally {
-      this.aiHistory = this.aiHistory.slice(-12);
-      this.aiGenerating = false;
-      renderMinAI({ messages: this.aiHistory, userAvatar: this.profile.avatar });
-    }
-  },
-
-  async askAI() {
-    if (this.aiGenerating) return;
-    const input = qs("aiQuestionInput");
-    const question = clean(input?.value || "", 500);
-    if (!question) return;
-
-    this.aiGenerating = true;
-    this.aiHistory.push({ role: "user", content: question });
-    renderMinAI({
-      messages: this.aiHistory,
-      loading: true,
-      userAvatar: this.profile.avatar,
-    });
-    if (input) input.value = "";
-    setText("aiAskButton", "Ҷавоб...");
-    try { localStorage.setItem('minai_history', JSON.stringify(this.aiHistory)); } catch {}
-
-    try {
-      const response = await askMinAI({
-        grades: this.grades,
-        profile: this.profile,
-        info: this.info,
-        target: qs("aiGoalInput")?.value || null,
-        question,
-        history: this.aiHistory,
-        app: this,
-      });
-      if (response?.answer) {
-        this.aiHistory.push({ role: "assistant", content: response.answer });
-        try { localStorage.setItem('minai_history', JSON.stringify(this.aiHistory)); } catch {}
-      }
-    } catch {
-      this.aiHistory.push({
-        role: "assistant",
-        content:
-          "Ҳоло ҷавоб омода карда нашуд. Лутфан саволро бори дигар фиристед.",
-      });
-    } finally {
-      this.aiHistory = this.aiHistory.slice(-12);
-      this.aiGenerating = false;
-      setText("aiAskButton", "Фиристодан");
-      renderMinAI({
-        messages: this.aiHistory,
-        userAvatar: this.profile.avatar,
-      });
-      input?.focus();
-    }
-  },
-
   setupNavDrag() {
-    try {
-      // enable draggable highlight only on phone-sized screens
-      const isMobile =
-        typeof window !== "undefined" &&
-        ((window.matchMedia &&
-          window.matchMedia("(max-width: 760px)").matches) ||
-          window.innerWidth <= 760);
-      if (!isMobile) return;
-      const nav = document.querySelector("nav");
-      if (!nav) return;
+    const nav = document.querySelector("nav");
+    if (!nav) return;
 
-      const buttons = Array.from(nav.querySelectorAll(".nav-btn"));
-      if (!buttons.length) return;
+    const buttons = Array.from(nav.querySelectorAll(".nav-btn"));
+    if (!buttons.length) return;
 
-      const updatePosition = (btn) => {
-        btn.classList.add("active");
-      };
+    const indicator = nav.querySelector(".nav-active-indicator");
+    const isMobile = () =>
+      (typeof window.matchMedia === "function" &&
+        window.matchMedia("(max-width: 760px)").matches) ||
+      window.innerWidth <= 760;
+    const updateIndicator = (button) => {
+      if (!indicator || !button) return;
+      const navRect = nav.getBoundingClientRect();
+      const buttonRect = button.getBoundingClientRect();
+      const paddingLeft = Number.parseFloat(getComputedStyle(nav).paddingLeft) || 0;
+      const indicatorOrigin = navRect.left + nav.clientLeft + paddingLeft;
 
-      // initial position to active and size highlight
-      const active = nav.querySelector(".nav-btn.active") || buttons[0];
-      updatePosition(active);
+      indicator.style.setProperty(
+        "--nav-indicator-x",
+        `${buttonRect.left - indicatorOrigin}px`,
+      );
+      indicator.style.setProperty(
+        "--nav-indicator-width",
+        `${buttonRect.width}px`,
+      );
+    };
+    const updatePosition = (button) => {
+      buttons.forEach((item) => {
+        const selected = item === button;
+        item.classList.toggle("active", selected);
+        if (selected) item.setAttribute("aria-current", "page");
+        else item.removeAttribute("aria-current");
+      });
+      updateIndicator(button);
+    };
+    const active = nav.querySelector(".nav-btn.active") || buttons[0];
+    updatePosition(active);
+    document.body.dataset.activeTab =
+      document.querySelector(".tab.active")?.id || active.dataset.tab || "";
 
-      // when nav is changed programmatically
-      this.updateNavHighlight = (button) => {
-        const btn =
-          button || nav.querySelector(".nav-btn.active") || buttons[0];
-        if (btn) updatePosition(btn);
-      };
+    this.updateNavHighlight = (button) => {
+      updatePosition(
+        button || nav.querySelector(".nav-btn.active") || buttons[0],
+      );
+    };
 
-      // pointer drag
-      let dragging = false;
-      let pointerId = null;
-      let pendingFrame = false;
-      let currentX = 0;
-      let dragStartX = 0;
-      let dragDirection = "left center";
-      let navRect = null;
-      let buttonCenters = [];
-      let minX = 0;
-      let maxX = 0;
-      let lastNearest = null;
+    let pointerId = null;
+    let dragging = false;
+    let pendingFrame = false;
+    let currentX = 0;
+    let startX = 0;
+    let startY = 0;
+    let navRect = null;
+    let buttonCenters = [];
+    let suppressNextClick = false;
 
-      const refreshButtonData = () => {
-        navRect = nav.getBoundingClientRect();
-        buttonCenters = buttons.map((btn) => {
-          const brect = btn.getBoundingClientRect();
-          return {
-            btn,
-            center: brect.left - navRect.left + brect.width / 2,
-          };
-        });
-
-        const first = buttonCenters[0];
-        const last = buttonCenters[buttonCenters.length - 1];
-        minX = Math.round(first.center);
-        maxX = Math.round(last.center);
-      };
-
-      const updateDrag = () => {
-        pendingFrame = false;
-        if (!dragging) return;
-        if (!navRect || !buttonCenters.length) refreshButtonData();
-
-        const xCenter = currentX - navRect.left;
-
-        let nearest = buttonCenters[0];
-        let nearestDist = Infinity;
-        for (const item of buttonCenters) {
-          const dist = Math.abs(item.center - xCenter);
-          if (dist < nearestDist) {
-            nearestDist = dist;
-            nearest = item;
-          }
-        }
-
-        dragDirection = currentX >= dragStartX ? "left center" : "right center";
-
-        if (nearest.btn !== lastNearest) {
-          buttons.forEach((button) => {
-            button.classList.remove("drag-target");
-            button.style.removeProperty("--drag-origin");
-          });
-          nearest.btn.classList.add("drag-target");
-          nearest.btn.style.setProperty("--drag-origin", dragDirection);
-          lastNearest = nearest.btn;
-        } else {
-          nearest.btn.style.setProperty("--drag-origin", dragDirection);
-        }
-
-        const dragOffset = Math.max(-12, Math.min(12, currentX - dragStartX));
-        const dragScale =
-          1 + Math.min(Math.abs(currentX - dragStartX) * 0.0015, 0.08);
-        setStretchState(nearest.btn, dragOffset, 0, 0, dragScale);
-      };
-
-      const onPointerDown = (e) => {
-        if (e.pointerType === "mouse" && e.button !== 0) return;
-        dragging = true;
-        document.documentElement.classList.add("button-stretching");
-        document.body.classList.add("button-stretching");
-        pointerId = e.pointerId;
-        dragStartX = e.clientX;
-        dragDirection = "left center";
-        nav.classList.add("is-dragging");
-        try {
-          nav.setPointerCapture?.(pointerId);
-        } catch (_) {}
-        refreshButtonData();
-        currentX = e.clientX;
-        lastNearest = null;
-        if (!pendingFrame) {
-          pendingFrame = true;
-          requestAnimationFrame(updateDrag);
-        }
-      };
-
-      const onPointerMove = (e) => {
-        if (!dragging || e.pointerId !== pointerId) return;
-        currentX = e.clientX;
-        dragDirection = currentX >= dragStartX ? "left center" : "right center";
-        if (!pendingFrame) {
-          pendingFrame = true;
-          requestAnimationFrame(updateDrag);
-        }
-      };
-
-      const onPointerUp = (e) => {
-        if (!dragging || e.pointerId !== pointerId) return;
+    const refreshButtonData = () => {
+      navRect = nav.getBoundingClientRect();
+      buttonCenters = buttons.map((button) => {
+        const rect = button.getBoundingClientRect();
+        return {
+          btn: button,
+          center: rect.left - navRect.left + rect.width / 2,
+        };
+      });
+    };
+    const nearestButton = (clientX) => {
+      const x = clientX - navRect.left;
+      return buttonCenters.reduce((nearest, item) =>
+        Math.abs(item.center - x) < Math.abs(nearest.center - x)
+          ? item
+          : nearest,
+      );
+    };
+    const moveIndicator = (clientX) => {
+      if (!indicator || !navRect || !buttonCenters.length) return;
+      const firstButton = buttons[0].getBoundingClientRect();
+      const lastButton = buttons[buttons.length - 1].getBoundingClientRect();
+      const navStyle = getComputedStyle(nav);
+      const paddingLeft = Number.parseFloat(navStyle.paddingLeft) || 0;
+      const origin = navRect.left + nav.clientLeft + paddingLeft;
+      const width = firstButton.width;
+      const minX = firstButton.left - origin;
+      const maxX = Math.max(minX, lastButton.right - origin - width);
+      const x = Math.max(
+        minX,
+        Math.min(maxX, clientX - origin - width / 2),
+      );
+      indicator.style.setProperty("--nav-indicator-x", `${x}px`);
+    };
+    const canDrag = () =>
+      isMobile() &&
+      this.settings.uiKit === "perfect" &&
+      !document.body.classList.contains("more-subview-open") &&
+      !document.querySelector(
+        ".modal-backdrop.open, .note-modal-backdrop.open, .avatar-picker-backdrop.open",
+      );
+    const startDragging = (event) => {
+      dragging = true;
+      nav.classList.add("is-dragging");
+      refreshButtonData();
+      try {
+        nav.setPointerCapture(event.pointerId);
+      } catch (error) {
+        console.warn("Navigation drag pointer capture failed.", error);
+      }
+    };
+    const updateDrag = () => {
+      pendingFrame = false;
+      if (!dragging) return;
+      moveIndicator(currentX);
+    };
+    const onPointerDown = (event) => {
+      if (!canDrag()) return;
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      if (!event.target.closest(".nav-btn")) return;
+      pointerId = event.pointerId;
+      startX = currentX = event.clientX;
+      startY = event.clientY;
+      dragging = false;
+      refreshButtonData();
+    };
+    const onPointerMove = (event) => {
+      if (event.pointerId !== pointerId) return;
+      if (!canDrag()) {
+        pointerId = null;
         dragging = false;
-        document.documentElement.classList.remove("button-stretching");
-        document.body.classList.remove("button-stretching");
         nav.classList.remove("is-dragging");
-        if (lastNearest) {
-          const releasedButton = lastNearest;
-          releasedButton.classList.add("is-releasing");
-          setTimeout(() => {
-            releasedButton.classList.remove("is-releasing");
-            clearStretchState(releasedButton);
-          }, 600);
+        updatePosition(
+          nav.querySelector(".nav-btn.active") || buttons[0],
+        );
+        return;
+      }
+      currentX = event.clientX;
+      if (!dragging) {
+        const deltaX = Math.abs(currentX - startX);
+        const deltaY = Math.abs(event.clientY - startY);
+        if (deltaX < 8 || deltaX <= deltaY) return;
+        startDragging(event);
+      }
+      if (!pendingFrame) {
+        pendingFrame = true;
+        requestAnimationFrame(updateDrag);
+      }
+    };
+    const onPointerUp = (event) => {
+      if (event.pointerId !== pointerId) return;
+      const wasDragging = dragging;
+      pointerId = null;
+      dragging = false;
+      nav.classList.remove("is-dragging");
+      if (!wasDragging) return;
+
+      try {
+        if (nav.hasPointerCapture?.(event.pointerId)) {
+          nav.releasePointerCapture?.(event.pointerId);
         }
-        buttons.forEach((button) => {
-          button.classList.remove("drag-target");
-          button.style.removeProperty("--drag-origin");
-        });
-        try {
-          nav.releasePointerCapture?.(pointerId);
-        } catch (_) {}
+      } catch (error) {
+        console.warn("Navigation drag pointer release failed.", error);
+      }
 
-        refreshButtonData();
-        const centerX = e.clientX - navRect.left;
-        let nearest = buttonCenters[0];
-        let nearestDist = Infinity;
-        for (const item of buttonCenters) {
-          const dist = Math.abs(item.center - centerX);
-          if (dist < nearestDist) {
-            nearestDist = dist;
-            nearest = item;
-          }
-        }
+      if (event.type === "pointercancel" || !canDrag()) {
+        updatePosition(
+          nav.querySelector(".nav-btn.active") || buttons[0],
+        );
+        return;
+      }
 
-        const tab = nearest.btn.dataset.tab;
-        if (tab) this.nav(tab, nearest.btn);
-        updatePosition(nearest.btn, true);
-      };
+      refreshButtonData();
+      const nearest = nearestButton(event.clientX);
+      suppressNextClick = true;
+      setTimeout(() => {
+        suppressNextClick = false;
+      }, 0);
+      if (nearest.btn.dataset.tab) {
+        this.nav(nearest.btn.dataset.tab, nearest.btn);
+      }
+    };
 
-      nav.addEventListener("pointerdown", onPointerDown);
-      window.addEventListener("pointermove", onPointerMove);
-      window.addEventListener("pointerup", onPointerUp);
-      window.addEventListener("pointercancel", onPointerUp);
-    } catch (err) {
-      // silent
-    }
+    nav.addEventListener("pointerdown", onPointerDown);
+    nav.addEventListener(
+      "click",
+      (event) => {
+        if (!suppressNextClick) return;
+        suppressNextClick = false;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      },
+      true,
+    );
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
+    window.addEventListener("resize", () => {
+      const selected = nav.querySelector(".nav-btn.active") || buttons[0];
+      updateIndicator(selected);
+    });
   },
 
   bindResultDetailsToggle() {
@@ -634,86 +525,85 @@ export const app = {
   },
 
   bindExportActionStretch() {
-    const button = document.querySelector(".export-action");
-    if (!button || button.dataset.stretchBound === "true") return;
+    document
+      .querySelectorAll(".export-action, .percent-export-btn")
+      .forEach((button) => {
+        if (button.dataset.stretchBound === "true") return;
 
-    button.dataset.stretchBound = "true";
-    let pointerId = null;
-    let startX = 0;
-    let startY = 0;
-    let dragged = false;
+        button.dataset.stretchBound = "true";
+        let pointerId = null;
+        let startX = 0;
+        let startY = 0;
+        let dragged = false;
 
-    button.addEventListener("pointerdown", (event) => {
-      if (event.pointerType === "mouse" && event.button !== 0) return;
+        button.addEventListener("pointerdown", (event) => {
+          if (event.pointerType === "mouse" && event.button !== 0) return;
 
-      pointerId = event.pointerId;
-      startX = event.clientX;
-      startY = event.clientY;
-      dragged = false;
-      button.classList.add("is-stretching");
-      document.documentElement.classList.add("button-stretching");
-      document.body.classList.add("button-stretching");
-      button.style.transformOrigin = "center";
-      button.style.transition =
-        "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
-      button.style.transform = "scale(0.985)";
-      try {
-        try {
-          button.setPointerCapture?.(pointerId);
-        } catch (error) {}
-      } catch (error) {}
-    });
+          pointerId = event.pointerId;
+          startX = event.clientX;
+          startY = event.clientY;
+          dragged = false;
+          button.classList.add("is-stretching");
+          document.documentElement.classList.add("button-stretching");
+          document.body.classList.add("button-stretching");
+          button.style.transformOrigin = "center";
+          button.style.transition =
+            "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
+          button.style.transform = "scale(0.985)";
+          try {
+            button.setPointerCapture?.(pointerId);
+          } catch (error) {}
+        });
 
-    button.addEventListener("pointermove", (event) => {
-      if (event.pointerId !== pointerId) return;
+        button.addEventListener("pointermove", (event) => {
+          if (event.pointerId !== pointerId) return;
 
-      const deltaX = event.clientX - startX;
-      const deltaY = event.clientY - startY;
-      const distance = Math.hypot(deltaX, deltaY);
-      if (distance > 8) dragged = true;
+          const deltaX = event.clientX - startX;
+          const deltaY = event.clientY - startY;
+          const distance = Math.hypot(deltaX, deltaY);
+          if (distance > 8) dragged = true;
 
-      const offsetX = Math.max(-4, Math.min(4, deltaX * 0.035));
-      const offsetY = Math.max(-2, Math.min(2, deltaY * 0.02));
-      const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
-      const scale = 1 + Math.min(distance * 0.0018, 0.085);
+          const offsetX = Math.max(-4, Math.min(4, deltaX * 0.035));
+          const offsetY = Math.max(-2, Math.min(2, deltaY * 0.02));
+          const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+          const scale = 1 + Math.min(distance * 0.0018, 0.085);
 
-      button.style.transformOrigin = "center";
-      button.style.transition =
-        "transform 120ms cubic-bezier(0.22, 1, 0.36, 1), background 180ms ease, box-shadow 180ms ease";
-      button.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg) scaleX(${scale}) rotate(${-angle}deg)`;
-      setStretchState(button, offsetX, offsetY, angle, scale);
-    });
+          button.style.transformOrigin = "center";
+          button.style.transition =
+            "transform 120ms cubic-bezier(0.22, 1, 0.36, 1), background 180ms ease, box-shadow 180ms ease";
+          button.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg) scaleX(${scale}) rotate(${-angle}deg)`;
+          setStretchState(button, offsetX, offsetY, angle, scale);
+        });
 
-    const resetButton = (event) => {
-      if (event.pointerId !== pointerId) return;
+        const resetButton = (event) => {
+          if (event.pointerId !== pointerId) return;
 
-      try {
-        try {
-          button.releasePointerCapture?.(pointerId);
-        } catch (error) {}
-      } catch (error) {}
-      button.classList.remove("is-stretching");
-      button.classList.add("is-releasing");
-      document.documentElement.classList.remove("button-stretching");
-      document.body.classList.remove("button-stretching");
+          try {
+            button.releasePointerCapture?.(pointerId);
+          } catch (error) {}
+          button.classList.remove("is-stretching");
+          button.classList.add("is-releasing");
+          document.documentElement.classList.remove("button-stretching");
+          document.body.classList.remove("button-stretching");
 
-      if (dragged) {
-        button.dataset.dragged = "true";
-        setTimeout(() => delete button.dataset.dragged, 0);
-      }
+          if (dragged) {
+            button.dataset.dragged = "true";
+            setTimeout(() => delete button.dataset.dragged, 0);
+          }
 
-      pointerId = null;
-      setTimeout(() => {
-        button.classList.remove("is-releasing");
-        button.style.removeProperty("transform");
-        button.style.removeProperty("transition");
-        button.style.removeProperty("transform-origin");
-        clearStretchState(button);
-      }, 600);
-    };
+          pointerId = null;
+          setTimeout(() => {
+            button.classList.remove("is-releasing");
+            button.style.removeProperty("transform");
+            button.style.removeProperty("transition");
+            button.style.removeProperty("transform-origin");
+            clearStretchState(button);
+          }, 600);
+        };
 
-    button.addEventListener("pointerup", resetButton);
-    button.addEventListener("pointercancel", resetButton);
+        button.addEventListener("pointerup", resetButton);
+        button.addEventListener("pointercancel", resetButton);
+      });
   },
 
   bindChartScrollButtonStretch() {
@@ -802,6 +692,25 @@ export const app = {
       input.value = value;
     });
 
+    qs("percentExportClass")?.addEventListener("input", (event) => {
+      const input = event.target;
+      const value = String(input.value || "")
+        .replace(/\D/g, "")
+        .replace(/^0+(?=\d)/, "");
+      input.value =
+        value && Number(value) >= 1 && Number(value) <= 11 ? value : "";
+    });
+
+    ["percentExportTeacher", "percentExportSubject"].forEach((fieldId) => {
+      qs(fieldId)?.addEventListener("input", (event) => {
+        const input = event.target;
+        input.value = String(input.value || "")
+          .replace(/[^\p{L}\p{M}\s]/gu, "")
+          .replace(/\s{2,}/g, " ")
+          .trimStart();
+      });
+    });
+
     document.addEventListener("click", (event) => {
       const actionButton = event.target.closest("[data-action]");
       if (actionButton?.dataset.dragged) {
@@ -810,12 +719,28 @@ export const app = {
       }
       if (actionButton)
         this.action(actionButton.dataset.action, actionButton.dataset);
+      if (event.target.id === "shareModal") this.closeShareModal();
 
       const tabButton = event.target.closest("[data-tab]");
       if (tabButton) this.nav(tabButton.dataset.tab, tabButton);
     });
 
+    const shareQrCode = qs("shareQrCode");
+    const shareQrFallback = qs("shareQrFallback");
+    shareQrCode?.addEventListener("load", () => {
+      shareQrCode.hidden = false;
+      if (shareQrFallback) shareQrFallback.hidden = true;
+    });
+    shareQrCode?.addEventListener("error", () => {
+      shareQrCode.hidden = true;
+      if (shareQrFallback) shareQrFallback.hidden = false;
+    });
+
     this.bindNotesSwitcherGesture();
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") this.closeShareModal();
+    });
 
     document
       .querySelectorAll(".mobile-subview-header .btn-back")
@@ -1072,99 +997,6 @@ export const app = {
       this.selectNote(noteId);
     });
 
-    qs("noteCategoryRow")?.addEventListener("click", (event) => {
-      const button = event.target.closest(".note-category-pill");
-      if (!button) return;
-      if (button.dataset.dragged) {
-        delete button.dataset.dragged;
-        return;
-      }
-      const category = button.dataset.category;
-      this.setNoteCategory(category);
-    });
-
-    qs("noteCategoryRow")?.addEventListener("keydown", (event) => {
-      const button = event.target.closest(".note-category-pill");
-      if (!button || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
-      const buttons = [
-        ...event.currentTarget.querySelectorAll(".note-category-pill"),
-      ];
-      const offset = event.key === "ArrowRight" ? 1 : -1;
-      const next =
-        buttons[
-          (buttons.indexOf(button) + offset + buttons.length) % buttons.length
-        ];
-      event.preventDefault();
-      next?.focus();
-      next?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
-      });
-    });
-
-    document
-      .querySelectorAll(".note-category-pill, .notes-filters .pill")
-      .forEach((button) => {
-        let pointerId = null;
-        let startX = 0;
-        let startY = 0;
-        let dragged = false;
-
-        button.addEventListener("pointerdown", (event) => {
-          if (event.pointerType === "mouse" && event.button !== 0) return;
-          event.preventDefault();
-          pointerId = event.pointerId;
-          startX = event.clientX;
-          startY = event.clientY;
-          dragged = false;
-          button.classList.add("is-stretching");
-          document.documentElement.classList.add("button-stretching");
-          document.body.classList.add("button-stretching");
-          try {
-            button.setPointerCapture?.(pointerId);
-          } catch (error) {}
-        });
-
-        button.addEventListener("pointermove", (event) => {
-          if (event.pointerId !== pointerId) return;
-          const deltaX = event.clientX - startX;
-          const deltaY = event.clientY - startY;
-          const distance = Math.hypot(deltaX, deltaY);
-          if (distance > 8) dragged = true;
-          const offsetX = clamp(deltaX * 0.04, -5, 5);
-          const offsetY = clamp(deltaY * 0.04, -5, 5);
-          const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
-          const scale = 1 + Math.min(distance * 0.0025, 0.075);
-          button.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg) scaleX(${scale}) rotate(${-angle}deg)`;
-          setStretchState(button, offsetX, offsetY, angle, scale);
-        });
-
-        const resetCategory = (event) => {
-          if (event.pointerId !== pointerId) return;
-          try {
-            button.releasePointerCapture?.(pointerId);
-          } catch (error) {}
-          button.classList.remove("is-stretching");
-          button.classList.add("is-releasing");
-          document.documentElement.classList.remove("button-stretching");
-          document.body.classList.remove("button-stretching");
-          if (dragged) {
-            button.dataset.dragged = "true";
-            setTimeout(() => delete button.dataset.dragged, 260);
-          }
-          pointerId = null;
-          setTimeout(() => {
-            button.classList.remove("is-releasing");
-            button.style.removeProperty("transform");
-            clearStretchState(button);
-          }, 600);
-        };
-
-        button.addEventListener("pointerup", resetCategory);
-        button.addEventListener("pointercancel", resetCategory);
-      });
-
     qs("noteSearchInput")?.addEventListener("input", () => this.renderNotes());
 
     if (this.settings.fs) {
@@ -1194,13 +1026,99 @@ export const app = {
       this.setPupilTotal(),
     );
     document.addEventListener("keydown", (event) => this.keyboard(event));
+    window.addEventListener("pagehide", () => this.flushNoteAutosave());
     this.bindSwitches();
+    this.bindThemeSelector();
+    const uiKitRange = qs("uiKitRange");
+    uiKitRange?.addEventListener("input", () => {
+      this.setUiKit(Number(uiKitRange.value), { commit: false });
+    });
+    uiKitRange?.addEventListener("change", () => {
+      this.setUiKit(Number(uiKitRange.value));
+    });
+  },
+
+  bindThemeSelector() {
+    const group = qs("themeOptions");
+    if (!group) return;
+
+    let pointerId = null;
+    let startX = 0;
+    let dragged = false;
+    let selectedIndex = 0;
+    const options = [...group.querySelectorAll(".theme-option")];
+
+    const selectAt = (clientX) => {
+      const rect = group.getBoundingClientRect();
+      const position = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      selectedIndex = Math.round(position * (options.length - 1));
+      options.forEach((option, index) => {
+        const selected = index === selectedIndex;
+        option.classList.toggle("is-active", selected);
+        option.setAttribute("aria-pressed", String(selected));
+      });
+      group.style.setProperty("--theme-offset", `${selectedIndex * 100}%`);
+      const theme = options[selectedIndex]?.dataset.themeValue;
+      if (theme) {
+        this.settings.theme = theme;
+        this.applySettings({ preserveUiKitRange: true });
+      }
+    };
+
+    group.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      pointerId = event.pointerId;
+      startX = event.clientX;
+      dragged = false;
+      group.dataset.dragging = "true";
+      try {
+        group.setPointerCapture?.(pointerId);
+      } catch (error) {}
+      selectAt(event.clientX);
+    });
+
+    group.addEventListener("pointermove", (event) => {
+      if (event.pointerId !== pointerId) return;
+      if (Math.abs(event.clientX - startX) > 5) dragged = true;
+      if (dragged) {
+        event.preventDefault();
+        selectAt(event.clientX);
+      }
+    });
+
+    const finishDrag = (event) => {
+      if (event.pointerId !== pointerId) return;
+      try {
+        group.releasePointerCapture?.(pointerId);
+      } catch (error) {}
+      pointerId = null;
+      delete group.dataset.dragging;
+      if (!dragged) return;
+
+      const theme = options[selectedIndex]?.dataset.themeValue;
+      if (theme) this.setTheme(theme);
+      group.dataset.dragged = "true";
+      setTimeout(() => delete group.dataset.dragged, 0);
+    };
+
+    group.addEventListener("pointerup", finishDrag);
+    group.addEventListener("pointercancel", finishDrag);
+    group.addEventListener(
+      "click",
+      (event) => {
+        if (!group.dataset.dragged) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        delete group.dataset.dragged;
+      },
+      true,
+    );
   },
 
   bindSwitches() {
     const switches = Array.from(
       document.querySelectorAll(
-        "#themeToggle, #soundToggle, #fsToggle, #diagramToggle",
+        "#soundToggle, #vibrationToggle, #fsToggle, #diagramToggle, #minaiCalculatorToggle, #minaiPercentToggle",
       ),
     );
 
@@ -1295,6 +1213,7 @@ export const app = {
   },
 
   showLogoutConfirm() {
+    this.setProfileMenuOpen(false);
     qs("logoutModal")?.classList.add("open");
     this.tone(450, "sine", 0.06);
   },
@@ -1324,14 +1243,25 @@ export const app = {
   },
 
   bindProfile() {
-    setInputValue("profileNameInput", this.profile.name || "");
-    setInputValue("profileSurnameInput", this.profile.surname || "");
-    setInputValue("profileSchoolInput", this.profile.school || "");
-
-    ["profileNameInput", "profileSurnameInput"].forEach((fieldId) => {
+    ["profileEditNameInput", "profileEditSurnameInput"].forEach((fieldId) => {
       qs(fieldId)?.addEventListener("input", (event) =>
         this.sanitizeLettersOnly(event),
       );
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest("#profileMenu")) {
+        this.setProfileMenuOpen(false);
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      if (!qs("profileMenuPanel")?.hidden) {
+        this.setProfileMenuOpen(false);
+        qs("profileMenuToggle")?.focus();
+      }
+      qs("profileNameModal")?.classList.remove("open");
     });
 
     qs("profileAvatarInput")?.addEventListener("change", (event) => {
@@ -1362,6 +1292,47 @@ export const app = {
     });
   },
 
+  setProfileMenuOpen(open) {
+    const panel = qs("profileMenuPanel");
+    const toggle = qs("profileMenuToggle");
+    if (!panel || !toggle) return;
+
+    panel.hidden = !open;
+    toggle.setAttribute("aria-expanded", String(open));
+  },
+
+  openProfileNameModal() {
+    this.setProfileMenuOpen(false);
+    setInputValue("profileEditNameInput", this.profile.name || "");
+    setInputValue("profileEditSurnameInput", this.profile.surname || "");
+    qs("profileNameModal")?.classList.add("open");
+    setTimeout(() => qs("profileEditNameInput")?.focus(), 80);
+  },
+
+  closeProfileNameModal() {
+    qs("profileNameModal")?.classList.remove("open");
+  },
+
+  saveProfileName() {
+    const name = clean(qs("profileEditNameInput")?.value || "");
+    const surname = clean(qs("profileEditSurnameInput")?.value || "");
+
+    if (!name || !surname) {
+      this.toast.show("Лутфан ному насабро пурра ворид кунед.");
+      return;
+    }
+
+    this.profile = {
+      ...this.profile,
+      name,
+      surname,
+    };
+    this.save();
+    this.updateProfileUI(this.profile);
+    this.closeProfileNameModal();
+    this.toast.show("Ном сабт шуд.");
+  },
+
   bindSetupOverlay() {
     ["setupNameInput", "setupSurnameInput"].forEach((fieldId) => {
       qs(fieldId)?.addEventListener("input", (event) =>
@@ -1389,34 +1360,6 @@ export const app = {
       };
       reader.readAsDataURL(file);
     });
-  },
-
-  bindStartupNotice() {
-    const modal = document.getElementById("startupNoticeModal");
-    if (!modal) return;
-
-    const key = "choryak_startup_notice_count";
-    let count = 0;
-
-    try {
-      count = Number(localStorage.getItem(key) || 0);
-    } catch {}
-
-    if (count >= 3) return;
-
-    const closeModal = () => modal.classList.remove("open");
-    const closeButton = modal.querySelector("[data-action='closeStartupNotice']");
-
-    modal.addEventListener("click", (event) => {
-      if (event.target === modal) closeModal();
-    });
-    closeButton?.addEventListener("click", closeModal);
-    modal.classList.add("open");
-
-    count += 1;
-    try {
-      localStorage.setItem(key, String(count));
-    } catch {}
   },
 
   checkFirstRun() {
@@ -1462,6 +1405,9 @@ export const app = {
         this.clearAllPercentages(true);
       },
       clearPupilCount: () => this.clearPupilCount(),
+      openPercentExport: () => this.openPercentExport(),
+      closePercentExport: () => this.closePercentExport(),
+      exportPercentCanvas: () => this.exportPercentCanvas(),
       downloadResult: () => this.ensureInfo(),
       closeModal: () => this.closeModal(),
       saveModalInfo: () => this.saveModalInfo(),
@@ -1469,9 +1415,12 @@ export const app = {
       toggleSound: () => this.toggleSound(payload),
       toggleFS: () => this.toggleFS(payload),
       toggleDiagram: () => this.toggleDiagram(payload),
+      setTheme: () => this.setTheme(payload.themeValue),
+      toggleVibration: () => this.toggleVibration(payload),
+      toggleMinaiCalculator: () => this.toggleMinaiCalculator(payload),
+      toggleMinaiPercent: () => this.toggleMinaiPercent(payload),
       toggleResultDetails: () => this.toggleResultDetails(),
       editProfile: () => this.showSubView("more-profile-view"),
-      saveProfile: () => this.saveProfile(),
       goToProfile: () => this.showSubView("more-profile-view"),
       saveSetupProfile: () => this.saveSetupProfile(),
       showSettings: () => this.showSubView("more-settings-view"),
@@ -1482,12 +1431,22 @@ export const app = {
       showInstallPwa: () => this.showSubView("more-install-view"),
       hideSubviews: () => this.showSubView("more-home-view"),
       showLogoutConfirm: () => this.showLogoutConfirm(),
+      toggleProfileMenu: () => this.setProfileMenuOpen(
+        qs("profileMenuPanel")?.hidden ?? true,
+      ),
+      closeProfileMenu: () => this.setProfileMenuOpen(false),
+      openProfileNameModal: () => this.openProfileNameModal(),
+      closeProfileNameModal: () => this.closeProfileNameModal(),
+      saveProfileName: () => this.saveProfileName(),
       showLogoutFinalConfirm: () => this.showLogoutFinalConfirm(),
       cancelLogout: () => this.closeLogoutModal(),
       cancelLogoutFinal: () => this.closeLogoutFinalModal(),
       confirmLogout: () => this.confirmLogoutFinal(),
       scrollToShortcuts: () => this.showSubView("more-shortcuts-view"),
       shareApp: () => this.shareApp(),
+      closeShareModal: () => this.closeShareModal(),
+      copyShareLink: () => this.copyShareLink(),
+      sendShareLink: () => this.sendShareLink(),
       installPwa: () => this.installPwa(),
       installPwaNow: () => this.installPwa(),
       openNoteModal: (payload) => this.openNoteEntry(payload?.noteId),
@@ -1501,24 +1460,10 @@ export const app = {
       saveSelectedNoteEdit: () => this.saveSelectedNoteEdit(),
       cancelSelectedNoteEdit: () => this.cancelSelectedNoteEdit(),
       clearSelectedNote: () => this.requestClearSelectedNote(),
-      cancelUnsavedNote: () => qs("noteUnsavedModal")?.classList.remove("open"),
-      discardUnsavedNote: () => this.discardUnsavedNote(),
       deleteSelectedNote: () => {
         this.activeNoteId = this.selectedNoteId;
         this.showDeleteConfirm();
       },
-      createNoteCategory: () => this.createNoteCategory(),
-      openNoteCategoryCreateModal: () => this.openNoteCategoryCreateModal(),
-      openNoteCategoryManageModal: () => this.openNoteCategoryManageModal(),
-      closeNoteCategoryModal: () => this.closeNoteCategoryModal(),
-      saveNoteCategory: () => this.saveNoteCategory(),
-      showNoteCategoryDeleteConfirm: (payload) =>
-        this.showNoteCategoryDeleteConfirm(payload?.category),
-      cancelNoteCategoryDelete: () => this.cancelNoteCategoryDelete(),
-      confirmNoteCategoryDelete: () => this.confirmNoteCategoryDelete(),
-
-      setNoteCategory: (payload) => this.setNoteCategory(payload?.category),
-      setNoteFilter: (payload) => this.setNoteFilter(payload),
       toggleNotesSwitcher: () => this.toggleNotesSwitcher(),
       selectNotesWorkspace: (payload) =>
         this.selectNotesWorkspace(payload?.view),
@@ -1544,30 +1489,37 @@ export const app = {
       document.activeElement?.tagName,
     );
     const key = event.key.toLowerCase();
+    const activeTab = document.querySelector(".tab.active")?.id;
+    const homeActive = activeTab === "tab-home";
+    const percentActive = activeTab === "tab-prosent";
+    const notesActive = activeTab === "tab-notes";
 
     if (isInput && key !== "escape") return;
 
-    if (/^[1-9]$/.test(key)) {
+    if (
+      key === "/" &&
+      notesActive &&
+      !this.editingNoteId &&
+      !this.creatingNoteInline &&
+      !qs("noteModal")?.classList.contains("open")
+    ) {
+      event.preventDefault();
+      qs("noteSearchInput")?.focus();
+    } else if (homeActive && /^[1-9]$/.test(key)) {
       event.preventDefault();
       this.add(Number(key));
-    } else if (key === "0") {
-      // if percent tab is active, use 0 as quick clear-percent shortcut
-      const prosentActive = qs("tab-prosent")?.classList.contains("active");
-      if (prosentActive) {
-        event.preventDefault();
-        this.clearAllPercentages();
-      } else {
-        event.preventDefault();
-        this.add(10);
-      }
-    } else if (key === "backspace") {
+    } else if (homeActive && key === "0") {
+      event.preventDefault();
+      this.add(10);
+    } else if (homeActive && key === "backspace") {
       event.preventDefault();
       this.deleteLast();
       /* English */
-    } else if (key === "c") {
+    } else if (key === "c" && (homeActive || percentActive)) {
       event.preventDefault();
-      this.clearAll();
-    } else if (key === "e") {
+      if (percentActive) this.clearAllPercentages();
+      else this.clearAll();
+    } else if (homeActive && key === "e") {
       event.preventDefault();
       this.toggleLast();
     } else if (key === "h") {
@@ -1575,7 +1527,12 @@ export const app = {
     } else if (key === "s") {
       this.nav("tab-more");
     } else if (key === "p") {
-      this.nav("tab-prosent");
+      if (percentActive) {
+        event.preventDefault();
+        this.clearPupilCount();
+      } else {
+        this.nav("tab-prosent");
+      }
     } else if (key === "j") {
       // navigate to journal tab
       event.preventDefault();
@@ -1583,10 +1540,11 @@ export const app = {
     } else if (key === "n") {
       this.nav("tab-notes");
       /* Русский */
-    } else if (key === "с") {
+    } else if (key === "с" && (homeActive || percentActive)) {
       event.preventDefault();
-      this.clearAll();
-    } else if (key === "у") {
+      if (percentActive) this.clearAllPercentages();
+      else this.clearAll();
+    } else if (homeActive && key === "у") {
       event.preventDefault();
       this.toggleLast();
     } else if (key === "р") {
@@ -1594,20 +1552,17 @@ export const app = {
     } else if (key === "ы") {
       this.nav("tab-more");
     } else if (key === "з") {
-      this.nav("tab-prosent");
+      if (percentActive) {
+        event.preventDefault();
+        this.clearPupilCount();
+      } else {
+        this.nav("tab-prosent");
+      }
       /* Тоҷикӣ */
-    } else if (key === "с") {
-      event.preventDefault();
-      this.clearAll();
-    } else if (key === "у") {
-      event.preventDefault();
-      this.toggleLast();
     } else if (key === "р") {
       this.nav("tab-home");
     } else if (key === "ҷ") {
       this.nav("tab-more");
-    } else if (key === "з") {
-      this.nav("tab-prosent");
     } else if (key === "н") {
       this.nav("tab-notes");
     } else if (key === "escape") {
@@ -1811,6 +1766,25 @@ export const app = {
         : "Баллҳоро ворид кунед",
     );
 
+    setText(
+      "minaiQuarterResult",
+      this.grades.length ? stats.final.toFixed(2) : "—",
+    );
+    setText(
+      "minaiStudentLevel",
+      this.grades.length ? gradeLabel(stats.final) : "—",
+    );
+    const trend = getTrend(this.grades);
+    const progressMessage =
+      trend === "беҳтар шуда истодааст"
+        ? "Аз рӯйи баллҳои воридшуда хонанда пешравӣ карда истодааст."
+        : trend === "паст шуда истодааст"
+          ? "Аз рӯйи баллҳои воридшуда сатҳи таҳсили хонанда паст шуда истодааст."
+          : trend === "устувор аст"
+            ? "Аз рӯйи баллҳои воридшуда дар хонанда ягон тағйирот дида нашудааст."
+            : "Барои хулоса баровардани сатҳи пешравии хонанда маълумоти воридшуда кам аст.";
+    setText("minaiProgress", progressMessage);
+
     const blocksContainer = qs("blocksContainer");
     renderGradeBlocks(blocksContainer, this.grades, GRADE_LABELS, (id) =>
       this.toggleGrade(id),
@@ -1847,11 +1821,6 @@ export const app = {
     this.bindChartScrollButtonStretch();
     this.percentUpdate();
 
-    renderMinAI({
-      messages: this.aiHistory,
-      loading: this.aiGenerating,
-      userAvatar: this.profile.avatar,
-    });
   },
 
   bump(element) {
@@ -2013,6 +1982,179 @@ export const app = {
     setText("percentAverageUI", percentMap ? average.toFixed(2) : "-");
     setText("percentUsedUI", used);
     setText("percentLeftUI", left);
+    setText("percentMinaiStatus", this.getPercentClassStatus().message);
+  },
+
+  getPercentClassStatus() {
+    const total = toInt(this.pct.total, 0);
+    const counts = Array.from({ length: 10 }, (_, index) => ({
+      grade: index + 1,
+      count: toInt(this.pct.counts[index + 1], 0),
+    }));
+    const used = counts.reduce((sum, item) => sum + item.count, 0);
+
+    if (total <= 0) {
+      return {
+        complete: false,
+        missing: null,
+        level: "",
+        message:
+          "Шумораи умумии хонандагонро ворид кунед, баъд шумораи баллҳоро пур намоед.",
+      };
+    }
+
+    const missing = Math.max(0, total - used);
+    if (used < total) {
+      return {
+        complete: false,
+        missing,
+        level: "",
+        message: `Барои он ки сатҳи синфро барои шумо муайян кунам, лутфан шумораи ҳамаи баллҳоро дуруст ва пурра ворид кунед. Шумораи баллҳои вориднашуда: ${missing}.`,
+      };
+    }
+
+    if (used > total) {
+      return {
+        complete: false,
+        missing: 0,
+        level: "",
+        message:
+          "Шумораи баллҳои воридшуда аз шумораи умумии хонандагон зиёд аст. Маълумотро санҷед.",
+      };
+    }
+
+    const groups = [
+      {
+        level: "аъло",
+        count: counts
+          .filter((item) => item.grade >= 8)
+          .reduce((sum, item) => sum + item.count, 0),
+      },
+      {
+        level: "миёна",
+        count: counts
+          .filter((item) => item.grade >= 6 && item.grade <= 7)
+          .reduce((sum, item) => sum + item.count, 0),
+      },
+      {
+        level: "паст",
+        count: counts
+          .filter((item) => item.grade <= 5)
+          .reduce((sum, item) => sum + item.count, 0),
+      },
+    ];
+    const highestCount = Math.max(...groups.map((group) => group.count));
+    const leaders = groups.filter((group) => group.count === highestCount);
+
+    if (leaders.length !== 1) {
+      return {
+        complete: true,
+        missing: 0,
+        level: "",
+        message:
+          "Шумораи баллҳои гурӯҳҳо баробар аст; сатҳи ягонаи синфро муайян кардан имкон надорад.",
+      };
+    }
+
+    const level = leaders[0].level;
+    return {
+      complete: true,
+      missing: 0,
+      level,
+      message: `Сатҳи таҳсили синф дар ин фан ${level} аст.`,
+    };
+  },
+
+  openPercentExport() {
+    const status = this.getPercentClassStatus();
+    if (!status.complete) {
+      this.showIncompletePercentExportToast(status);
+      return;
+    }
+
+    const modal = qs("percentExportModal");
+    modal?.classList.add("open");
+    setTimeout(() => qs("percentExportClass")?.focus(), 80);
+  },
+
+  closePercentExport() {
+    qs("percentExportModal")?.classList.remove("open");
+  },
+
+  showIncompletePercentExportToast(status = this.getPercentClassStatus()) {
+    const total = toInt(this.pct.total, 0);
+    const used = Object.values(this.pct.counts || {}).reduce(
+      (sum, value) => sum + toInt(value, 0),
+      0,
+    );
+    const missing = status.missing ?? Math.max(0, total - used);
+    this.toast.show(
+      `Барои натиҷаро эскорт гирифтан, шумо бояд шумораи баллҳоро пурра ворид кунед, баллҳои вориднашуда: ${missing}.`,
+    );
+  },
+
+  async exportPercentCanvas() {
+    const status = this.getPercentClassStatus();
+    if (!status.complete) {
+      this.showIncompletePercentExportToast(status);
+      return;
+    }
+
+    const classValue = clean(qs("percentExportClass")?.value || "", 2);
+    const teacher = clean(qs("percentExportTeacher")?.value || "");
+    const schoolValue = clean(qs("percentExportSchool")?.value || "");
+    const subject = clean(qs("percentExportSubject")?.value || "");
+    const classNumber = Number(classValue);
+    const schoolNumber = Number(schoolValue);
+
+    if (!classValue || !teacher || !schoolValue || !subject) {
+      this.toast.show("Лутфан ҳамаи маълумоти экспортро пур кунед.");
+      return;
+    }
+
+    if (
+      !Number.isInteger(classNumber) ||
+      classNumber < 1 ||
+      classNumber > 11
+    ) {
+      this.toast.show("Синф бояд байни 1 ва 11 бошад.");
+      return;
+    }
+
+    if (!Number.isInteger(schoolNumber) || schoolNumber < 1) {
+      this.toast.show("Рақами мактабро дуруст ворид кунед.");
+      return;
+    }
+
+    const canvas = await this.percentCanvas({
+      classNumber,
+      teacher,
+      schoolNumber,
+      subject,
+    });
+    if (!canvas) {
+      this.toast.show("Сохтани расми экспортшуда иҷро нашуд.");
+      return;
+    }
+
+    const blob = await new Promise((resolve) =>
+      canvas.toBlob(resolve, "image/png", 0.96),
+    );
+    if (!blob) {
+      this.toast.show("Экспорт иҷро нашуд. Бори дигар кӯшиш кунед.");
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Фоизҳои-синфи-${classNumber}.png`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    this.closePercentExport();
+    this.toast.show("Фоизҳои синф экспорт шуданд.");
   },
 
   ensureInfo() {
@@ -2030,29 +2172,6 @@ export const app = {
 
   closeModal() {
     closeInfoModal(qs("infoModal"));
-  },
-
-  saveProfile() {
-    const name = clean(qs("profileNameInput")?.value || "");
-    const surname = clean(qs("profileSurnameInput")?.value || "");
-    const school = clean(qs("profileSchoolInput")?.value || "");
-
-    if (!name || !surname || !school) {
-      this.toast.show(
-        "Лутфан ному насаб ва рақами мактабро пурра ворид кунед.",
-      );
-      return;
-    }
-
-    this.profile = {
-      ...this.profile,
-      name,
-      surname,
-      school,
-    };
-    this.save();
-    this.updateProfileUI(this.profile);
-    this.toast.show("Профил сабт шуд.");
   },
 
   saveSetupProfile() {
@@ -2075,10 +2194,6 @@ export const app = {
       avatar: this._setupAvatarData || this.profile.avatar || "",
     };
     this._setupAvatarData = null;
-
-    setInputValue("profileNameInput", name);
-    setInputValue("profileSurnameInput", surname);
-    setInputValue("profileSchoolInput", school);
 
     this.save();
     this.updateProfileUI(this.profile);
@@ -2172,7 +2287,7 @@ export const app = {
     ctx.font = "900 58px Arial";
 
     const appIcon = new Image();
-    appIcon.src = "assets/images/logoLight.png";
+    appIcon.src = "assets/images/pics/logo.png";
     await new Promise((resolve) => {
       appIcon.onload = resolve;
       appIcon.onerror = resolve;
@@ -2299,7 +2414,151 @@ export const app = {
     return canvas;
   },
 
+  async percentCanvas({ classNumber, teacher, schoolNumber, subject }) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080;
+    canvas.height = 1700;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+
+    const ink = "#102a43";
+    const muted = "#6b7f8c";
+    const primary = "#0a84ff";
+    const line = "#dce8ee";
+    const background = "#f4f8fb";
+    const total = toInt(this.pct.total, 0);
+    const percentageMap = this.buildPercentDistribution(total);
+    const date = new Date().toLocaleDateString("tg-TJ");
+    const drawWrappedText = (text, x, y, maxWidth, lineHeight) => {
+      const words = String(text).split(/\s+/);
+      let lineText = "";
+      let lineY = y;
+
+      words.forEach((word) => {
+        const nextLine = lineText ? `${lineText} ${word}` : word;
+        if (lineText && ctx.measureText(nextLine).width > maxWidth) {
+          ctx.fillText(lineText, x, lineY);
+          lineText = word;
+          lineY += lineHeight;
+        } else {
+          lineText = nextLine;
+        }
+      });
+
+      if (lineText) ctx.fillText(lineText, x, lineY);
+      return lineY;
+    };
+    const drawCard = (x, y, width, height) => {
+      roundRect(ctx, x, y, width, height, 28);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+      ctx.strokeStyle = line;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    };
+
+    ctx.fillStyle = background;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const appIcon = new Image();
+    appIcon.src = "assets/images/pics/logo.png";
+    await new Promise((resolve) => {
+      appIcon.onload = resolve;
+      appIcon.onerror = resolve;
+    });
+    if (appIcon.complete && appIcon.naturalWidth > 0) {
+      ctx.save();
+      ctx.beginPath();
+      roundRect(ctx, 80, 42, 88, 88, 20);
+      ctx.clip();
+      ctx.drawImage(appIcon, 80, 42, 88, 88);
+      ctx.restore();
+    }
+
+    ctx.fillStyle = ink;
+    ctx.font = "900 52px Arial";
+    ctx.fillText("Фоизҳои синф", 195, 106);
+    ctx.fillStyle = muted;
+    ctx.font = "700 22px Arial";
+    ctx.textAlign = "right";
+    ctx.fillText(`Сана: ${date}`, 990, 101);
+    ctx.textAlign = "left";
+    ctx.strokeStyle = line;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(70, 145);
+    ctx.lineTo(1010, 145);
+    ctx.stroke();
+
+    drawCard(70, 175, 940, 510);
+    ctx.fillStyle = primary;
+    ctx.font = "900 24px Arial";
+    ctx.fillText("МАЪЛУМОТИ СИНФ", 115, 225);
+
+    let infoY = 260;
+    const drawInfoField = (label, value) => {
+      ctx.fillStyle = muted;
+      ctx.font = "700 18px Arial";
+      ctx.fillText(label, 115, infoY);
+      ctx.fillStyle = ink;
+      ctx.font = "700 26px Arial";
+      infoY = drawWrappedText(String(value), 115, infoY + 36, 850, 32) + 38;
+    };
+    drawInfoField("СИНФ", classNumber);
+    drawInfoField("РОҲБАРИ СИНФ", teacher);
+    drawInfoField("РАҚАМИ МАКТАБ", schoolNumber);
+    drawInfoField("ФАН", subject);
+
+    drawCard(70, 715, 940, 165);
+    ctx.fillStyle = primary;
+    ctx.font = "900 24px Arial";
+    ctx.fillText("ШУМОРАИ ХОНАНДАГОН", 115, 765);
+    ctx.fillStyle = ink;
+    ctx.font = "900 76px Arial";
+    ctx.fillText(String(total), 115, 845);
+
+    drawCard(70, 910, 940, 720);
+    ctx.fillStyle = primary;
+    ctx.font = "900 24px Arial";
+    ctx.fillText("ТАҚСИМОТИ БАЛЛҲО", 115, 960);
+    ctx.fillStyle = muted;
+    ctx.font = "900 20px Arial";
+    ctx.fillText("БАЛЛ", 150, 1010);
+    ctx.fillText("ШУМОРА", 480, 1010);
+    ctx.fillText("ФОИЗ", 790, 1010);
+    ctx.strokeStyle = line;
+    ctx.beginPath();
+    ctx.moveTo(115, 1030);
+    ctx.lineTo(965, 1030);
+    ctx.stroke();
+
+    for (let grade = 10; grade >= 1; grade -= 1) {
+      const y = 1070 + (10 - grade) * 50;
+      if (grade % 2 === 0) {
+        roundRect(ctx, 115, y - 29, 850, 42, 10);
+        ctx.fillStyle = "#f1f7fa";
+        ctx.fill();
+      }
+      ctx.fillStyle = ink;
+      ctx.font = "900 23px Arial";
+      ctx.fillText(String(grade), 160, y);
+      ctx.font = "700 23px Arial";
+      ctx.fillText(String(toInt(this.pct.counts[grade], 0)), 500, y);
+      ctx.fillText(
+        percentageMap ? `${percentageMap[grade]}%` : "—",
+        810,
+        y,
+      );
+    }
+
+    return canvas;
+  },
+
   nav(id, button) {
+    if (id !== "tab-notes") this.flushNoteAutosave();
+    document.body.dataset.activeTab = id;
+
     document
       .querySelectorAll(".tab")
       .forEach((tab) => tab.classList.remove("active"));
@@ -2321,18 +2580,15 @@ export const app = {
       journalButton.classList.toggle("notes-mode", false);
     }
 
-    // update draggable highlight if present
-    try {
-      this.updateNavHighlight &&
-        this.updateNavHighlight(
-          button || document.querySelector(`[data-tab="${id}"]`),
-        );
-    } catch (e) {}
+    this.updateNavHighlight?.(
+      button || document.querySelector(`[data-tab="${id}"]`),
+    );
 
     this.tone(600, "sine", 0.04);
   },
 
   showSubView(viewId) {
+    this.setProfileMenuOpen(false);
     document.querySelectorAll(".more-subview").forEach((view) => {
       view.classList.remove("active");
     });
@@ -2345,6 +2601,7 @@ export const app = {
   },
 
   showLogoutConfirm() {
+    this.setProfileMenuOpen(false);
     qs("logoutModal")?.classList.add("open");
     this.tone(450, "sine", 0.06);
   },
@@ -2372,27 +2629,42 @@ export const app = {
     }, 80);
   },
 
-  async shareApp() {
-    const shareUrl = "https://abdughafur.github.io/Quarter/";
+  shareApp() {
+    qs("shareModal")?.classList.add("open");
+  },
+
+  closeShareModal() {
+    qs("shareModal")?.classList.remove("open");
+  },
+
+  async copyShareLink() {
+    try {
+      await navigator.clipboard.writeText(SHARE_URL);
+      this.toast.show("Пайванд нусхабардорӣ шуд!");
+    } catch (error) {
+      console.error("Could not copy the app link.", error);
+      this.toast.show("Нусхабардории пайванд иҷро нашуд.");
+    }
+  },
+
+  async sendShareLink() {
     const shareData = {
       title: "Чоряк - Ҳисобкунаки Чорякҳо",
       text: "Барномаи муосири Чоряк барои ҳисоб кардани натиҷаи баллҳои хонандагон.",
-      url: shareUrl,
+      url: SHARE_URL,
     };
     try {
       if (navigator.share) {
         await navigator.share(shareData);
+        this.closeShareModal();
         this.toast.show("Ба дигарон фиристода шуд!");
       } else {
-        await navigator.clipboard.writeText(shareUrl);
-        this.toast.show(
-          "Пайванд (ссылка) ба нусхабардорӣ шуд! Барои мубодила пайвандро ба дигарон фиристед",
-        );
+        await this.copyShareLink();
       }
-    } catch (err) {
-      if (err.name !== "AbortError") {
-        await navigator.clipboard.writeText(shareUrl);
-        this.toast.show("Пайванд (ссылка) нусхабардорӣ шуд!");
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        console.error("Could not share the app link.", error);
+        this.toast.show("Ирсоли пайванд иҷро нашуд.");
       }
     }
   },
@@ -2406,21 +2678,21 @@ export const app = {
     this.toast.show("Насб дар ин браузер ё дар ин ҳолат дастрас нест.");
   },
 
-  toggleTheme(value) {
-    if (typeof value === "boolean") {
-      this.settings.theme = value ? "dark" : "light";
-    } else {
-      const toggle = qs("themeToggle");
-      this.settings.theme = toggle
-        ? toggle.checked
-          ? "dark"
-          : "light"
-        : this.settings.theme === "dark"
-          ? "light"
-          : "dark";
-    }
+  setTheme(theme) {
+    if (!["light", "dark", "system"].includes(theme)) return;
+    this.settings.theme = theme;
     this.applySettings();
     this.save();
+  },
+
+  toggleTheme(value) {
+    this.setTheme(
+      typeof value === "string"
+        ? value
+        : this.settings.theme === "dark"
+          ? "light"
+          : "dark",
+    );
   },
 
   toggleSound(value) {
@@ -2431,7 +2703,13 @@ export const app = {
       this.settings.sound = toggle ? toggle.checked : !this.settings.sound;
     }
     this.save();
-    this.tone(680, "sine", 0.06, true);
+    if (this.settings.sound) this.tone(680, "sine", 0.06);
+  },
+
+  toggleVibration(value) {
+    this.settings.vibration =
+      typeof value === "boolean" ? value : !this.settings.vibration;
+    this.save();
   },
 
   toggleDiagram(value) {
@@ -2443,10 +2721,31 @@ export const app = {
     }
     this.applySettings();
     this.save();
+  },
 
-    this.toast.show(
-      this.settings.diagram ? "Диаграмма фаъол шуд." : "Диаграмма хомӯш шуд.",
-    );
+  setUiKit(value, { commit = true } = {}) {
+    const levels = ["low", "medium", "perfect"];
+    const normalizedValue = Math.max(0, Math.min(100, Number(value)));
+    const level = levels[Math.round(normalizedValue / 50)];
+    if (!level) return;
+
+    this.settings.uiKit = level;
+    this.applySettings({ preserveUiKitRange: !commit });
+    if (commit) this.save();
+  },
+
+  toggleMinaiCalculator(value) {
+    this.settings.minaiCalculator =
+      typeof value === "boolean" ? value : !this.settings.minaiCalculator;
+    this.applySettings();
+    this.save();
+  },
+
+  toggleMinaiPercent(value) {
+    this.settings.minaiPercent =
+      typeof value === "boolean" ? value : !this.settings.minaiPercent;
+    this.applySettings();
+    this.save();
   },
 
   openNoteModal(noteId = null) {
@@ -2455,14 +2754,12 @@ export const app = {
     setText("noteModalTitle", note ? "Таҳрир кардани ёддошт" : "Ёддости нав");
     setInputValue("noteTitleInput", note?.title || "");
     setInputValue("noteBodyInput", note?.body || "");
-    setInputValue("noteCategoryInput", note?.category || "lesson");
     if (qs("noteImportantInput"))
       qs("noteImportantInput").checked = Boolean(note?.important);
     qs("noteDeleteButton").style.display = note ? "inline-flex" : "none";
     qs("noteDeleteConfirm")?.classList.remove("open");
     this.noteHistory = [];
     this.noteHistoryIndex = -1;
-    this.setNoteCategory(qs("noteCategoryInput")?.value || "lesson");
     this.recordNoteChange();
     qs("noteModal")?.classList.add("open");
   },
@@ -2477,7 +2774,6 @@ export const app = {
   saveNote() {
     const title = clean(qs("noteTitleInput")?.value || "");
     const body = clean(qs("noteBodyInput")?.value || "", 512);
-    const category = qs("noteCategoryInput")?.value || "other";
     const important = qs("noteImportantInput")?.checked || false;
 
     if (!title && !body) {
@@ -2488,7 +2784,6 @@ export const app = {
     const noteData = {
       title: title || "Ёддошт",
       body,
-      category,
       important,
     };
 
@@ -2497,7 +2792,6 @@ export const app = {
       if (!note) return;
       note.title = noteData.title;
       note.body = noteData.body;
-      note.category = noteData.category;
       note.important = noteData.important;
       note.updatedAt = Date.now();
       this.toast.show("Ёддошт навсозӣ шуд.");
@@ -2540,40 +2834,21 @@ export const app = {
     this.toast.show("Ёддошт пок карда шуд.");
   },
 
-  setNoteCategory(category) {
-    if (!qs("noteCategoryInput")) return;
-    qs("noteCategoryInput").value = category;
-    qs("noteCategoryRow")
-      ?.querySelectorAll(".note-category-pill")
-      .forEach((pill) => {
-        const active = pill.dataset.category === category;
-        pill.classList.toggle("active", active);
-        if (active) {
-          pill.scrollIntoView({
-            behavior: "smooth",
-            block: "nearest",
-            inline: "center",
-          });
-        }
-      });
-    this.recordNoteChange("category");
-  },
-
   selectNote(noteId) {
     if (!this.notes.some((note) => note.id === noteId)) return;
+    this.flushNoteAutosave();
     this.selectedNoteId = noteId;
     this.editingNoteId = null;
     this.creatingNoteInline = false;
-    this.noteDetailDirty = false;
     this.renderNotes();
   },
 
   openNoteEntry(noteId = null) {
     if (!noteId) {
+      this.flushNoteAutosave();
       this.selectedNoteId = null;
       this.editingNoteId = null;
       this.creatingNoteInline = true;
-      this.noteDetailDirty = false;
       this.renderNoteDetail();
       return;
     }
@@ -2583,403 +2858,93 @@ export const app = {
   startInlineNoteEdit() {
     if (!this.selectedNoteId) return;
     this.editingNoteId = this.selectedNoteId;
-    this.noteDetailDirty = false;
     this.renderNoteDetail();
   },
 
-  saveSelectedNoteEdit() {
-    const note = this.notes.find((item) => item.id === this.editingNoteId);
+  scheduleNoteAutosave() {
+    clearTimeout(this.noteAutosaveTimer);
+    this.noteAutosaveTimer = setTimeout(() => {
+      this.noteAutosaveTimer = null;
+      this.autosaveSelectedNote();
+    }, 400);
+  },
+
+  flushNoteAutosave() {
+    if (!this.noteAutosaveTimer) return;
+    clearTimeout(this.noteAutosaveTimer);
+    this.noteAutosaveTimer = null;
+    this.autosaveSelectedNote();
+  },
+
+  autosaveSelectedNote() {
     const title = clean(qs("noteDetailTitleInput")?.value || "");
     const body = clean(qs("noteDetailBodyInput")?.value || "", 512);
-    const category =
-      qs("noteDetailCategoryInput")?.value || note?.category || "other";
-    if (!title && !body) {
-      this.toast.show("Лутфан ёддоштро холӣ нагузоред.");
-      return;
-    }
+    if (!title && !body) return;
 
     if (this.creatingNoteInline) {
+      const now = Date.now();
       const created = {
         id: uid(),
         title: title || "Ёддошт",
         body,
-        category,
         important: false,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
+        createdAt: now,
+        updatedAt: now,
       };
       this.notes.unshift(created);
       this.selectedNoteId = created.id;
+      this.editingNoteId = created.id;
       this.creatingNoteInline = false;
-      this.noteDetailDirty = false;
       this.save();
-      this.renderNotes();
-      this.toast.show("Ёддошт сабт шуд.");
       return;
     }
 
+    const note = this.notes.find((item) => item.id === this.editingNoteId);
     if (!note) return;
-    note.title = title || "Ёддошт";
+    const nextTitle = title || "Ёддошт";
+    if (note.title === nextTitle && note.body === body) return;
+    note.title = nextTitle;
     note.body = body;
-    note.category = category;
     note.updatedAt = Date.now();
-    this.editingNoteId = null;
-    this.noteDetailDirty = false;
     this.save();
+  },
+
+  saveSelectedNoteEdit() {
+    this.flushNoteAutosave();
+    const title = clean(qs("noteDetailTitleInput")?.value || "");
+    const body = clean(qs("noteDetailBodyInput")?.value || "", 512);
+    if (!title && !body) {
+      this.toast.show("Лутфан ёддоштро холӣ нагузоред.");
+      return;
+    }
+    this.autosaveSelectedNote();
+    this.editingNoteId = null;
+    this.creatingNoteInline = false;
     this.renderNotes();
-    this.toast.show("Ёддошт навсозӣ шуд.");
+    this.toast.show("Ёддошт сабт шуд.");
   },
 
   cancelSelectedNoteEdit() {
-    this.discardUnsavedNote();
+    this.flushNoteAutosave();
+    this.editingNoteId = null;
+    this.creatingNoteInline = false;
+    this.renderNotes();
   },
 
   requestClearSelectedNote() {
-    if (
-      (this.editingNoteId || this.creatingNoteInline) &&
-      this.noteDetailDirty
-    ) {
-      qs("noteUnsavedModal")?.classList.add("open");
-      return;
-    }
-    this.discardUnsavedNote();
-  },
-
-  discardUnsavedNote() {
-    qs("noteUnsavedModal")?.classList.remove("open");
+    this.flushNoteAutosave();
     this.selectedNoteId = null;
     this.editingNoteId = null;
     this.creatingNoteInline = false;
-    this.noteDetailDirty = false;
-    this.renderNoteDetail();
     this.renderNotes();
   },
 
-  createNoteCategory() {
-    this.openNoteCategoryCreateModal();
-  },
-
-  openNoteCategoryCreateModal() {
-    setText("noteCategoryModalTitle", "Категорияи нав");
-    qs("noteCategoryModal")?.classList.remove("manage-mode");
-    qs("noteCategoryCreateView")?.classList.remove("is-hidden");
-    qs("noteCategoryManageView")?.classList.add("is-hidden");
-    qs("noteCategorySaveButton")?.classList.remove("is-hidden");
-    setInputValue("noteCategoryNameInput", "");
-    qs("noteCategoryModal")?.classList.add("open");
-    qs("noteCategoryNameInput")?.focus();
-  },
-
-  openNoteCategoryManageModal() {
-    setText("noteCategoryModalTitle", "Идоракунии категорияҳо");
-    qs("noteCategoryModal")?.classList.add("manage-mode");
-    qs("noteCategoryCreateView")?.classList.add("is-hidden");
-    qs("noteCategoryManageView")?.classList.remove("is-hidden");
-    qs("noteCategorySaveButton")?.classList.add("is-hidden");
-    this.renderNoteCategoryModalList();
-    qs("noteCategoryModal")?.classList.add("open");
-  },
-
-  closeNoteCategoryModal() {
-    qs("noteCategoryModal")?.classList.remove("open");
-  },
-
-  saveNoteCategory() {
-    const category = clean(qs("noteCategoryNameInput")?.value || "").slice(
-      0,
-      32,
-    );
-    if (!category) return;
-    if (
-      this.noteCategories.some(
-        (item) => item.toLowerCase() === category.toLowerCase(),
-      )
-    ) {
-      this.toast.show("Ин категория аллакай вуҷуд дорад.");
-      return;
-    }
-
-    this.noteCategories.push(category);
-    this.save();
-    this.renderNoteCategories();
-    this.closeNoteCategoryModal();
-    this.toast.show("Категория илова шуд.");
-  },
-
-  deleteNoteCategory(category) {
-    if (!category || DEFAULT_NOTE_CATEGORIES.includes(category)) return;
-
-    this.noteCategories = this.noteCategories.filter(
-      (item) => item !== category,
-    );
-    this.notes.forEach((note) => {
-      if (note.category === category) note.category = "other";
-    });
-    if (this.noteFilter === category) this.noteFilter = "all";
-    this.save();
-    this.renderNoteCategories();
-    this.renderNoteCategoryModalList();
-    this.renderNotes();
-    this.toast.show("Категория пок карда шуд.");
-  },
-
-  showNoteCategoryDeleteConfirm(category) {
-    if (!category || DEFAULT_NOTE_CATEGORIES.includes(category)) return;
-    this.pendingNoteCategoryDelete = category;
-    setText(
-      "noteCategoryDeleteMessage",
-      `Категорияи «${this.noteCategoryLabel(category)}» пок карда шавад?`,
-    );
-    qs("noteCategoryDeleteModal")?.classList.add("open");
-  },
-
-  cancelNoteCategoryDelete() {
-    this.pendingNoteCategoryDelete = null;
-    qs("noteCategoryDeleteModal")?.classList.remove("open");
-  },
-
-  confirmNoteCategoryDelete() {
-    const category = this.pendingNoteCategoryDelete;
-    this.cancelNoteCategoryDelete();
-    this.deleteNoteCategory(category);
-  },
-
-  bindNoteFilterDrag() {
-    const container = qs("noteFilters");
-    if (!container || container.dataset.dragBound) return;
-    container.dataset.dragBound = "true";
-    let pointerId = null;
-    let startX = 0;
-    let startScroll = 0;
-    let dragged = false;
-
-    container.addEventListener("pointerdown", (event) => {
-      if (event.pointerType === "mouse" && event.button !== 0) return;
-      pointerId = event.pointerId;
-      startX = event.clientX;
-      startScroll = container.scrollLeft;
-      dragged = false;
-    });
-
-    container.addEventListener("pointermove", (event) => {
-      if (event.pointerId !== pointerId) return;
-      const distance = event.clientX - startX;
-      if (Math.abs(distance) > 6) dragged = true;
-      if (dragged) {
-        event.preventDefault();
-        container.scrollLeft = startScroll - distance;
-      }
-    });
-
-    const finish = (event) => {
-      if (event.pointerId !== pointerId) return;
-      if (dragged) {
-        const button = event.target.closest("button");
-        if (button) {
-          button.dataset.dragged = "true";
-          setTimeout(() => delete button.dataset.dragged, 260);
-        }
-      }
-      pointerId = null;
-    };
-
-    container.addEventListener("pointerup", finish);
-    container.addEventListener("pointercancel", finish);
-  },
-
-  bindNoteCategoryReorder() {
-    const list = qs("noteCategoryModalList");
-    if (!list || list.dataset.dragBound) return;
-    list.dataset.dragBound = "true";
-    let draggedItem = null;
-    let pointerId = null;
-    let startY = 0;
-    let moved = false;
-
-    const finishDrag = (event) => {
-      if (!draggedItem || event.pointerId !== pointerId) return;
-      draggedItem.releasePointerCapture?.(pointerId);
-      draggedItem.classList.remove("is-dragging");
-
-      if (moved) {
-        this.noteCategories = Array.from(
-          list.querySelectorAll(".note-category-modal-item"),
-          (item) => item.dataset.category,
-        );
-        this.save();
-        this.renderNoteCategories();
-        this.renderNoteCategoryModalList();
-      }
-
-      draggedItem = null;
-      pointerId = null;
-      moved = false;
-    };
-
-    list.addEventListener("pointerdown", (event) => {
-      const item = event.target.closest(".note-category-modal-item");
-      if (!item || event.target.closest(".note-category-delete")) return;
-      draggedItem = item;
-      pointerId = event.pointerId;
-      startY = event.clientY;
-      moved = false;
-      item.setPointerCapture?.(pointerId);
-    });
-
-    list.addEventListener("pointermove", (event) => {
-      if (!draggedItem || event.pointerId !== pointerId) return;
-      if (Math.abs(event.clientY - startY) > 6) moved = true;
-      if (!moved) return;
-
-      event.preventDefault();
-      draggedItem.classList.add("is-dragging");
-      const target = Array.from(
-        list.querySelectorAll(".note-category-modal-item"),
-      ).find((item) => {
-        if (item === draggedItem) return false;
-        const rect = item.getBoundingClientRect();
-        return event.clientY >= rect.top && event.clientY <= rect.bottom;
-      });
-      if (!target) return;
-      const before =
-        event.clientY <
-        target.getBoundingClientRect().top + target.offsetHeight / 2;
-      list.insertBefore(draggedItem, before ? target : target.nextSibling);
-    });
-
-    list.addEventListener("pointerup", finishDrag);
-    list.addEventListener("pointercancel", finishDrag);
-  },
-
-  noteCategoryLabel(category) {
-    return (
-      {
-        lesson: "Дарс",
-        task: "Вазифа",
-        idea: "Идея",
-        other: "Дигар",
-      }[category] || category
-    );
-  },
-
-  noteCategoryIcon(category) {
-    const icons = {
-      all: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 6h14M5 12h14M5 18h14" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="3.5" cy="6" r=".8" fill="currentColor"/><circle cx="3.5" cy="12" r=".8" fill="currentColor"/><circle cx="3.5" cy="18" r=".8" fill="currentColor"/></svg>',
-      lesson:
-        '<svg viewBox="0 0 24 24" fill="none"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H19v17H7.5A2.5 2.5 0 0 0 5 21.5v-17Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M5 5h12M9 7.5h5M9 11h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
-      task: '<svg viewBox="0 0 24 24" fill="none"><rect x="5" y="3" width="14" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M9 3.5h6M8.5 10.5h7M8.5 14h4M8.5 17.5h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
-      idea: '<svg viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 21h4M8.5 14.5A6 6 0 1 1 16 14c-.9.7-1.3 1.5-1.5 2.5h-5c-.2-1-.5-1.4-1-2Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 4V2M4.9 6.1 3.5 4.7M19.1 6.1l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
-      other:
-        '<svg viewBox="0 0 24 24" fill="none"><path d="m20.5 13-7.5 7.5-9.5-9.5V4h7l10 9Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor"/></svg>',
-    };
-    return icons[category] || icons.other;
-  },
-
-  renderNoteCategories() {
-    const filters = qs("noteFilters");
-    const modalCategories = qs("noteCategoryRow");
-    const categories = this.noteCategories.length
-      ? this.noteCategories
-      : [...DEFAULT_NOTE_CATEGORIES];
-
-    if (filters) {
-      filters.innerHTML = "";
-      const all = document.createElement("button");
-      all.className = `pill${this.noteFilter === "all" ? " active" : ""}`;
-      all.type = "button";
-      all.dataset.action = "setNoteFilter";
-      all.dataset.filter = "all";
-      all.classList.add("system-category-pill");
-      all.innerHTML = `<span class="note-system-icon" aria-hidden="true">${this.noteCategoryIcon("all")}</span><span>Ҳама</span>`;
-      filters.appendChild(all);
-      categories.forEach((category) => {
-        const button = document.createElement("button");
-        button.className = `pill${this.noteFilter === category ? " active" : ""}`;
-        button.type = "button";
-        button.dataset.action = "setNoteFilter";
-        button.dataset.filter = category;
-        if (DEFAULT_NOTE_CATEGORIES.includes(category)) {
-          button.classList.add("system-category-pill");
-          button.innerHTML = `<span class="note-system-icon" aria-hidden="true">${this.noteCategoryIcon(category)}</span><span>${escapeHtml(this.noteCategoryLabel(category))}</span>`;
-        } else {
-          button.innerHTML = `<span class="note-system-icon" aria-hidden="true">${this.noteCategoryIcon(category)}</span><span>${escapeHtml(this.noteCategoryLabel(category))}</span>`;
-        }
-        filters.appendChild(button);
-      });
-
-      const add = document.createElement("button");
-      add.className = "note-category-control";
-      add.type = "button";
-      add.dataset.action = "openNoteCategoryCreateModal";
-      add.setAttribute("aria-label", "Илова кардани категория");
-      add.title = "Категорияи нав";
-      add.textContent = "+";
-      filters.appendChild(add);
-
-      const edit = document.createElement("button");
-      edit.className = "note-category-control";
-      edit.type = "button";
-      edit.dataset.action = "openNoteCategoryManageModal";
-      edit.setAttribute("aria-label", "Таҳрири категорияҳо");
-      edit.title = "Таҳрири категорияҳо";
-      edit.textContent = "✎";
-      filters.appendChild(edit);
-    }
-
-    if (modalCategories) {
-      modalCategories.innerHTML = "";
-      categories.forEach((category) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "note-category-pill";
-        button.dataset.category = category;
-        button.textContent = this.noteCategoryLabel(category);
-        modalCategories.appendChild(button);
-      });
-    }
-  },
-
-  renderNoteCategoryModalList() {
-    const list = qs("noteCategoryModalList");
-    if (!list) return;
-    list.innerHTML = "";
-    this.noteCategories.forEach((category) => {
-      const item = document.createElement("div");
-      item.className = "note-category-modal-item";
-      item.dataset.category = category;
-      item.draggable = false;
-      item.innerHTML = `<span class="note-category-modal-name">${escapeHtml(this.noteCategoryLabel(category))}</span><span class="note-category-drag-handle" aria-hidden="true">⋮⋮</span>`;
-      if (!DEFAULT_NOTE_CATEGORIES.includes(category)) {
-        const remove = document.createElement("button");
-        remove.className = "note-category-delete";
-        remove.type = "button";
-        remove.dataset.action = "showNoteCategoryDeleteConfirm";
-        remove.dataset.category = category;
-        remove.setAttribute("aria-label", `Пок кардани категорияи ${category}`);
-        remove.textContent = "×";
-        item.appendChild(remove);
-      } else {
-        const systemIcon = document.createElement("span");
-        systemIcon.className = "note-category-system-icon";
-        systemIcon.setAttribute("aria-hidden", "true");
-        systemIcon.innerHTML = `<svg viewBox="0 0 24 24" fill="none"><path d="M12 3 5 6v5c0 4.5 2.8 8.2 7 10 4.2-1.8 7-5.5 7-10V6l-7-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-        item.insertBefore(systemIcon, item.firstChild);
-        const fixed = document.createElement("span");
-        fixed.className = "note-category-fixed";
-        fixed.textContent = "Системавӣ";
-        item.appendChild(fixed);
-      }
-      list.appendChild(item);
-    });
-  },
-
-  recordNoteChange(field) {
+  recordNoteChange() {
     const title = clean(qs("noteTitleInput")?.value || "");
     const body = clean(qs("noteBodyInput")?.value || "", 512);
-    const category = qs("noteCategoryInput")?.value || "other";
     const important = qs("noteImportantInput")?.checked || false;
 
-    const snapshot = { title, body, category, important };
+    const snapshot = { title, body, important };
     const last = this.noteHistory[this.noteHistoryIndex];
     if (JSON.stringify(last) === JSON.stringify(snapshot)) return;
 
@@ -2994,10 +2959,8 @@ export const app = {
     if (!state) return;
     setInputValue("noteTitleInput", state.title);
     setInputValue("noteBodyInput", state.body);
-    setInputValue("noteCategoryInput", state.category);
     if (qs("noteImportantInput"))
       qs("noteImportantInput").checked = state.important;
-    this.setNoteCategory(state.category);
     this.renderNoteHistory();
   },
 
@@ -3018,16 +2981,6 @@ export const app = {
       step.textContent = `${index === entries.length - 1 ? "Ҳозира" : `Қадами ${index + 1}`}`;
       list.appendChild(step);
     });
-  },
-
-  setNoteFilter(payload) {
-    const filter =
-      typeof payload === "string" ? payload : payload?.filter || "all";
-    this.noteFilter = filter;
-    document.querySelectorAll(".pill").forEach((pill) => {
-      pill.classList.toggle("active", pill.dataset.filter === filter);
-    });
-    this.renderNotes();
   },
 
   toggleNotesSwitcher() {
@@ -3195,16 +3148,12 @@ export const app = {
     const list = qs("notesList");
     if (!list) return;
 
-    const query = String(qs("noteSearchInput")?.value || "")
-      .trim()
-      .toLowerCase();
+    const queryRaw = String(qs("noteSearchInput")?.value || "").trim();
+    const query = queryRaw.toLowerCase();
 
     const filtered = this.notes.filter((note) => {
-      if (this.noteFilter !== "all" && note.category !== this.noteFilter) {
-        return false;
-      }
       if (!query) return true;
-      return [note.title, note.body, note.category].some((text) =>
+      return [note.title, note.body].some((text) =>
         String(text || "")
           .toLowerCase()
           .includes(query),
@@ -3220,25 +3169,14 @@ export const app = {
       const image = document.createElement("img");
       image.className = "note-empty-image";
       image.alt = "";
-      const queryRaw = String(qs("noteSearchInput")?.value || "").trim();
-      image.src =
-        queryRaw || (this.noteFilter && this.noteFilter !== "all")
-          ? "assets/images/minai/search.png"
-          : "assets/images/minai/write.png";
+      image.src = queryRaw
+        ? "assets/images/minai/search.png"
+        : "assets/images/minai/write.png";
       const message = document.createElement("p");
       if (queryRaw) {
         const snippet =
           queryRaw.length > 7 ? `${queryRaw.slice(0, 7)}...` : queryRaw;
         message.textContent = `Барои "${snippet}" чизе ёфт нашуд.`;
-      } else if (this.noteFilter && this.noteFilter !== "all") {
-        const labels = {
-          lesson: "Дарс",
-          task: "Вазифа",
-          idea: "Идея",
-          other: "Дигар",
-        };
-        const label = labels[this.noteFilter] || this.noteFilter;
-        message.textContent = `Дар "${label}" чизе ёфт нашуд.`;
       } else {
         message.textContent =
           "Шумо ҳоло ягон ёддошт надоред. Барои оғоз ва осон кардани кори худ, ёддошти нав сабт кунед.";
@@ -3261,7 +3199,6 @@ export const app = {
           </div>
           <div class="note-item-badges">
             ${note.important ? '<span class="note-important-mark" title="Муҳим" aria-label="Муҳим">★</span>' : ""}
-            <span class="note-chip note-chip-${escapeHtml(note.category || "other")}">${note.category === "lesson" ? "Дарс" : note.category === "task" ? "Вазифа" : note.category === "idea" ? "Идея" : "Дигар"}</span>
           </div>
         </div>
         <div class="note-item-meta">
@@ -3290,56 +3227,45 @@ export const app = {
     if (this.creatingNoteInline || this.editingNoteId === note?.id) {
       const title = note?.title || "";
       const body = note?.body || "";
-      const activeCategory = note?.category || "other";
-      const options = this.noteCategories
-        .map(
-          (category) =>
-            `<option value="${escapeHtml(category)}"${category === activeCategory ? " selected" : ""}>${escapeHtml(this.noteCategoryLabel(category))}</option>`,
-        )
-        .join("");
       panel.innerHTML = `
-        <button class="note-detail-back" type="button" data-action="clearSelectedNote" aria-label="Бозгашт">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l8 8-8 8 1.41 1.41L20 13v-2z" /></svg>
-        </button>
+        <div class="note-detail-toolbar">
+          <button class="note-detail-back" type="button" data-action="clearSelectedNote" aria-label="Бозгашт">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+          ${note ? '<button class="btn secondary note-toolbar-btn note-toolbar-delete" type="button" data-action="deleteSelectedNote">Пок кардан</button>' : ""}
+          <button class="btn secondary note-toolbar-btn" type="button" data-action="cancelSelectedNoteEdit">Лағв</button>
+          <button class="btn note-toolbar-btn" type="button" data-action="saveSelectedNoteEdit">Сабт</button>
+        </div>
         <div class="note-detail-edit-form">
-          <input id="noteDetailTitleInput" class="input-field" type="text" value="${escapeHtml(title)}" placeholder="Сарлавҳа" />
-          <select id="noteDetailCategoryInput" class="input-field">${options}</select>
-          <textarea id="noteDetailBodyInput" class="input-field note-detail-body-input" rows="9" placeholder="Матни ёддошт">${escapeHtml(body)}</textarea>
-          <div class="note-detail-actions">
-            <button class="btn" type="button" data-action="saveSelectedNoteEdit">Сабт</button>
-            <button class="btn secondary" type="button" data-action="cancelSelectedNoteEdit">Лағв</button>
-          </div>
+          <input id="noteDetailTitleInput" class="note-detail-title-input" type="text" value="${escapeHtml(title)}" placeholder="Сарлавҳа" aria-label="Сарлавҳаи ёддошт" />
+          <textarea id="noteDetailBodyInput" class="note-detail-body-input" rows="9" placeholder="Матни ёддошт" aria-label="Матни ёддошт">${escapeHtml(body)}</textarea>
         </div>`;
-      qs("noteDetailTitleInput")?.focus();
+      qs("noteDetailTitleInput")?.focus({ preventScroll: true });
       [
         "noteDetailTitleInput",
-        "noteDetailCategoryInput",
         "noteDetailBodyInput",
       ].forEach((id) => {
         qs(id)?.addEventListener("input", () => {
-          this.noteDetailDirty = true;
-        });
-        qs(id)?.addEventListener("change", () => {
-          this.noteDetailDirty = true;
+          this.scheduleNoteAutosave();
         });
       });
       return;
     }
 
     panel.innerHTML = `
-      <button class="note-detail-back" type="button" data-action="clearSelectedNote" aria-label="Бозгашт">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l8 8-8 8 1.41 1.41L20 13v-2z" /></svg>
-      </button>
+      <div class="note-detail-toolbar">
+        <button class="note-detail-back" type="button" data-action="clearSelectedNote" aria-label="Бозгашт">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </button>
+        <button class="btn secondary note-toolbar-btn note-toolbar-delete" type="button" data-action="deleteSelectedNote">Пок кардан</button>
+        <button class="btn note-toolbar-btn" type="button" data-action="editSelectedNote">Таҳрир</button>
+      </div>
       <div class="note-detail-header">
-        <span class="note-chip note-chip-${escapeHtml(note.category || "other")}">${escapeHtml(this.noteCategoryLabel(note.category || "other"))}</span>
         <span class="note-time">${new Date(note.updatedAt || note.createdAt).toLocaleString("tg-TJ", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" })}</span>
       </div>
       <h3 class="note-detail-title">${escapeHtml(note.title)}</h3>
       <div class="note-detail-body">${escapeHtml(note.body).replace(/\n/g, "<br>") || "Матни ёддошт холӣ аст."}</div>
-      <div class="note-detail-actions">
-        <button class="btn" type="button" data-action="editSelectedNote">Таҳрир</button>
-        <button class="btn secondary" type="button" data-action="deleteSelectedNote">Пок кардан</button>
-      </div>`;
+      `;
   },
 
   toggleFS(value) {
@@ -3363,10 +3289,16 @@ export const app = {
     }
   },
 
-  applySettings() {
+  applySettings({ preserveUiKitRange = false } = {}) {
     const root = document.documentElement;
     const body = document.body;
-    const theme = this.settings?.theme === "dark" ? "dark" : "light";
+    const themeSetting = this.settings?.theme || "light";
+    const theme =
+      themeSetting === "system"
+        ? this.systemThemeQuery?.matches
+          ? "dark"
+          : "light"
+        : themeSetting;
     const diagram = this.settings?.diagram === false ? "off" : "on";
 
     if (body) {
@@ -3377,13 +3309,51 @@ export const app = {
     if (root) {
       root.dataset.theme = theme;
       root.dataset.diagram = diagram;
+      root.dataset.uiKit = this.settings.uiKit || "medium";
+      root.dataset.minaiCalculator = this.settings.minaiCalculator
+        ? "on"
+        : "off";
+      root.dataset.minaiPercent = this.settings.minaiPercent ? "on" : "off";
       root.style.colorScheme = theme;
     }
 
-    setChecked("themeToggle", theme === "dark");
     setChecked("soundToggle", this.settings.sound);
+    setChecked("vibrationToggle", this.settings.vibration);
     setChecked("fsToggle", this.settings.fs);
     setChecked("diagramToggle", this.settings.diagram);
+    setChecked("minaiCalculatorToggle", this.settings.minaiCalculator);
+    setChecked("minaiPercentToggle", this.settings.minaiPercent);
+    const uiKitIndex = ["low", "medium", "perfect"].indexOf(
+      this.settings.uiKit,
+    );
+    const uiKitRange = qs("uiKitRange");
+    if (uiKitRange && !preserveUiKitRange) {
+      uiKitRange.value = String(Math.max(uiKitIndex, 0) * 50);
+    }
+    const rangeProgress = uiKitRange
+      ? Number(uiKitRange.value)
+      : Math.max(uiKitIndex, 0) * 50;
+    uiKitRange?.style.setProperty("--range-progress", `${rangeProgress}%`);
+    const rangeLevel = Math.round(rangeProgress / 50);
+    setText(
+      "uiKitValue",
+      ["Сабук", "Миёна", "Олӣ"][rangeLevel],
+    );
+    uiKitRange?.setAttribute(
+      "aria-valuetext",
+      ["Сабук", "Миёна", "Олӣ"][rangeLevel],
+    );
+    document.querySelectorAll(".theme-option").forEach((button) => {
+      const selected = button.dataset.themeValue === themeSetting;
+      button.classList.toggle("is-active", selected);
+      button.setAttribute("aria-pressed", String(selected));
+      if (selected) {
+        qs("themeOptions")?.style.setProperty(
+          "--theme-offset",
+          `${[...button.parentElement.children].indexOf(button) * 100}%`,
+        );
+      }
+    });
 
     const themeColor = theme === "dark" ? "#000000" : "#06b6d4";
     document
@@ -3417,6 +3387,12 @@ export const app = {
       "moreProfileSchool",
       school ? `Мактаби №${school}` : "Рақами мактаб илова нашудааст",
     );
+    setText("profileDisplayName", fullName || "Чоряк");
+    setText(
+      "profileDisplaySchool",
+      school ? `Мактаби №${school}` : "Рақами мактаб илова нашудааст",
+    );
+    setText("profileAvatarPreviewFallback", fallback);
 
     const moreProfilePhoto = qs("moreProfilePhoto");
     const moreProfileFallback = qs("moreProfileFallback");
@@ -3465,7 +3441,6 @@ export const app = {
       profile: this.profile,
       notes: this.notes,
       tasks: this.tasks,
-      noteCategories: this.noteCategories,
     });
     this.updateProfileUI(this.profile);
   },
@@ -3496,10 +3471,14 @@ export const app = {
     } catch {}
   },
 
-  vibrate(ms = 50) {
+  vibrate(ms = 60) {
     try {
-      if (navigator && typeof navigator.vibrate === "function") {
-        navigator.vibrate(ms);
+      if (
+        this.settings.vibration !== false &&
+        navigator &&
+        typeof navigator.vibrate === "function"
+      ) {
+        navigator.vibrate(Math.round(ms * 1.2));
       }
     } catch (e) {
       // ignore

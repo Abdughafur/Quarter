@@ -87,6 +87,10 @@ nav {
   will-change: transform;
 }
 
+.nav-active-indicator {
+  display: none;
+}
+
 .nav-btn {
   flex: 1;
   min-width: 0;
@@ -163,6 +167,54 @@ nav {
     height: 48px;
     border-radius: 999px; /* capsule buttons on mobile */
     font-size: 0.6rem;
+  }
+
+  [data-ui-kit="perfect"] nav {
+    position: fixed;
+  }
+
+  [data-ui-kit="perfect"] nav .nav-active-indicator {
+    position: absolute;
+    z-index: 0;
+    top: 6px;
+    bottom: 6px;
+    left: 6px;
+    display: block;
+    width: var(--nav-indicator-width, calc((100% - 24px) / 4));
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    box-shadow: 0 8px 18px rgba(14, 165, 233, 0.2);
+    pointer-events: none;
+    transform: translate3d(var(--nav-indicator-x, 0px), 0, 0)
+      scaleX(var(--nav-indicator-scale-x, 1))
+      scaleY(var(--nav-indicator-scale-y, 1));
+    transition:
+      transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      width 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform, width;
+  }
+
+  [data-ui-kit="perfect"] nav.is-dragging .nav-active-indicator {
+    --nav-indicator-scale-x: 0.96;
+    --nav-indicator-scale-y: 0.88;
+    transition: none;
+  }
+
+  [data-ui-kit="perfect"] nav.is-dragging .nav-btn,
+  [data-ui-kit="perfect"] nav.is-dragging .nav-btn.active {
+    color: var(--muted);
+    background: transparent;
+    box-shadow: none;
+  }
+
+  [data-ui-kit="perfect"] nav .nav-btn {
+    position: relative;
+    z-index: 1;
+  }
+
+  [data-ui-kit="perfect"] nav .nav-btn.active {
+    background: transparent;
+    box-shadow: none;
   }
 
   .journal-floating-btn {
