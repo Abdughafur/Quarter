@@ -64,6 +64,25 @@ const clearStretchState = (element) => {
   ].forEach((property) => element.style.removeProperty(property));
 };
 
+const canvasToPngBlob = (canvas) =>
+  new Promise((resolve, reject) => {
+    try {
+      if (typeof canvas.toBlob === "function") {
+        canvas.toBlob(resolve, "image/png");
+        return;
+      }
+
+      const data = canvas.toDataURL("image/png").split(",", 2)[1];
+      const binary = atob(data);
+      const bytes = Uint8Array.from(binary, (character) =>
+        character.charCodeAt(0),
+      );
+      resolve(new Blob([bytes], { type: "image/png" }));
+    } catch (error) {
+      reject(error);
+    }
+  });
+
 export const app = {
   grades: [],
   pct: { total: 0, counts: {} },
@@ -107,7 +126,9 @@ export const app = {
       (event) => {
         if (
           this.settings.uiKit !== "perfect" &&
-          !event.target.closest(".theme-options, #uiKitRange")
+          !event.target.closest(
+            ".theme-options, #uiKitRange, #profileMenu, .block",
+          )
         ) {
           event.stopImmediatePropagation();
         }
@@ -1717,11 +1738,6 @@ export const app = {
 
     grade.type = grade.type === "exam" ? "regular" : "exam";
     this.scheduleUpdate(true);
-    this.toast.show(
-      grade.type === "exam"
-        ? "Навъи балл ба балли корҳои санҷишӣ тағйир ёфт."
-        : "Навъи балл ба балли дарсӣ тағйир ёфт.",
-    );
   },
 
   scheduleUpdate(anim = false) {
@@ -2126,33 +2142,73 @@ export const app = {
       return;
     }
 
-    const canvas = await this.percentCanvas({
-      classNumber,
-      teacher,
-      schoolNumber,
-      subject,
-    });
+    let canvas;
+    let blob;
+    try {
+      canvas = await this.percentCanvas({
+        classNumber,
+        teacher,
+        schoolNumber,
+        subject,
+      });
+      if (canvas) blob = await canvasToPngBlob(canvas);
+    } catch (error) {
+      console.error("Percentage export failed:", error);
+      this.toast.show("Экспорт иҷро нашуд. Бори дигар кӯшиш кунед.");
+      return;
+    }
+
     if (!canvas) {
       this.toast.show("Сохтани расми экспортшуда иҷро нашуд.");
       return;
     }
 
-    const blob = await new Promise((resolve) =>
-      canvas.toBlob(resolve, "image/png", 0.96),
-    );
     if (!blob) {
       this.toast.show("Экспорт иҷро нашуд. Бори дигар кӯшиш кунед.");
       return;
     }
 
-    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
+    const fileName = `Фоизҳои-синфи-${classNumber}.png`;
+    const canUseFileShare =
+      typeof File === "function" &&
+      typeof navigator.share === "function" &&
+      typeof navigator.canShare === "function";
+
+    if (!("download" in link)) {
+      if (!canUseFileShare) {
+        this.toast.show("Ин браузер файлро экспорт карда наметавонад.");
+        return;
+      }
+
+      const file = new File([blob], fileName, { type: "image/png" });
+      if (!navigator.canShare({ files: [file] })) {
+        this.toast.show("Ин браузер файлро экспорт карда наметавонад.");
+        return;
+      }
+
+      try {
+        await navigator.share({ files: [file], title: fileName });
+      } catch (error) {
+        if (error.name === "AbortError") return;
+        console.error("Percentage export sharing failed:", error);
+        this.toast.show("Экспорт иҷро нашуд. Бори дигар кӯшиш кунед.");
+        return;
+      }
+      this.closePercentExport();
+      this.toast.show("Фоизҳои синф экспорт шуданд.");
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
     link.href = url;
-    link.download = `Фоизҳои-синфи-${classNumber}.png`;
+    link.download = fileName;
     document.body.append(link);
     link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setTimeout(() => {
+      link.remove();
+      URL.revokeObjectURL(url);
+    }, 60000);
     this.closePercentExport();
     this.toast.show("Фоизҳои синф экспорт шуданд.");
   },
@@ -2417,7 +2473,7 @@ export const app = {
   async percentCanvas({ classNumber, teacher, schoolNumber, subject }) {
     const canvas = document.createElement("canvas");
     canvas.width = 1080;
-    canvas.height = 1700;
+    canvas.height = 1620;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
@@ -2462,11 +2518,12 @@ export const app = {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const appIcon = new Image();
-    appIcon.src = "assets/images/pics/logo.png";
-    await new Promise((resolve) => {
+    const appIconLoaded = new Promise((resolve) => {
       appIcon.onload = resolve;
       appIcon.onerror = resolve;
     });
+    appIcon.src = "assets/images/pics/logo.png";
+    if (!appIcon.complete) await appIconLoaded;
     if (appIcon.complete && appIcon.naturalWidth > 0) {
       ctx.save();
       ctx.beginPath();
@@ -2496,6 +2553,18 @@ export const app = {
     ctx.font = "900 24px Arial";
     ctx.fillText("МАЪЛУМОТИ СИНФ", 115, 225);
 
+    ctx.strokeStyle = line;
+    ctx.beginPath();
+    ctx.moveTo(690, 225);
+    ctx.lineTo(690, 635);
+    ctx.stroke();
+    ctx.fillStyle = muted;
+    ctx.font = "700 18px Arial";
+    ctx.fillText("ШУМОРАИ ХОНАНДАГОН", 730, 275);
+    ctx.fillStyle = ink;
+    ctx.font = "900 76px Arial";
+    ctx.fillText(String(total), 730, 370);
+
     let infoY = 260;
     const drawInfoField = (label, value) => {
       ctx.fillStyle = muted;
@@ -2503,38 +2572,30 @@ export const app = {
       ctx.fillText(label, 115, infoY);
       ctx.fillStyle = ink;
       ctx.font = "700 26px Arial";
-      infoY = drawWrappedText(String(value), 115, infoY + 36, 850, 32) + 38;
+      infoY = drawWrappedText(String(value), 115, infoY + 36, 520, 32) + 38;
     };
     drawInfoField("СИНФ", classNumber);
     drawInfoField("РОҲБАРИ СИНФ", teacher);
     drawInfoField("РАҚАМИ МАКТАБ", schoolNumber);
     drawInfoField("ФАН", subject);
 
-    drawCard(70, 715, 940, 165);
+    drawCard(70, 715, 940, 660);
     ctx.fillStyle = primary;
     ctx.font = "900 24px Arial";
-    ctx.fillText("ШУМОРАИ ХОНАНДАГОН", 115, 765);
-    ctx.fillStyle = ink;
-    ctx.font = "900 76px Arial";
-    ctx.fillText(String(total), 115, 845);
-
-    drawCard(70, 910, 940, 720);
-    ctx.fillStyle = primary;
-    ctx.font = "900 24px Arial";
-    ctx.fillText("ТАҚСИМОТИ БАЛЛҲО", 115, 960);
+    ctx.fillText("ТАҚСИМОТИ БАЛЛҲО", 115, 765);
     ctx.fillStyle = muted;
     ctx.font = "900 20px Arial";
-    ctx.fillText("БАЛЛ", 150, 1010);
-    ctx.fillText("ШУМОРА", 480, 1010);
-    ctx.fillText("ФОИЗ", 790, 1010);
+    ctx.fillText("БАЛЛ", 150, 815);
+    ctx.fillText("ШУМОРА", 480, 815);
+    ctx.fillText("ФОИЗ", 790, 815);
     ctx.strokeStyle = line;
     ctx.beginPath();
-    ctx.moveTo(115, 1030);
-    ctx.lineTo(965, 1030);
+    ctx.moveTo(115, 835);
+    ctx.lineTo(965, 835);
     ctx.stroke();
 
     for (let grade = 10; grade >= 1; grade -= 1) {
-      const y = 1070 + (10 - grade) * 50;
+      const y = 875 + (10 - grade) * 50;
       if (grade % 2 === 0) {
         roundRect(ctx, 115, y - 29, 850, 42, 10);
         ctx.fillStyle = "#f1f7fa";
@@ -2551,6 +2612,41 @@ export const app = {
         y,
       );
     }
+
+    const range7to10 = [7, 8, 9, 10].reduce(
+      (sum, grade) => sum + toInt(this.pct.counts[grade], 0),
+      0,
+    );
+    const range4to10 = [4, 5, 6, 7, 8, 9, 10].reduce(
+      (sum, grade) => sum + toInt(this.pct.counts[grade], 0),
+      0,
+    );
+    const summaryY = 1400;
+    drawCard(70, summaryY, 940, 170);
+    ctx.fillStyle = primary;
+    ctx.font = "900 24px Arial";
+    ctx.strokeStyle = line;
+    ctx.beginPath();
+    ctx.moveTo(540, summaryY + 65);
+    ctx.lineTo(540, summaryY + 145);
+    ctx.stroke();
+
+    [
+      { label: "7–10", count: range7to10, x: 305 },
+      { label: "4–10", count: range4to10, x: 775 },
+    ].forEach(({ label, count, x }) => {
+      ctx.textAlign = "center";
+      ctx.fillStyle = muted;
+      ctx.font = "900 20px Arial";
+      ctx.fillText(`БАЛЛҲОИ ${label}`, x, summaryY + 86);
+      ctx.fillStyle = ink;
+      ctx.font = "900 34px Arial";
+      ctx.fillText(`${Math.round((count / total) * 100)}%`, x, summaryY + 128);
+      ctx.fillStyle = muted;
+      ctx.font = "700 17px Arial";
+      ctx.fillText(`${count} хонанда`, x, summaryY + 153);
+    });
+    ctx.textAlign = "left";
 
     return canvas;
   },
@@ -3496,3 +3592,4 @@ whenReady(() => {
 */
 
 // THE END
+// Created by Abdughafur - Believe GOD

@@ -356,3 +356,9 @@
     }
   }
 }
+
+[data-ui-kit="low"] .avatar-picker-modal {
+  animation: none !important;
+  transform: none !important;
+}
+/* Created by Abdughafur - Believe GOD */

@@ -1,4 +1,4 @@
-# ✨ Чоряк v4.5 S (Stable)
+# ✨ Чоряк v4.5.1S (Stable)
 
 ### Quarterly Grade Calculator
 

@@ -1,5 +1,5 @@
 /* sw.js */
-const CACHE_NAME = "choryak-cache-v4.5.1-s-stable";
+const CACHE_NAME = "choryak-cache-v4.5.1s-stable";
 
 const PRECACHE = [
   "./",
@@ -46,7 +46,7 @@ const PRECACHE = [
   "./assets/css/utilities/shadows.css",
   "./assets/css/utilities/radius.css",
   "./assets/css/utilities/helpers.css",
-  "./assets/js/core/app.js?v=4.5-s",
+  "./assets/js/core/app.js?v=4.5.1S",
   "./assets/js/core/entry.js",
   "./assets/js/core/login.js",
   "./assets/js/core/storage.js",
@@ -57,7 +57,7 @@ const PRECACHE = [
   "./assets/js/ui/chart.js",
   "./assets/js/ui/avatar-picker.js",
   "./assets/js/utils/helpers.js",
-  "./assets/css/components/modal.css?v=4.5-s",
+  "./assets/css/components/modal.css?v=4.5.1S",
   "./assets/images/minai/ai.png",
   "./assets/images/minai/hello.png",
   "./assets/images/minai/search.png",
@@ -157,3 +157,4 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(staleWhileRevalidate(event));
 });
+// Created by Abdughafur - Believe GOD

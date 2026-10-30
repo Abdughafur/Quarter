@@ -341,7 +341,7 @@ body.more-subview-open::after {
   scroll-behavior: auto !important;
 }
 
-[data-ui-kit="low"] :active:not(nav) {
+[data-ui-kit="low"] :active:not(nav):not(.pupil-clear-btn) {
   transform: none !important;
 }
 
@@ -1311,3 +1311,4 @@ body.more-subview-open::after {
   margin: 0 !important;
   flex: 0 0 auto;
 }
+/* Created by Abdughafur - Believe GOD */

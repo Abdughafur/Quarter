@@ -743,18 +743,32 @@
   position: relative;
   z-index: 3;
   display: flex;
+  width: 100%;
   justify-content: flex-end;
   margin-bottom: 12px;
 }
 
+#more-profile-view .profile-menu-title {
+  position: absolute;
+  left: 50%;
+  margin: 0;
+  color: var(--text);
+  font-size: 1.1rem;
+  font-weight: 900;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
 #more-profile-view .profile-menu-toggle {
   display: grid;
-  width: 100%;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
   min-height: 44px;
-  place-items: center end;
-  padding: 0 12px;
+  place-items: center;
+  padding: 0;
   border: 1px solid var(--border);
-  border-radius: 15px;
+  border-radius: 50%;
   background: rgba(255, 255, 255, 0.3);
   color: var(--muted);
   cursor: pointer;
@@ -785,8 +799,10 @@
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
+  left: auto;
   display: grid;
   width: min(250px, calc(100vw - 64px));
+  margin: 0;
   padding: 6px;
   border: 1px solid var(--border);
   border-radius: 18px;
@@ -1038,11 +1054,11 @@
 }
 
 @media (max-width: 279px) {
-  body > *:not(.tiny-screen-warning) {
+  body:not(.profile-page) > *:not(.tiny-screen-warning) {
     display: none !important;
   }
 
-  .tiny-screen-warning {
+  body:not(.profile-page) .tiny-screen-warning {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1065,6 +1081,14 @@
     font-weight: 700;
     color: #1e293b;
     line-height: 1.5;
+  }
+
+  .login-page-footer {
+    min-height: 0;
+    padding-block: 8px;
+    font-size: 0.62rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
   }
 }
 
@@ -1442,3 +1466,4 @@
     min-height: calc(100vh - 24px);
   }
 }
+/* Created by Abdughafur - Believe GOD */

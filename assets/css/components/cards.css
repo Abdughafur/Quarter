@@ -1549,6 +1549,10 @@
   margin-bottom: 18px;
 }
 
+#tab-notes .notes-header .notes-page-title {
+  margin: 0;
+}
+
 .notes-search {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -2509,3 +2513,4 @@
   object-fit: cover;
   display: none;
 }
+/* Created by Abdughafur - Believe GOD */

@@ -1,4 +1,4 @@
-/* main.css - Чоряк v4.5 S (Stable)
+/* main.css - Чоряк v4.5.1S (Stable)
  Copyright (c) 2026 Abdughafur. All rights reserved.
 */
 @import url("./core/reset.css");
@@ -18,7 +18,7 @@
 @import url("./components/cards.css");
 @import url("./components/inputs.css");
 @import url("./components/switches.css");
-@import url("./components/modal.css?v=4.5-s");
+@import url("./components/modal.css?v=4.5.1S");
 @import url("./components/toast.css");
 @import url("./components/charts.css");
 @import url("./components/keypad.css");
@@ -81,3 +81,4 @@
     transform: translateY(0);
   }
 }
+/* Created by Abdughafur - Believe GOD */

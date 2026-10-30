@@ -15,3 +15,4 @@ export function openInfoModal(modal, pupilInput, subjectInput) {
 export function closeInfoModal(modal) {
   modal?.classList.remove("open");
 }
+// Created by Abdughafur - Believe GOD

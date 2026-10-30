@@ -18,3 +18,4 @@ export class Toast {
     this.timer = setTimeout(() => el.classList.remove("show"), duration);
   }
 }
+// Created by Abdughafur - Believe GOD

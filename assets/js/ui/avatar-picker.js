@@ -87,3 +87,4 @@ export function bindAvatarPicker({ inputId, triggerSelector, onSelect }) {
     if (option) selectPreset(option.dataset.avatar);
   });
 }
+// Created by Abdughafur - Believe GOD

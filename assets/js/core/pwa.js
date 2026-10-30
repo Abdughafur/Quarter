@@ -141,3 +141,4 @@ if (canUseServiceWorker) {
 }
 
 window.addEventListener("load", updateInstallButton);
+// Created by Abdughafur - Believe GOD
