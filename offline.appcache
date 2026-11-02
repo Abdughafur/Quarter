@@ -41,6 +41,7 @@ CACHE:
 ./assets/css/components/loader.css
 ./assets/css/components/badges.css
 ./assets/css/pages/home.css
+./assets/css/pages/calendar.css
 ./assets/css/pages/percent.css
 ./assets/css/pages/ai.css
 ./assets/css/pages/settings.css

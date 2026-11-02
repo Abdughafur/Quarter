@@ -1,15 +1,6 @@
 /* app.js */
-import {
-  calculateStats,
-  getTrend,
-  gradeLabel,
-  GRADE_LABELS,
-} from "./stats.js";
-import {
-  loadState,
-  saveState,
-  clearState,
-} from "./storage.js";
+import { calculateStats, getTrend, gradeLabel, GRADE_LABELS } from "./stats.js";
+import { loadState, saveState, clearState } from "./storage.js";
 import { promptInstallPwa } from "./pwa.js";
 import {
   buildKeypad,
@@ -35,6 +26,31 @@ import {
 } from "../utils/helpers.js";
 
 const SHARE_URL = "https://abdughafur.github.io/Quarter/";
+const CALENDAR_MONTHS = [
+  "январ",
+  "феврал",
+  "март",
+  "апрел",
+  "май",
+  "июн",
+  "июл",
+  "август",
+  "сентябр",
+  "октябр",
+  "ноябр",
+  "декабр",
+];
+const CALENDAR_WEEKDAYS = [
+  "якшанбе",
+  "душанбе",
+  "сешанбе",
+  "чоршанбе",
+  "панҷшанбе",
+  "ҷумъа",
+  "шанбе",
+];
+const CALENDAR_MIN_YEAR = 1900;
+const CALENDAR_MAX_YEAR = 2100;
 
 const setStretchState = (element, offsetX, offsetY, angle, scale) => {
   element.style.setProperty("--stretch-x", `${offsetX}px`);
@@ -94,6 +110,12 @@ export const app = {
   initialized: false,
   notes: [],
   tasks: [],
+  calendarMonth: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+  calendarSelectedDate: new Date(),
+  calendarPickerYear: new Date().getFullYear(),
+  calendarPickerOpen: false,
+  calendarPickerMode: "months",
+  calendarPickerHeading: "Интихоби моҳ",
   selectedNoteId: null,
   editingNoteId: null,
   creatingNoteInline: false,
@@ -172,6 +194,8 @@ export const app = {
     this.applySettings();
     this.updateAll();
     this.renderNotes();
+    this.renderCalendar();
+    this.bindCalendarSwipe();
 
     // initialize nav highlight and draggable behavior
     this.setupNavDrag();
@@ -185,15 +209,12 @@ export const app = {
     if (!buttons.length) return;
 
     const indicator = nav.querySelector(".nav-active-indicator");
-    const isMobile = () =>
-      (typeof window.matchMedia === "function" &&
-        window.matchMedia("(max-width: 760px)").matches) ||
-      window.innerWidth <= 760;
     const updateIndicator = (button) => {
       if (!indicator || !button) return;
       const navRect = nav.getBoundingClientRect();
       const buttonRect = button.getBoundingClientRect();
-      const paddingLeft = Number.parseFloat(getComputedStyle(nav).paddingLeft) || 0;
+      const paddingLeft =
+        Number.parseFloat(getComputedStyle(nav).paddingLeft) || 0;
       const indicatorOrigin = navRect.left + nav.clientLeft + paddingLeft;
 
       indicator.style.setProperty(
@@ -263,15 +284,10 @@ export const app = {
       const width = firstButton.width;
       const minX = firstButton.left - origin;
       const maxX = Math.max(minX, lastButton.right - origin - width);
-      const x = Math.max(
-        minX,
-        Math.min(maxX, clientX - origin - width / 2),
-      );
+      const x = Math.max(minX, Math.min(maxX, clientX - origin - width / 2));
       indicator.style.setProperty("--nav-indicator-x", `${x}px`);
     };
     const canDrag = () =>
-      isMobile() &&
-      this.settings.uiKit === "perfect" &&
       !document.body.classList.contains("more-subview-open") &&
       !document.querySelector(
         ".modal-backdrop.open, .note-modal-backdrop.open, .avatar-picker-backdrop.open",
@@ -307,9 +323,7 @@ export const app = {
         pointerId = null;
         dragging = false;
         nav.classList.remove("is-dragging");
-        updatePosition(
-          nav.querySelector(".nav-btn.active") || buttons[0],
-        );
+        updatePosition(nav.querySelector(".nav-btn.active") || buttons[0]);
         return;
       }
       currentX = event.clientX;
@@ -341,9 +355,7 @@ export const app = {
       }
 
       if (event.type === "pointercancel" || !canDrag()) {
-        updatePosition(
-          nav.querySelector(".nav-btn.active") || buttons[0],
-        );
+        updatePosition(nav.querySelector(".nav-btn.active") || buttons[0]);
         return;
       }
 
@@ -741,6 +753,9 @@ export const app = {
       if (actionButton)
         this.action(actionButton.dataset.action, actionButton.dataset);
       if (event.target.id === "shareModal") this.closeShareModal();
+      if (event.target.id === "resultDetailsModal")
+        this.closeResultDetailsModal();
+      if (event.target.id === "calendarPickerModal") this.closeCalendarPicker();
 
       const tabButton = event.target.closest("[data-tab]");
       if (tabButton) this.nav(tabButton.dataset.tab, tabButton);
@@ -760,7 +775,11 @@ export const app = {
     this.bindNotesSwitcherGesture();
 
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") this.closeShareModal();
+      if (event.key === "Escape") {
+        this.closeShareModal();
+        this.closeResultDetailsModal();
+        this.closeCalendarPicker();
+      }
     });
 
     document
@@ -1071,7 +1090,10 @@ export const app = {
 
     const selectAt = (clientX) => {
       const rect = group.getBoundingClientRect();
-      const position = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      const position = Math.max(
+        0,
+        Math.min(1, (clientX - rect.left) / rect.width),
+      );
       selectedIndex = Math.round(position * (options.length - 1));
       options.forEach((option, index) => {
         const selected = index === selectedIndex;
@@ -1441,6 +1463,20 @@ export const app = {
       toggleMinaiCalculator: () => this.toggleMinaiCalculator(payload),
       toggleMinaiPercent: () => this.toggleMinaiPercent(payload),
       toggleResultDetails: () => this.toggleResultDetails(),
+      closeResultDetailsModal: () => this.closeResultDetailsModal(),
+      changeCalendarMonth: (payload) =>
+        this.changeCalendarMonth(Number(payload.offset)),
+      showCalendarToday: () => this.showCalendarToday(),
+      selectCalendarDate: (payload) => this.selectCalendarDate(payload.date),
+      openCalendarMonthPicker: () =>
+        this.openCalendarPicker("months", "Интихоби моҳ"),
+      openCalendarYearPicker: () =>
+        this.openCalendarPicker("years", "Интихоби сол"),
+      openCalendarDatePicker: () =>
+        this.openCalendarPicker("months", "Гузариш ба сана"),
+      closeCalendarPicker: () => this.closeCalendarPicker(),
+      selectCalendarYear: (payload) => this.selectCalendarYear(payload.year),
+      selectCalendarMonth: (payload) => this.selectCalendarMonth(payload.month),
       editProfile: () => this.showSubView("more-profile-view"),
       goToProfile: () => this.showSubView("more-profile-view"),
       saveSetupProfile: () => this.saveSetupProfile(),
@@ -1452,9 +1488,8 @@ export const app = {
       showInstallPwa: () => this.showSubView("more-install-view"),
       hideSubviews: () => this.showSubView("more-home-view"),
       showLogoutConfirm: () => this.showLogoutConfirm(),
-      toggleProfileMenu: () => this.setProfileMenuOpen(
-        qs("profileMenuPanel")?.hidden ?? true,
-      ),
+      toggleProfileMenu: () =>
+        this.setProfileMenuOpen(qs("profileMenuPanel")?.hidden ?? true),
       closeProfileMenu: () => this.setProfileMenuOpen(false),
       openProfileNameModal: () => this.openProfileNameModal(),
       closeProfileNameModal: () => this.closeProfileNameModal(),
@@ -1497,28 +1532,137 @@ export const app = {
   },
 
   toggleResultDetails() {
-    const hero = document.querySelector(".hero");
     const toggle = document.querySelector(".result-details-toggle");
-    if (!hero || !toggle) return;
+    const modal = document.querySelector("#resultDetailsModal");
+    const content = document.querySelector("#resultDetailsModalContent");
+    const results = document.querySelector("#resultStatCards");
+    if (!this.grades.length || !toggle || !modal || !content || !results)
+      return;
 
-    const isOpen = hero.classList.toggle("result-details-open");
-    toggle.setAttribute("aria-expanded", String(isOpen));
+    if (modal.classList.contains("open")) {
+      this.closeResultDetailsModal();
+      return;
+    }
+
+    const rows = [...results.querySelectorAll(".stat-row")].map((row) => {
+      const clone = row.cloneNode(true);
+      clone
+        .querySelectorAll("[id]")
+        .forEach((element) => element.removeAttribute("id"));
+      return clone;
+    });
+    content.replaceChildren(...rows);
+    modal.classList.add("open");
+    toggle.setAttribute("aria-expanded", "true");
+    modal.querySelector(".result-details-modal-close")?.focus();
+  },
+
+  renderResultCalculation(stats) {
+    const container = document.querySelector("#resultCalculationDetails");
+    if (!container) return;
+
+    const lines = [];
+    const formatGrades = (items) => items.map((grade) => grade.val).join(" + ");
+
+    if (stats.regular.length) {
+      lines.push([
+        "Баллҳои дарсӣ",
+        `(${formatGrades(stats.regular)}) ÷ ${stats.regular.length} = ${stats.avgR.toFixed(2)}`,
+      ]);
+    }
+
+    if (stats.exam.length) {
+      lines.push([
+        "Корҳои санҷишӣ",
+        `(${formatGrades(stats.exam)}) ÷ ${stats.exam.length} = ${stats.avgE.toFixed(2)}`,
+      ]);
+    }
+
+    if (stats.regular.length && stats.exam.length) {
+      lines.push([
+        "Натиҷаи ниҳоӣ",
+        `(${stats.avgR.toFixed(2)} + ${stats.avgE.toFixed(2)}) ÷ 2 = ${stats.final.toFixed(2)}`,
+      ]);
+    } else if (stats.regular.length || stats.exam.length) {
+      lines.push([
+        "Натиҷаи ниҳоӣ",
+        `${stats.final.toFixed(2)} (миёнаи баллҳои воридшуда)`,
+      ]);
+    } else {
+      lines.push(["Натиҷаи ниҳоӣ", "Балл ворид нашудааст"]);
+    }
+
+    lines.push([
+      "Яклухткунӣ",
+      `Math.round(${stats.final}) = ${Math.round(stats.final)}`,
+    ]);
+
+    container.replaceChildren(
+      ...lines.map(([label, formula]) => {
+        const row = document.createElement("div");
+        row.className = "result-calculation-line";
+
+        const title = document.createElement("strong");
+        title.textContent = label;
+        const expression = document.createElement("span");
+        expression.textContent = formula;
+
+        row.append(title, expression);
+        return row;
+      }),
+    );
+  },
+
+  closeResultDetailsModal() {
+    const modal = document.querySelector("#resultDetailsModal");
+    const toggle = document.querySelector(".result-details-toggle");
+    if (!modal?.classList.contains("open")) return;
+
+    modal.classList.remove("open");
+    toggle?.setAttribute("aria-expanded", "false");
+    toggle?.focus();
   },
 
   keyboard(event) {
     const isInput = ["INPUT", "TEXTAREA"].includes(
       document.activeElement?.tagName,
     );
-    const key = event.key.toLowerCase();
+    const physicalCode = event.code || "";
+    const physicalMatch = /^(?:Key([A-Z])|Digit([0-9])|Numpad([0-9]))$/.exec(
+      physicalCode,
+    );
+    const key = physicalMatch
+      ? (physicalMatch[1] || physicalMatch[2] || physicalMatch[3]).toLowerCase()
+      : physicalCode === "Backspace"
+        ? "backspace"
+        : physicalCode === "Escape"
+          ? "escape"
+          : event.key.toLowerCase();
     const activeTab = document.querySelector(".tab.active")?.id;
     const homeActive = activeTab === "tab-home";
     const percentActive = activeTab === "tab-prosent";
     const notesActive = activeTab === "tab-notes";
-
-    if (isInput && key !== "escape") return;
+    const calendarActive = activeTab === "tab-calendar";
 
     if (
-      key === "/" &&
+      event.isComposing ||
+      event.keyCode === 229 ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.altKey ||
+      event.shiftKey
+    )
+      return;
+    if (isInput && key !== "escape") return;
+
+    if (calendarActive && key === "arrowleft") {
+      event.preventDefault();
+      this.changeCalendarMonth(-1);
+    } else if (calendarActive && key === "arrowright") {
+      event.preventDefault();
+      this.changeCalendarMonth(1);
+    } else if (
+      (key === "/" || physicalCode === "Slash") &&
       notesActive &&
       !this.editingNoteId &&
       !this.creatingNoteInline &&
@@ -1546,20 +1690,33 @@ export const app = {
     } else if (key === "h") {
       this.nav("tab-home");
     } else if (key === "s") {
-      this.nav("tab-more");
-    } else if (key === "p") {
       if (percentActive) {
         event.preventDefault();
         this.clearPupilCount();
       } else {
-        this.nav("tab-prosent");
+        this.nav("tab-more");
       }
+    } else if (key === "p") {
+      this.nav("tab-prosent");
     } else if (key === "j") {
       // navigate to journal tab
       event.preventDefault();
       this.nav("tab-journal");
+    } else if (key === "z") {
+      this.nav("tab-calendar");
     } else if (key === "n") {
-      this.nav("tab-notes");
+      if (notesActive) {
+        if (
+          !this.editingNoteId &&
+          !this.creatingNoteInline &&
+          !qs("noteModal")?.classList.contains("open")
+        ) {
+          event.preventDefault();
+          this.openNoteEntry();
+        }
+      } else {
+        this.nav("tab-notes");
+      }
       /* Русский */
     } else if (key === "с" && (homeActive || percentActive)) {
       event.preventDefault();
@@ -1571,23 +1728,35 @@ export const app = {
     } else if (key === "р") {
       this.nav("tab-home");
     } else if (key === "ы") {
-      this.nav("tab-more");
-    } else if (key === "з") {
       if (percentActive) {
         event.preventDefault();
         this.clearPupilCount();
       } else {
-        this.nav("tab-prosent");
+        this.nav("tab-more");
       }
+    } else if (key === "з") {
+      this.nav("tab-prosent");
       /* Тоҷикӣ */
     } else if (key === "р") {
       this.nav("tab-home");
     } else if (key === "ҷ") {
       this.nav("tab-more");
     } else if (key === "н") {
-      this.nav("tab-notes");
+      if (notesActive) {
+        if (
+          !this.editingNoteId &&
+          !this.creatingNoteInline &&
+          !qs("noteModal")?.classList.contains("open")
+        ) {
+          event.preventDefault();
+          this.openNoteEntry();
+        }
+      } else {
+        this.nav("tab-notes");
+      }
     } else if (key === "escape") {
-      this.closeModal();
+      if (calendarActive && this.calendarPickerOpen) this.closeCalendarPicker();
+      else this.closeModal();
     }
   },
 
@@ -1634,9 +1803,12 @@ export const app = {
 
     const hasOverflow = container.scrollHeight > container.clientHeight + 1;
     const isCompactView = window.innerWidth <= 520;
-    const expandedBeforeToggle = container.classList.contains("grades-expanded");
+    const expandedBeforeToggle =
+      container.classList.contains("grades-expanded");
     const shouldShowToggle =
-      isCompactView && this.grades.length > 0 && (hasOverflow || expandedBeforeToggle);
+      isCompactView &&
+      this.grades.length > 0 &&
+      (hasOverflow || expandedBeforeToggle);
 
     if (!shouldShowToggle) {
       toggle.classList.remove("is-visible");
@@ -1761,18 +1933,36 @@ export const app = {
     setText("regularAvgUI", stats.avgR.toFixed(2));
     setText("examAvgUI", stats.avgE.toFixed(2));
     setText("preciseAvgUI", stats.final.toFixed(2));
+    this.renderResultCalculation(stats);
     // countUI and chartHint removed — keep UI minimal
 
+    const hasGrades = this.grades.length > 0;
+    const resultToggle = document.querySelector(".result-details-toggle");
+    const exportButton = document.querySelector(".export-action");
+    const emptyResultIllustration = qs("emptyResultIllustration");
+    if (resultToggle) {
+      resultToggle.disabled = !hasGrades;
+      resultToggle.setAttribute("aria-disabled", String(!hasGrades));
+    }
+    if (exportButton) {
+      exportButton.disabled = !hasGrades;
+      exportButton.setAttribute("aria-disabled", String(!hasGrades));
+    }
+
     const avgLarge = qs("avgLarge");
+    if (avgLarge) avgLarge.hidden = !hasGrades;
+    if (emptyResultIllustration) emptyResultIllustration.hidden = hasGrades;
     if (avgLarge) {
       const num = avgLarge.querySelector?.(".large-number");
-      if (num) num.textContent = String(Math.round(stats.final));
-      else avgLarge.textContent = String(Math.round(stats.final));
+      if (num)
+        num.textContent = hasGrades ? String(Math.round(stats.final)) : "";
+      else
+        avgLarge.textContent = hasGrades ? String(Math.round(stats.final)) : "";
       const labelEl = avgLarge.querySelector?.(".label-small");
       if (labelEl)
-        labelEl.textContent = this.grades.length ? gradeLabel(stats.final) : "";
+        labelEl.textContent = hasGrades ? gradeLabel(stats.final) : "";
       avgLarge.className = "large";
-      if (anim) this.bump(avgLarge);
+      if (anim && hasGrades) this.bump(avgLarge);
     }
 
     setText(
@@ -1809,14 +1999,17 @@ export const app = {
     if (gradesToggle) {
       const hasOverflow = Boolean(
         blocksContainer &&
-          blocksContainer.scrollHeight > blocksContainer.clientHeight + 1,
+        blocksContainer.scrollHeight > blocksContainer.clientHeight + 1,
       );
       const isCompactView = window.innerWidth <= 520;
       const expandedState = Boolean(
-        blocksContainer && blocksContainer.classList.contains("grades-expanded"),
+        blocksContainer &&
+        blocksContainer.classList.contains("grades-expanded"),
       );
       const shouldShowToggle =
-        isCompactView && this.grades.length > 0 && (hasOverflow || expandedState);
+        isCompactView &&
+        this.grades.length > 0 &&
+        (hasOverflow || expandedState);
 
       gradesToggle.classList.toggle("is-visible", shouldShowToggle);
       gradesToggle.disabled = !shouldShowToggle;
@@ -1829,14 +2022,13 @@ export const app = {
         gradesToggle.setAttribute("aria-expanded", "false");
         if (blocksContainer) {
           blocksContainer.classList.remove("grades-expanded");
-          blocksContainer.style.height = "168px";
+          blocksContainer.style.height = this.grades.length ? "168px" : "100%";
         }
       }
     }
     renderGradeChart(qs("gradeChart"), this.grades);
     this.bindChartScrollButtonStretch();
     this.percentUpdate();
-
   },
 
   bump(element) {
@@ -2128,11 +2320,7 @@ export const app = {
       return;
     }
 
-    if (
-      !Number.isInteger(classNumber) ||
-      classNumber < 1 ||
-      classNumber > 11
-    ) {
+    if (!Number.isInteger(classNumber) || classNumber < 1 || classNumber > 11) {
       this.toast.show("Синф бояд байни 1 ва 11 бошад.");
       return;
     }
@@ -2214,10 +2402,7 @@ export const app = {
   },
 
   ensureInfo() {
-    if (!this.grades.length) {
-      this.toast.show("Аввал балл ворид кунед.");
-      return;
-    }
+    if (!this.grades.length) return;
 
     openInfoModal(
       qs("infoModal"),
@@ -2606,11 +2791,7 @@ export const app = {
       ctx.fillText(String(grade), 160, y);
       ctx.font = "700 23px Arial";
       ctx.fillText(String(toInt(this.pct.counts[grade], 0)), 500, y);
-      ctx.fillText(
-        percentageMap ? `${percentageMap[grade]}%` : "—",
-        810,
-        y,
-      );
+      ctx.fillText(percentageMap ? `${percentageMap[grade]}%` : "—", 810, y);
     }
 
     const range7to10 = [7, 8, 9, 10].reduce(
@@ -2681,6 +2862,403 @@ export const app = {
     );
 
     this.tone(600, "sine", 0.04);
+  },
+
+  formatCalendarDate(date, includeYear = true) {
+    const weekday = CALENDAR_WEEKDAYS[date.getDay()];
+    const month = CALENDAR_MONTHS[date.getMonth()];
+    const dateText = `${weekday}, ${date.getDate()} ${month}`;
+    return includeYear ? `${dateText} ${date.getFullYear()}` : dateText;
+  },
+
+  renderCalendar(direction = 0) {
+    const monthLabel = qs("calendarMonthLabel");
+    const selectedDateLabel = qs("calendarSelectedDate");
+    const grid = qs("calendarGrid");
+    if (!monthLabel || !selectedDateLabel || !grid) return;
+
+    const year = this.calendarMonth.getFullYear();
+    const month = this.calendarMonth.getMonth();
+    const selected = this.calendarSelectedDate;
+    const today = new Date();
+    const dateKey = (date) =>
+      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+    const monthName = CALENDAR_MONTHS[month];
+    monthLabel.textContent = `${monthName[0].toUpperCase()}${monthName.slice(1)}`;
+    setText("calendarYearLabel", String(year));
+    selectedDateLabel.textContent = this.formatCalendarDate(selected, false);
+    const previousButton = qs("calendarPreviousMonth");
+    const nextButton = qs("calendarNextMonth");
+    if (previousButton)
+      previousButton.disabled = year === CALENDAR_MIN_YEAR && month === 0;
+    if (nextButton)
+      nextButton.disabled = year === CALENDAR_MAX_YEAR && month === 11;
+
+    const fragment = document.createDocumentFragment();
+    const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let index = 0; index < firstWeekday; index += 1) {
+      const emptyCell = document.createElement("span");
+      emptyCell.className = "calendar-day-empty";
+      emptyCell.setAttribute("role", "presentation");
+      fragment.append(emptyCell);
+    }
+
+    for (let day = 1; day <= daysInMonth; day += 1) {
+      const date = new Date(year, month, day);
+      const key = dateKey(date);
+      const cell = document.createElement("div");
+      const button = document.createElement("button");
+      cell.setAttribute("role", "gridcell");
+      button.type = "button";
+      button.className = "calendar-day-button";
+      button.textContent = String(day);
+      button.dataset.action = "selectCalendarDate";
+      button.dataset.date = key;
+      button.setAttribute("aria-pressed", String(key === dateKey(selected)));
+      button.setAttribute("aria-label", this.formatCalendarDate(date));
+      if (key === dateKey(today)) button.classList.add("is-today");
+      if (key === dateKey(selected)) button.classList.add("is-selected");
+      if ((firstWeekday + day - 1) % 7 >= 5) button.classList.add("is-weekend");
+      cell.append(button);
+      fragment.append(cell);
+    }
+
+    grid.replaceChildren(fragment);
+    if (direction) {
+      const animationClass =
+        direction > 0 ? "calendar-slide-next" : "calendar-slide-previous";
+      grid.classList.remove("calendar-slide-next", "calendar-slide-previous");
+      void grid.offsetWidth;
+      grid.classList.add(animationClass);
+      grid.addEventListener(
+        "animationend",
+        () => grid.classList.remove(animationClass),
+        { once: true },
+      );
+    }
+    this.renderCalendarPicker();
+  },
+
+  renderCalendarPicker() {
+    const panel = qs("calendarPickerModal");
+    const title = qs("calendarPickerTitle");
+    const yearList = qs("calendarYearList");
+    const monthList = qs("calendarMonthList");
+    if (!panel || !title || !yearList || !monthList) return;
+
+    let pickerBody = qs("calendarPickerBody");
+    if (!pickerBody) {
+      pickerBody = document.createElement("div");
+      pickerBody.id = "calendarPickerBody";
+      pickerBody.className = "calendar-picker-body";
+      const insertBefore = yearList.parentNode;
+      if (insertBefore) insertBefore.insertBefore(pickerBody, yearList);
+      pickerBody.appendChild(yearList);
+      pickerBody.appendChild(monthList);
+    }
+
+    panel.classList.toggle("open", this.calendarPickerOpen);
+    if (!this.calendarPickerOpen) return;
+
+    const isYearMode = this.calendarPickerMode === "years";
+    const activeYear = this.calendarPickerYear ?? this.calendarMonth.getFullYear();
+    title.textContent =
+      this.calendarPickerHeading ||
+      (isYearMode ? "Интихоби сол" : "Интихоби моҳ");
+
+    yearList.hidden = !isYearMode;
+    monthList.hidden = isYearMode;
+    pickerBody.classList.toggle("is-year-mode", isYearMode);
+    pickerBody.classList.toggle("is-month-mode", !isYearMode);
+
+    if (isYearMode) {
+      const yearButtons = [];
+      for (let year = CALENDAR_MIN_YEAR; year <= CALENDAR_MAX_YEAR; year += 1) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "calendar-picker-option calendar-year-option";
+        button.textContent = String(year);
+        button.dataset.action = "selectCalendarYear";
+        button.dataset.year = String(year);
+        button.setAttribute(
+          "aria-pressed",
+          String(year === activeYear),
+        );
+        yearButtons.push(button);
+      }
+      yearList.replaceChildren(...yearButtons);
+      requestAnimationFrame(() => {
+        yearList
+          .querySelector('[aria-pressed="true"]')
+          ?.scrollIntoView({ block: "center" });
+      });
+    } else {
+      yearList.replaceChildren();
+      const monthButtons = CALENDAR_MONTHS.map((month, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "calendar-picker-option";
+        button.textContent = month;
+        button.dataset.action = "selectCalendarMonth";
+        button.dataset.month = String(index);
+        button.setAttribute(
+          "aria-pressed",
+          String(
+            this.calendarMonth.getFullYear() === activeYear &&
+              this.calendarMonth.getMonth() === index,
+          ),
+        );
+        return button;
+      });
+      monthList.replaceChildren(...monthButtons);
+    }
+  },
+
+  bindCalendarSwipe() {
+    const grid = qs("calendarGrid");
+    if (!grid || grid.dataset.swipeBound === "true") return;
+
+    grid.dataset.swipeBound = "true";
+    let pointerId = null;
+    let startX = 0;
+    let startY = 0;
+    let lastX = 0;
+    let dragging = false;
+    let suppressNextClick = false;
+
+    grid.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      pointerId = event.pointerId;
+      startX = event.clientX;
+      startY = event.clientY;
+      lastX = startX;
+      dragging = false;
+    });
+
+    document.addEventListener(
+      "pointermove",
+      (event) => {
+        if (event.pointerId !== pointerId) return;
+        const deltaX = event.clientX - startX;
+        const deltaY = event.clientY - startY;
+        lastX = event.clientX;
+
+        if (!dragging) {
+          if (Math.abs(deltaX) < 8 && Math.abs(deltaY) < 8) return;
+          if (Math.abs(deltaY) >= Math.abs(deltaX)) {
+            pointerId = null;
+            return;
+          }
+          dragging = true;
+          grid.classList.add("is-dragging");
+        }
+
+        event.preventDefault();
+        const travel = Math.max(
+          -grid.clientWidth,
+          Math.min(grid.clientWidth, deltaX),
+        );
+        grid.style.setProperty("--calendar-drag-x", `${travel}px`);
+        grid.style.setProperty(
+          "--calendar-drag-opacity",
+          String(
+            1 -
+              Math.min(
+                (Math.abs(travel) / Math.max(grid.clientWidth, 1)) * 0.35,
+                0.35,
+              ),
+          ),
+        );
+      },
+      { passive: false },
+    );
+
+    document.addEventListener("pointerup", (event) => {
+      if (event.pointerId !== pointerId) return;
+      pointerId = null;
+      const deltaX = lastX - startX;
+      const deltaY = event.clientY - startY;
+      const horizontalSwipe =
+        dragging &&
+        Math.abs(deltaX) >= 48 &&
+        Math.abs(deltaX) > Math.abs(deltaY);
+      if (!dragging) return;
+
+      if (horizontalSwipe) {
+        suppressNextClick = true;
+        setTimeout(() => {
+          suppressNextClick = false;
+        }, 0);
+      }
+      const direction = deltaX < 0 ? 1 : -1;
+      if (!horizontalSwipe || !this.canChangeCalendarMonth(direction)) {
+        grid.classList.remove("is-dragging");
+        grid.classList.add("is-returning");
+        grid.style.removeProperty("--calendar-drag-x");
+        grid.style.removeProperty("--calendar-drag-opacity");
+        setTimeout(() => grid.classList.remove("is-returning"), 240);
+        return;
+      }
+
+      grid.classList.remove("is-dragging");
+      grid.classList.add("is-committing");
+      grid.style.setProperty(
+        "--calendar-drag-x",
+        `${direction > 0 ? -grid.clientWidth : grid.clientWidth}px`,
+      );
+      grid.style.setProperty("--calendar-drag-opacity", "0");
+
+      let completed = false;
+      const finishSwipe = () => {
+        if (completed) return;
+        completed = true;
+        grid.classList.remove("is-committing");
+        grid.style.removeProperty("--calendar-drag-x");
+        grid.style.removeProperty("--calendar-drag-opacity");
+        this.changeCalendarMonth(direction);
+      };
+      grid.addEventListener("transitionend", finishSwipe, { once: true });
+      setTimeout(finishSwipe, 240);
+    });
+
+    document.addEventListener("pointercancel", (event) => {
+      if (event.pointerId !== pointerId) return;
+      pointerId = null;
+      if (!dragging) return;
+      grid.classList.remove("is-dragging");
+      grid.classList.add("is-returning");
+      grid.style.removeProperty("--calendar-drag-x");
+      grid.style.removeProperty("--calendar-drag-opacity");
+      setTimeout(() => grid.classList.remove("is-returning"), 240);
+    });
+
+    grid.addEventListener(
+      "click",
+      (event) => {
+        if (!suppressNextClick) return;
+        suppressNextClick = false;
+        event.preventDefault();
+        event.stopPropagation();
+      },
+      true,
+    );
+  },
+
+  canChangeCalendarMonth(offset) {
+    const date = new Date(
+      this.calendarMonth.getFullYear(),
+      this.calendarMonth.getMonth() + offset,
+      1,
+    );
+    return (
+      Number.isFinite(date.getTime()) &&
+      date.getFullYear() >= CALENDAR_MIN_YEAR &&
+      date.getFullYear() <= CALENDAR_MAX_YEAR
+    );
+  },
+
+  changeCalendarMonth(offset) {
+    if (!Number.isFinite(offset)) return;
+    const nextMonth = new Date(
+      this.calendarMonth.getFullYear(),
+      this.calendarMonth.getMonth() + offset,
+      1,
+    );
+    if (
+      nextMonth.getFullYear() < CALENDAR_MIN_YEAR ||
+      nextMonth.getFullYear() > CALENDAR_MAX_YEAR
+    )
+      return;
+    this.calendarMonth = nextMonth;
+    this.calendarPickerYear = nextMonth.getFullYear();
+    this.renderCalendar(offset);
+  },
+
+  openCalendarPicker(mode = "months", heading = "Интихоби моҳ") {
+    this.calendarPickerYear = this.calendarMonth.getFullYear();
+    this.calendarPickerOpen = true;
+    this.calendarPickerMode = mode === "years" ? "years" : "months";
+    this.calendarPickerHeading = heading;
+    document
+      .querySelectorAll('[aria-controls="calendarPickerModal"]')
+      .forEach((button) => button.setAttribute("aria-expanded", "true"));
+    this.renderCalendarPicker();
+  },
+
+  closeCalendarPicker() {
+    this.calendarPickerOpen = false;
+    document
+      .querySelectorAll('[aria-controls="calendarPickerModal"]')
+      .forEach((button) => button.setAttribute("aria-expanded", "false"));
+    this.renderCalendarPicker();
+  },
+
+  selectCalendarYear(value) {
+    const year = Number(value);
+    if (
+      !Number.isInteger(year) ||
+      year < CALENDAR_MIN_YEAR ||
+      year > CALENDAR_MAX_YEAR
+    )
+      return;
+    this.calendarPickerYear = year;
+    const month = this.calendarMonth.getMonth();
+    const day = Math.min(
+      this.calendarSelectedDate.getDate(),
+      new Date(year, month + 1, 0).getDate(),
+    );
+    this.calendarMonth = new Date(year, month, 1);
+    this.calendarSelectedDate = new Date(year, month, day);
+    this.closeCalendarPicker();
+    this.renderCalendar();
+  },
+
+  selectCalendarMonth(value) {
+    const month = Number(value);
+    if (
+      !Number.isInteger(month) ||
+      month < 0 ||
+      month >= CALENDAR_MONTHS.length
+    )
+      return;
+    const year = this.calendarPickerYear;
+    const day = Math.min(
+      this.calendarSelectedDate.getDate(),
+      new Date(year, month + 1, 0).getDate(),
+    );
+    this.calendarMonth = new Date(year, month, 1);
+    this.calendarSelectedDate = new Date(year, month, day);
+    this.calendarPickerYear = year;
+    this.closeCalendarPicker();
+    this.renderCalendar();
+  },
+
+  showCalendarToday() {
+    const today = new Date();
+    if (
+      today.getFullYear() < CALENDAR_MIN_YEAR ||
+      today.getFullYear() > CALENDAR_MAX_YEAR
+    )
+      return;
+    this.calendarSelectedDate = today;
+    this.calendarMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    this.calendarPickerYear = today.getFullYear();
+    this.renderCalendar(1);
+  },
+
+  selectCalendarDate(value) {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || "");
+    if (!match) return;
+    const [, year, month, day] = match;
+    this.calendarSelectedDate = new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+    );
+    this.renderCalendar();
   },
 
   showSubView(viewId) {
@@ -3337,10 +3915,7 @@ export const app = {
           <textarea id="noteDetailBodyInput" class="note-detail-body-input" rows="9" placeholder="Матни ёддошт" aria-label="Матни ёддошт">${escapeHtml(body)}</textarea>
         </div>`;
       qs("noteDetailTitleInput")?.focus({ preventScroll: true });
-      [
-        "noteDetailTitleInput",
-        "noteDetailBodyInput",
-      ].forEach((id) => {
+      ["noteDetailTitleInput", "noteDetailBodyInput"].forEach((id) => {
         qs(id)?.addEventListener("input", () => {
           this.scheduleNoteAutosave();
         });
@@ -3431,10 +4006,7 @@ export const app = {
       : Math.max(uiKitIndex, 0) * 50;
     uiKitRange?.style.setProperty("--range-progress", `${rangeProgress}%`);
     const rangeLevel = Math.round(rangeProgress / 50);
-    setText(
-      "uiKitValue",
-      ["Сабук", "Миёна", "Олӣ"][rangeLevel],
-    );
+    setText("uiKitValue", ["Сабук", "Миёна", "Олӣ"][rangeLevel]);
     uiKitRange?.setAttribute(
       "aria-valuetext",
       ["Сабук", "Миёна", "Олӣ"][rangeLevel],

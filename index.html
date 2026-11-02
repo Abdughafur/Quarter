@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="tg" manifest="offline.appcache">
 
 <head>
@@ -13,7 +13,7 @@
   <link rel="icon" href="assets/images/pics/logo.png" type="image/png" />
   <link rel="apple-touch-icon" href="assets/images/pics/logo.png" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="assets/css/main.css?v=4.5.1S">
+  <link rel="stylesheet" href="assets/css/main.css?v=4.5.2B">
 
 </head>
 
@@ -38,7 +38,7 @@
   </svg>
   <div id="splash" class="splash" aria-hidden="false">
     <div class="splash-inner">
-      <img class="splash-logo" src="assets/images/pics/logo.png" alt="App logo" />
+      <img class="splash-logo" src="assets/images/pics/logo.png" alt="Нишонаи барнома" />
       <div class="splash-progress" role="progressbar" aria-label="Боркунии барнома">
         <span class="splash-progress-fill"></span>
       </div>
@@ -61,23 +61,33 @@
       <div class="calculator-desktop-layout">
         <div class="calculator-input-column">
           <div class="card compact-card">
-            <div class="top grades-header">
-              <span class="small">Баллҳо</span>
-              <button class="grades-toggle" type="button" data-action="toggleGradesView" aria-controls="blocksContainer"
-                aria-expanded="false" aria-label="Намоиши ҳамаи баллҳо">
-                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-                  <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg>
-              </button>
-            </div>
-            <div class="blocks" id="blocksContainer">
-              <div class="empty">Ҳоло ягон балл нест</div>
+            <div class="blocks is-empty" id="blocksContainer">
+              <div class="empty">
+                <img src="assets/images/minai/write.png" alt="" aria-hidden="true" />
+                <span>Ҳоло ягон балл нест</span>
+              </div>
             </div>
           </div>
 
           <div class="card compact-card">
-            <div class="keypad" id="keypad"></div>
+            <div class="keypad" id="keypad" aria-label="Клавиатураи баллҳо">
+              <button class="key scale-only" type="button" data-value="1">1</button>
+              <button class="key scale-only" type="button" data-value="2">2</button>
+              <button class="key scale-only" type="button" data-value="3">3</button>
+              <button class="key scale-only" type="button" data-value="4">4</button>
+              <button class="key scale-only" type="button" data-value="5">5</button>
+              <button class="key scale-only" type="button" data-value="6">6</button>
+              <button class="key scale-only" type="button" data-value="7">7</button>
+              <button class="key scale-only" type="button" data-value="8">8</button>
+              <button class="key scale-only" type="button" data-value="9">9</button>
+              <button class="key clear back" type="button" data-action="deleteLast" aria-label="Пок кардани баҳои охирин">
+                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
+                  <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2Z" fill="currentColor" />
+                </svg>
+              </button>
+              <button class="key scale-only" type="button" data-value="10">10</button>
+              <button class="key clear" type="button" data-action="clearAll">Тоза</button>
+            </div>
           </div>
 
           <div class="hero">
@@ -85,10 +95,12 @@
 
             <div class="hero-inner">
               <div class="score-tile">
-                <div id="avgLarge" class="large">
+                <div id="avgLarge" class="large" hidden>
                   <div class="large-number">0</div>
                   <div class="label-small">-</div>
                 </div>
+                <img id="emptyResultIllustration" class="result-empty-illustration"
+                  src="assets/images/minai/write.png" alt="" aria-hidden="true" />
               </div>
 
               <div class="stats-stack">
@@ -132,16 +144,13 @@
 
                 <div class="actions">
                   <button class="result-details-toggle" type="button" data-action="toggleResultDetails"
-                    aria-controls="resultStatCards" aria-expanded="false" aria-label="Намоиш ё пинҳон кардани натиҷаҳо">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                    </svg>
-                    <span class="sr-only">Намоиши натиҷаҳо</span>
+                    aria-controls="resultDetailsModal" aria-haspopup="dialog" aria-expanded="false"
+                    aria-label="Дидани ҳисоб" disabled>
+                    <span class="result-details-icon" aria-hidden="true">?</span>
+                    <span class="result-details-label">Дидани ҳисоб</span>
                   </button>
-
                   <button class="btn export-action" type="button" data-action="downloadResult"
-                    aria-label="Экспорт кардани натиҷа" title="Экспорт кардани натиҷа">
+                    aria-label="Экспорт кардани натиҷа" title="Экспорт кардани натиҷа" disabled>
                     <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
                       <path d="M12 3v11m0 0 4-4m-4 4-4-4M5 18.5v1A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-1"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -189,40 +198,55 @@
 
 
     <section id="tab-prosent" class="tab">
-      <div class="card percent-board-card">
-        <h3 class="settings-title">Фоизҳо</h3>
-        <div class="input-row pupil-total-row" style="grid-template-columns:1fr; position:relative;">
-          <span class="pupil-field-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path
-                d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm6-1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM3.5 19a5.5 5.5 0 0 1 11 0v1h-11v-1Zm11.5 1v-1a6.9 6.9 0 0 0-1.1-3.75A4.5 4.5 0 0 1 20.5 19v1H15Z"
-                fill="currentColor" />
-            </svg>
-          </span>
-          <input id="pupilCountInput" class="input-field" type="number" inputmode="numeric" min="0" max="100"
-            placeholder="Шумораи умумии хонандагон, максимум 100" />
-          <button class="pupil-clear-btn" type="button" title="Тозакунӣ" data-action="clearPupilCount"
-            aria-label="Тоза кардани шумораи хонандагон">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="m7 7 10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2.2"
-                stroke-linecap="round" />
-            </svg>
-          </button>
+      <div class="percent-layout">
+        <div class="card percent-board-card">
+          <h3 class="settings-title">Фоизҳо</h3>
+          <div class="input-row pupil-total-row" style="grid-template-columns:1fr; position:relative;">
+            <span class="pupil-field-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm6-1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM3.5 19a5.5 5.5 0 0 1 11 0v1h-11v-1Zm11.5 1v-1a6.9 6.9 0 0 0-1.1-3.75A4.5 4.5 0 0 1 20.5 19v1H15Z"
+                  fill="currentColor" />
+              </svg>
+            </span>
+            <input id="pupilCountInput" class="input-field" type="number" inputmode="numeric" min="0" max="100"
+              placeholder="Шумораи умумии хонандагон, максимум 100" />
+            <button class="pupil-clear-btn" type="button" title="Тозакунӣ" data-action="clearPupilCount"
+              aria-label="Тоза кардани шумораи хонандагон">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m7 7 10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2.2"
+                  stroke-linecap="round" />
+              </svg>
+            </button>
+          </div>
+
+          <div id="percentRows" class="percent-columns">
+            <div class="percent-column" data-grades="10-6">
+              <div class="percent-table" data-percent-group="10-6"></div>
+            </div>
+            <div class="percent-column" data-grades="5-1">
+              <div class="percent-table" data-percent-group="5-1"></div>
+            </div>
+          </div>
+          <div class="percent-range-summary">
+            <div class="mini-stat"><span>7–10</span><strong id="range7to10UI">0%</strong></div>
+            <div class="mini-stat"><span>4–10</span><strong id="range4to10UI">0%</strong></div>
+          </div>
         </div>
 
-        <div id="percentRows" class="percent-columns">
-          <div class="percent-column" data-grades="10-6">
-            <div class="percent-table" data-percent-group="10-6"></div>
+        <div class="card minai-card minai-coming-soon minai-status-card percent-minai-card"
+          aria-label="MinAI: сатҳи фоизии синф">
+          <div class="minai-coming-soon-art" aria-hidden="true">
+            <img src="assets/images/minai/smile.png" alt="" />
           </div>
-          <div class="percent-column" data-grades="5-1">
-            <div class="percent-table" data-percent-group="5-1"></div>
-          </div>
-        </div>
-        <div class="percent-range-summary">
-          <div class="mini-stat"><span>7–10</span><strong id="range7to10UI">0%</strong></div>
-          <div class="mini-stat"><span>4–10</span><strong id="range4to10UI">0%</strong></div>
+          <div class="minai-coming-soon-badge">MinAI v1.1S</div>
+          <h3 class="minai-coming-soon-title">Сатҳи таҳсили синф</h3>
+          <p id="percentMinaiStatus" class="minai-status-message" aria-live="polite">
+            Шумораи умумии хонандагонро ворид кунед, баъд шумораи баллҳоро пур намоед.
+          </p>
         </div>
       </div>
+
       <div class="percent-actions">
         <button class="btn percent-export-btn" type="button" data-action="openPercentExport">
           Экспорт
@@ -230,17 +254,6 @@
         <button class="btn clear-percent-btn" type="button" data-action="clearAllPercentages">
           Тоза кардани фоизҳо
         </button>
-      </div>
-      <div class="card minai-card minai-coming-soon minai-status-card percent-minai-card"
-        aria-label="MinAI: сатҳи фоизии синф">
-        <div class="minai-coming-soon-art" aria-hidden="true">
-          <img src="assets/images/minai/smile.png" alt="" />
-        </div>
-        <div class="minai-coming-soon-badge">MinAI v1.1S</div>
-        <h3 class="minai-coming-soon-title">Сатҳи таҳсили синф</h3>
-        <p id="percentMinaiStatus" class="minai-status-message" aria-live="polite">
-          Шумораи умумии хонандагонро ворид кунед, баъд шумораи баллҳоро пур намоед.
-        </p>
       </div>
     </section>
 
@@ -334,7 +347,7 @@
           </div>
 
           <div class="tasks-add-row">
-            <input id="tasksTaskInput" class="input-field" type="text" maxlength="160" placeholder="Вазифаи нав нависед ва Enter занед..." autocomplete="off" />
+            <input id="tasksTaskInput" class="input-field" type="text" maxlength="160" placeholder="Вазифаи нав нависед ва тугмаи воридкуниро пахш кунед..." autocomplete="off" />
             <button class="btn tasks-add-btn" type="button" data-action="addNoteTask" aria-label="Илова кардани вазифа">
               <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
               <span>Илова</span>
@@ -370,6 +383,48 @@
         </div>
       </div>
       -->
+    </section>
+
+    <section id="tab-calendar" class="tab" aria-labelledby="calendarTitle">
+      <div class="card calendar-shell">
+        <div class="calendar-page-header">
+          <div>
+            <h2 id="calendarTitle">Тақвим</h2>
+            <p id="calendarSelectedDate" class="calendar-selected-date" aria-live="polite"></p>
+          </div>
+          <button id="calendarYearLabel" class="calendar-year-label" type="button"
+            data-action="openCalendarYearPicker" aria-controls="calendarPickerModal"
+            aria-haspopup="dialog" aria-expanded="false"></button>
+        </div>
+
+        <div class="calendar-toolbar">
+          <button id="calendarPreviousMonth" class="calendar-icon-button" type="button" data-action="changeCalendarMonth"
+            data-offset="-1" aria-label="Моҳи гузашта" title="Моҳи гузашта">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+          </button>
+          <div class="calendar-period-controls">
+            <button class="calendar-month-label" type="button" data-action="openCalendarMonthPicker"
+              aria-controls="calendarPickerModal" aria-haspopup="dialog" aria-expanded="false">
+              <span id="calendarMonthLabel"></span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5" /></svg>
+            </button>
+          </div>
+          <button id="calendarNextMonth" class="calendar-icon-button" type="button" data-action="changeCalendarMonth"
+            data-offset="1" aria-label="Моҳи оянда" title="Моҳи оянда">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+          </button>
+        </div>
+
+        <div class="calendar-weekdays" aria-hidden="true">
+          <span>Дш</span><span>Сш</span><span>Чш</span><span>Пш</span><span>Ҷм</span><span>Шн</span><span>Яш</span>
+        </div>
+        <div id="calendarGrid" class="calendar-grid" role="grid" aria-labelledby="calendarMonthLabel"></div>
+        <div class="calendar-footer-actions">
+          <button class="calendar-today-button" type="button" data-action="showCalendarToday">Имрӯз</button>
+          <button class="calendar-go-to-date" type="button" data-action="openCalendarDatePicker"
+            aria-controls="calendarPickerModal" aria-haspopup="dialog" aria-expanded="false">Гузариш ба сана</button>
+        </div>
+      </div>
     </section>
 
     <section id="tab-journal" class="tab">
@@ -542,27 +597,61 @@
             </button>
             </div>
 
-            <div class="more-actions-row">
-            <button class="btn capsule-btn" type="button" data-action="shareApp">
-              <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
-                width="40" height="40" viewBox="0 0 17 17">
-                <g>
-                </g>
-                <path
-                  d="M16.5 13.168c0 1.843-1.49 3.332-3.333 3.332-1.844 0-3.333-1.489-3.333-3.332 0-0.116 0.010-0.24 0.020-0.354l-3.75-1.876c-0.593 0.552-1.396 0.896-2.271 0.896-1.844 0-3.333-1.489-3.333-3.334 0-1.843 1.489-3.332 3.333-3.332 0.875 0 1.677 0.343 2.271 0.895l3.75-1.874c-0.010-0.116-0.020-0.24-0.020-0.354 0-1.845 1.489-3.334 3.333-3.334 1.843 0 3.333 1.489 3.333 3.334 0 1.844-1.49 3.333-3.333 3.333-0.875 0-1.677-0.344-2.271-0.896l-3.75 1.875c0.010 0.115 0.021 0.24 0.021 0.354 0 0.115-0.011 0.24-0.021 0.354l3.75 1.877c0.594-0.553 1.397-0.897 2.271-0.897 1.843-0.002 3.333 1.487 3.333 3.333z"
-                  fill="#ffffff"></path>
-              </svg>
-              Мубодила
-            </button>
-            <a class="btn secondary capsule-btn" href="privacy.html" rel="noopener">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 3 5 6v5c0 4.5 2.8 8.2 7 10 4.2-1.8 7-5.5 7-10V6l-7-3Z" fill="none" stroke="currentColor"
-                  stroke-width="1.8" stroke-linejoin="round" />
-                <path d="m9 12 2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                  stroke-linejoin="round" />
-              </svg>
-              Махфият
-            </a>
+            <div class="more-actions-row circular-actions-row">
+              <button class="circle-action" type="button" data-action="shareApp" aria-label="Мубодила">
+                <span class="circle-action-icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 17 17" fill="currentColor" aria-hidden="true">
+                    <path d="M16.5 13.168c0 1.843-1.49 3.332-3.333 3.332-1.844 0-3.333-1.489-3.333-3.332 0-0.116 0.010-0.24 0.020-0.354l-3.75-1.876c-0.593 0.552-1.396 0.896-2.271 0.896-1.844 0-3.333-1.489-3.333-3.334 0-1.843 1.489-3.332 3.333-3.332 0.875 0 1.677 0.343 2.271 0.895l3.75-1.874c-0.010-0.116-0.020-0.24-0.020-0.354 0-1.845 1.489-3.334 3.333-3.334 1.843 0 3.333 1.489 3.333 3.334 0 1.844-1.49 3.333-3.333 3.333-0.875 0-1.677-0.344-2.271-0.896l-3.75 1.875c0.010 0.115 0.021 0.24 0.021 0.354 0 0.115-0.011 0.24-0.021 0.354l3.75 1.877c0.594-0.553 1.397-0.897 2.271-0.897 1.843-0.002 3.333 1.487 3.333 3.333z" />
+                  </svg>
+                </span>
+                <span class="circle-action-label">Мубодила</span>
+              </button>
+
+              <a class="circle-action" href="privacy.html" rel="noopener" aria-label="Махфият">
+                <span class="circle-action-icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 3 5 6v5c0 4.5 2.8 8.2 7 10 4.2-1.8 7-5.5 7-10V6l-7-3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                    <path d="m9 12 2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <span class="circle-action-label">Махфият</span>
+              </a>
+
+              <a class="circle-action" href="https://github.com/Abdughafur" target="_blank" rel="noopener" aria-label="GitHub">
+                <span class="circle-action-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z" />
+                  </svg>
+                </span>
+                <span class="circle-action-label">GitHub</span>
+              </a>
+
+              <a class="circle-action" href="tel:+992928024414" aria-label="Телефон">
+                <span class="circle-action-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                  </svg>
+                </span>
+                <span class="circle-action-label">Телефон</span>
+              </a>
+
+              <a class="circle-action" href="https://t.me/+992928024414" target="_blank" rel="noopener" aria-label="Telegram">
+                <span class="circle-action-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11.94 18.5c-.48 0-.4-.18-.57-.63l-1.42-4.68L18.6 6.5c.28-.18.53-.08.32.12L11.94 18.5Zm-1.5-4.96 6.2 4.08c.7.38 1.2.18 1.38-.64l2.5-11.8c.25-1-.35-1.45-1.04-1.17L3.6 10.6c-1 .4-1 1 .2 1.25l3.9 1.22 9.04-5.7c.42-.26.82-.12.5.16l-7.32 6.62Z" />
+                  </svg>
+                </span>
+                <span class="circle-action-label">Telegram</span>
+              </a>
+
+              <a class="circle-action" href="mailto:abdughafur.2010.khujzoda@gmail.com" aria-label="Почтаи электронӣ">
+                <span class="circle-action-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z" />
+                  </svg>
+                </span>
+                <span class="circle-action-label">Почтаи электронӣ</span>
+              </a>
             </div>
           </div>
         </div>
@@ -679,7 +768,7 @@
                   <path
                     d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
                 </svg>
-                Email
+                Почтаи электронӣ
               </a>
               <a class="contact-btn" href="tel:+992928024414">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"
@@ -831,13 +920,13 @@
             </div>
 
             <div class="shortcut-card">
-              <div class="kbd-wrap"><kbd>Backspace</kbd></div>
+              <div class="kbd-wrap"><kbd>Несткунӣ</kbd></div>
               <div class="shortcut-desc">Пок кардани баҳои охирин</div>
             </div>
 
             <div class="shortcut-card">
               <div class="kbd-wrap"><kbd>C</kbd></div>
-              <div class="shortcut-desc">Пок кардани ҳамаи баҳоҳо</div>
+              <div class="shortcut-desc">Пок кардани ҳамаи баҳоҳо ё фоизҳо (бе Ctrl, Shift ё Alt)</div>
             </div>
 
             <div class="shortcut-card">
@@ -852,7 +941,7 @@
 
             <div class="shortcut-card">
               <div class="kbd-wrap"><kbd>S</kbd></div>
-              <div class="shortcut-desc">Таб: Бештар</div>
+              <div class="shortcut-desc">Таб: Бештар; дар Фоиз: пок кардани шумораи хонандагон</div>
             </div>
 
             <div class="shortcut-card">
@@ -867,7 +956,12 @@
 
             <div class="shortcut-card">
               <div class="kbd-wrap"><kbd>N</kbd></div>
-              <div class="shortcut-desc">Таб: Ёддоштҳо</div>
+              <div class="shortcut-desc">Таб: Ёддоштҳо; дар ин таб: сохтани ёддошти нав</div>
+            </div>
+
+            <div class="shortcut-card">
+              <div class="kbd-wrap"><kbd>Z</kbd></div>
+              <div class="shortcut-desc">Таб: Тақвим</div>
             </div>
           </div>
         </div>
@@ -893,11 +987,11 @@
           <h3 class="settings-title">Дар бораи барнома</h3>
           <div class="app-info about-app-info">
             <div class="big-app-icon">
-              <img src="assets/images/pics/logo.png" alt="Чоряк logo" />
+              <img src="assets/images/pics/logo.png" alt="Нишонаи Чоряк" />
             </div>
             <div class="about">
               <p class="about-app-name"><strong>Чоряк</strong></p>
-              <p><strong>Версия:</strong> 4.5.1S (Stable)</p>
+              <p><strong>Нусха:</strong> v4.5.2B (Бета)</p>
               <p><strong>Таҳиягар:</strong> Abdughafur (Абдуғафур)</p>
             </div>
           </div>
@@ -908,12 +1002,15 @@
               сохта шудааст. Барнома барои ҳамаи омӯзгорон ройгон пешниҳод мегардад.
             </p>
             <p>
-              Айни замон барнома дар версияи 4.5.1S (Stable) қарор дорад. Дар ин версия ба устуворӣ ва кори барнома
+              Айни замон барнома дар нусхаи v4.5.2B (Бета) қарор дорад. Дар ин нусха ба устуворӣ, функсияҳои нав ва кори барнома
               диққати махсус дода шудааст. Системаи барнома аз ҷониби мутахассисон ва корбарон санҷида шудааст.
+              Фунскияҳои асосии барнома дуруст кор мекунад ва функсяҳои нав дар ҳоли санҷиш ҳастанд.
             </p>
             <p>
               Агар хурдтарин хатогиро пайдо кунед ё барои беҳтар кардани «Чоряк» идея дошта бошед, ба бахши
-              «Таҳиягар» гузаред ва мустақиман бо таҳиягари барнома тамос гиред.
+              «Таҳиягар» гузаред ва мустақиман бо таҳиягари барнома тамос гиред. Зеро ба зуди версияи навбатии S (Stable) таҳия мешавад (v4.6S). Агар ягон фикру ақида доред метавонед нависед, идеяи шумо коркард ва аҳаммият дода мешавад. Мақсади мо осон кардани кори шумост. <br> 
+              <strong>Ташаккур барои фаҳмиданатон.</strong> <br>
+              <i>"Абдуғафур Хуҷзода"</i>
             </p>
           </div>
         </div>
@@ -964,17 +1061,47 @@
     </section>
   </main>
 
+  <div id="calendarPickerModal" class="modal-backdrop calendar-picker-backdrop" role="dialog"
+    aria-modal="true" aria-labelledby="calendarPickerTitle">
+    <div class="ios-modal calendar-picker-modal">
+      <div class="calendar-picker-header">
+        <div>
+          <span class="calendar-picker-kicker">Тақвим</span>
+          <h3 id="calendarPickerTitle">Интихоби моҳ</h3>
+        </div>
+        <button class="calendar-icon-button calendar-picker-close" type="button"
+          data-action="closeCalendarPicker" aria-label="Пӯшидан" title="Пӯшидан">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" /></svg>
+        </button>
+      </div>
+      <div id="calendarYearList" class="calendar-year-list" role="listbox" aria-label="Интихоби сол" hidden></div>
+      <div id="calendarMonthList" class="calendar-month-list" role="listbox" aria-label="Интихоби моҳ"></div>
+    </div>
+  </div>
+
+  <div id="resultDetailsModal" class="modal-backdrop result-details-modal-backdrop" role="dialog"
+    aria-modal="true" aria-labelledby="resultDetailsModalTitle">
+    <div class="ios-modal result-details-modal">
+      <button class="result-details-modal-close" type="button" data-action="closeResultDetailsModal"
+        aria-label="Пӯшидан">&times;</button>
+      <span class="share-modal-kicker">НАТИҶАҲО</span>
+      <h3 id="resultDetailsModalTitle">Натиҷаҳои чоряк</h3>
+      <div id="resultCalculationDetails" class="result-calculation-details" aria-live="polite"></div>
+      <div id="resultDetailsModalContent" class="result-details-modal-content" aria-live="polite"></div>
+    </div>
+  </div>
+
   <div id="shareModal" class="modal-backdrop share-modal-backdrop" role="dialog" aria-modal="true"
     aria-labelledby="shareModalTitle">
     <div class="ios-modal share-modal">
       <button class="share-modal-close" type="button" data-action="closeShareModal"
         aria-label="Пӯшидан">&times;</button>
-      <span class="share-modal-kicker">Чоряк · 4.5.1S (Stable)</span>
+      <span class="share-modal-kicker">Чоряк · v4.5.2B (Бета)</span>
       <h3 id="shareModalTitle">Мубодилаи барнома</h3>
       <p>Рамзи QR-ро скан кунед ё пайвандро фиристед.</p>
       <div class="share-qr-frame">
         <img id="shareQrCode" class="share-qr-code" src="assets/images/pics/share-qr.svg"
-          alt="QR code барои кушодани Чоряк" loading="lazy" decoding="async" />
+          alt="Рамзи QR барои кушодани Чоряк" loading="lazy" decoding="async" />
         <img class="share-qr-logo" src="assets/images/pics/abdughafur.png" alt="Таҳиягари Чоряк"
           loading="lazy" decoding="async" />
         <span id="shareQrFallback" class="share-qr-fallback" hidden>QR муваққатан дастрас нест</span>
@@ -1148,27 +1275,25 @@
 
   <nav>
     <div class="nav-active-indicator" aria-hidden="true"></div>
-    <button class="nav-btn active" data-tab="tab-home" aria-label="Ҳисобкунак">
+    <button class="nav-btn active" data-tab="tab-home" aria-label="Ҳисобкунак" title="Ҳисобкунак">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"
         xmlns:xlink="http://www.w3.org/1999/xlink">
         <path fill="currentColor" fill-rule="evenodd"
           d="M3.5 12V4A1.5 1.5 0 0 1 5 2.5h6A1.5 1.5 0 0 1 12.5 4v8a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 12M5 15a3 3 0 0 1-3-3V4a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3zm.5-11a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2zm1 7a1 1 0 1 1-2 0 1 1 0 0 1 2 0M8 12a1 1 0 1 0 0-2 1 1 0 0 0 0 2m3.5-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-6-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2M9 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m1.5 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2"
           clip-rule="evenodd"></path>
       </svg>
-      Ҳисобкунак
     </button>
 
-    <button class="nav-btn advanced-tab" data-tab="tab-prosent">
+    <button class="nav-btn advanced-tab" data-tab="tab-prosent" aria-label="Фоиз" title="Фоиз">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 1792 1792"
         xmlns:xlink="http://www.w3.org/1999/xlink">
         <path
           d="M1408 1280q0-52-38-90t-90-38-90 38-38 90 38 90 90 38 90-38 38-90zm-768-768q0-52-38-90t-90-38-90 38-38 90 38 90 90 38 90-38 38-90zm1024 768q0 159-112.5 271.5t-271.5 112.5-271.5-112.5-112.5-271.5 112.5-271.5 271.5-112.5 271.5 112.5 112.5 271.5zm-96-1088q0 20-13 38l-1056 1408q-19 26-51 26h-160q-26 0-45-19t-19-45q0-20 13-38l1056-1408q19-26 51-26h160q26 0 45 19t19 45zm-672 320q0 159-112.5 271.5t-271.5 112.5-271.5-112.5-112.5-271.5 112.5-271.5 271.5-112.5 271.5 112.5 112.5 271.5z">
         </path>
       </svg>
-      Фоиз
     </button>
 
-    <button class="nav-btn advanced-tab" data-tab="tab-notes">
+    <button class="nav-btn advanced-tab" data-tab="tab-notes" aria-label="Ёддоштҳо" title="Ёддоштҳо">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
         xmlns:xlink="http://www.w3.org/1999/xlink">
         <path
@@ -1178,10 +1303,17 @@
           d="M20.8293 10.7154L20.3116 12.6473C19.7074 14.9024 19.4052 16.0299 18.7203 16.7612C18.1795 17.3386 17.4796 17.7427 16.7092 17.9223C16.6129 17.9448 16.5152 17.9621 16.415 17.9744C15.4999 18.0873 14.3834 17.7881 12.3508 17.2435C10.0957 16.6392 8.96815 16.3371 8.23687 15.6522C7.65945 15.1114 7.25537 14.4115 7.07573 13.641C6.84821 12.6652 7.15033 11.5377 7.75458 9.28263L8.27222 7.35077C8.3591 7.02654 8.43979 6.7254 8.51621 6.44561C8.97128 4.77957 9.27709 3.86298 9.86351 3.23687C10.4043 2.65945 11.1042 2.25537 11.8747 2.07573C12.8504 1.84821 13.978 2.15033 16.2331 2.75458C18.4881 3.35883 19.6157 3.66095 20.347 4.34587C20.9244 4.88668 21.3285 5.58657 21.5081 6.35703C21.7356 7.3328 21.4335 8.46034 20.8293 10.7154ZM11.0524 9.80589C11.1596 9.40579 11.5709 9.16835 11.971 9.27556L16.8006 10.5697C17.2007 10.6769 17.4381 11.0881 17.3309 11.4882C17.2237 11.8883 16.8125 12.1257 16.4124 12.0185L11.5827 10.7244C11.1826 10.6172 10.9452 10.206 11.0524 9.80589ZM10.2756 12.7033C10.3828 12.3032 10.794 12.0658 11.1941 12.173L14.0919 12.9495C14.492 13.0567 14.7294 13.4679 14.6222 13.868C14.515 14.2681 14.1038 14.5056 13.7037 14.3984L10.8059 13.6219C10.4058 13.5147 10.1683 13.1034 10.2756 12.7033Z"
           fill="currentColor"></path>
       </svg>
-      Ёддоштҳо
     </button>
 
-    <button class="nav-btn" data-tab="tab-more">
+    <button class="nav-btn" data-tab="tab-calendar" aria-label="Тақвим" title="Тақвим">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="3.5" y="5" width="17" height="16" rx="3" stroke="currentColor" stroke-width="1.8" />
+        <path d="M7.5 3.5v3M16.5 3.5v3M3.5 9.5h17M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01"
+          stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      </svg>
+    </button>
+
+    <button class="nav-btn" data-tab="tab-more" aria-label="Бештар" title="Бештар">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
         xmlns:xlink="http://www.w3.org/1999/xlink">
         <path fill-rule="evenodd" clip-rule="evenodd"
@@ -1194,13 +1326,12 @@
           d="M22 12C22 13.6569 20.6569 15 19 15C17.3431 15 16 13.6569 16 12C16 10.3431 17.3431 9 19 9C20.6569 9 22 10.3431 22 12ZM20 12C20 12.5523 19.5523 13 19 13C18.4477 13 18 12.5523 18 12C18 11.4477 18.4477 11 19 11C19.5523 11 20 11.4477 20 12Z"
           fill="currentColor"></path>
       </svg>
-      Бештар
     </button>
   </nav>
 
   <script type="module" src="assets/js/core/entry.js"></script>
   <script type="module" src="assets/js/core/pwa.js"></script>
-  <script type="module" src="assets/js/core/app.js?v=4.5.1S"></script>
+  <script type="module" src="assets/js/core/app.js?v=4.5.2B"></script>
 </body>
 
 </html>

@@ -61,20 +61,21 @@ body.more-subview-open nav {
 
 nav {
   position: fixed;
-  left: 10px;
-  right: 10px;
+  left: 0;
+  right: 0;
   bottom: 14px;
-  max-width: 540px;
-  height: var(--nav);
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  height: 64px;
   margin: 0 auto;
   padding: 8px;
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 40px;
+  border-radius: 999px;
   backdrop-filter: blur(6px) saturate(1.5) brightness(1.05);
   -webkit-backdrop-filter: blur(8px) saturate(1.8) brightness(1.1);
   box-shadow:
@@ -91,19 +92,61 @@ nav {
   display: none;
 }
 
+[data-ui-kit="perfect"] nav .nav-active-indicator {
+  position: absolute;
+  z-index: 0;
+  top: 8px;
+  bottom: 8px;
+  left: 8px;
+  display: block;
+  width: var(--nav-indicator-width, 48px);
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  box-shadow: 0 8px 18px rgba(14, 165, 233, 0.2);
+  pointer-events: none;
+  transform: translate3d(var(--nav-indicator-x, 0px), 0, 0)
+    scaleX(var(--nav-indicator-scale-x, 1))
+    scaleY(var(--nav-indicator-scale-y, 1));
+  transition:
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, width;
+}
+
+[data-ui-kit="perfect"] nav.is-dragging .nav-active-indicator {
+  --nav-indicator-scale-x: 0.96;
+  --nav-indicator-scale-y: 0.88;
+  transition: none;
+}
+
+[data-ui-kit="perfect"] nav.is-dragging .nav-btn,
+[data-ui-kit="perfect"] nav.is-dragging .nav-btn.active {
+  color: var(--muted);
+  background: transparent;
+  box-shadow: none;
+}
+
+[data-ui-kit="perfect"] nav .nav-btn {
+  position: relative;
+  z-index: 1;
+}
+
+[data-ui-kit="perfect"] nav .nav-btn.active {
+  background: transparent;
+  box-shadow: none;
+}
+
 .nav-btn {
-  flex: 1;
-  min-width: 0;
-  height: 56px;
-  border-radius: 23px;
+  flex: 0 0 48px;
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  padding: 0;
+  border-radius: 50%;
   background: transparent;
   color: var(--muted);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  font-size: 0.62rem;
+  display: grid;
+  place-items: center;
   font-weight: 1000;
   transition:
     background 260ms cubic-bezier(0.22, 0.9, 0.24, 1),
@@ -119,6 +162,11 @@ nav {
   transform: none;
 }
 
+.nav-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .nav-btn.drag-target {
   color: white;
   background: linear-gradient(135deg, var(--primary), var(--accent));
@@ -128,8 +176,8 @@ nav {
 }
 
 .nav-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   fill: currentColor;
 }
 
@@ -140,12 +188,14 @@ nav {
 
 @media (max-width: 760px) {
   nav {
-    left: 8px;
-    right: 8px;
+    left: 0;
+    right: 0;
     bottom: 12px;
-    height: 56px;
-    padding: 6px;
-    border-radius: 28px;
+    width: max-content;
+    max-width: calc(100vw - 16px);
+    height: 64px;
+    padding: 8px;
+    border-radius: 999px;
     backdrop-filter: blur(3px) saturate(1.2) brightness(1.02);
     -webkit-backdrop-filter: blur(4px) saturate(1.3) brightness(1.02);
     transition:
@@ -165,56 +215,11 @@ nav {
 
   .nav-btn {
     height: 48px;
-    border-radius: 999px; /* capsule buttons on mobile */
-    font-size: 0.6rem;
+    border-radius: 50%;
   }
 
   [data-ui-kit="perfect"] nav {
     position: fixed;
-  }
-
-  [data-ui-kit="perfect"] nav .nav-active-indicator {
-    position: absolute;
-    z-index: 0;
-    top: 6px;
-    bottom: 6px;
-    left: 6px;
-    display: block;
-    width: var(--nav-indicator-width, calc((100% - 24px) / 4));
-    border-radius: 999px;
-    background: linear-gradient(135deg, var(--primary), var(--accent));
-    box-shadow: 0 8px 18px rgba(14, 165, 233, 0.2);
-    pointer-events: none;
-    transform: translate3d(var(--nav-indicator-x, 0px), 0, 0)
-      scaleX(var(--nav-indicator-scale-x, 1))
-      scaleY(var(--nav-indicator-scale-y, 1));
-    transition:
-      transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
-      width 280ms cubic-bezier(0.22, 1, 0.36, 1);
-    will-change: transform, width;
-  }
-
-  [data-ui-kit="perfect"] nav.is-dragging .nav-active-indicator {
-    --nav-indicator-scale-x: 0.96;
-    --nav-indicator-scale-y: 0.88;
-    transition: none;
-  }
-
-  [data-ui-kit="perfect"] nav.is-dragging .nav-btn,
-  [data-ui-kit="perfect"] nav.is-dragging .nav-btn.active {
-    color: var(--muted);
-    background: transparent;
-    box-shadow: none;
-  }
-
-  [data-ui-kit="perfect"] nav .nav-btn {
-    position: relative;
-    z-index: 1;
-  }
-
-  [data-ui-kit="perfect"] nav .nav-btn.active {
-    background: transparent;
-    box-shadow: none;
   }
 
   .journal-floating-btn {

@@ -1,5 +1,5 @@
 /* sw.js */
-const CACHE_NAME = "choryak-cache-v4.5.1s-stable";
+const CACHE_NAME = "choryak-cache-v4.5.2b-beta";
 
 const PRECACHE = [
   "./",
@@ -36,6 +36,7 @@ const PRECACHE = [
   "./assets/css/components/loader.css",
   "./assets/css/components/badges.css",
   "./assets/css/pages/home.css",
+  "./assets/css/pages/calendar.css",
   "./assets/css/pages/percent.css",
   "./assets/css/pages/ai.css",
   "./assets/css/pages/settings.css",
@@ -46,7 +47,7 @@ const PRECACHE = [
   "./assets/css/utilities/shadows.css",
   "./assets/css/utilities/radius.css",
   "./assets/css/utilities/helpers.css",
-  "./assets/js/core/app.js?v=4.5.1S",
+  "./assets/js/core/app.js?v=4.5.2B",
   "./assets/js/core/entry.js",
   "./assets/js/core/login.js",
   "./assets/js/core/storage.js",
@@ -57,7 +58,7 @@ const PRECACHE = [
   "./assets/js/ui/chart.js",
   "./assets/js/ui/avatar-picker.js",
   "./assets/js/utils/helpers.js",
-  "./assets/css/components/modal.css?v=4.5.1S",
+  "./assets/css/components/modal.css?v=4.5.2B",
   "./assets/images/minai/ai.png",
   "./assets/images/minai/hello.png",
   "./assets/images/minai/search.png",
@@ -107,9 +108,9 @@ function staleWhileRevalidate(event) {
     }),
   );
   event.waitUntil(update.catch(() => undefined));
-  return cachePromise.then((cache) => cache.match(request)).then(
-    (cached) => cached || update,
-  );
+  return cachePromise
+    .then((cache) => cache.match(request))
+    .then((cached) => cached || update);
 }
 
 self.addEventListener("install", (event) => {
@@ -135,8 +136,7 @@ self.addEventListener("activate", (event) => {
         Promise.all(
           keys
             .filter(
-              (key) =>
-                key.startsWith("choryak-cache-") && key !== CACHE_NAME,
+              (key) => key.startsWith("choryak-cache-") && key !== CACHE_NAME,
             )
             .map((key) => caches.delete(key)),
         ),

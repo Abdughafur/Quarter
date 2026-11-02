@@ -13,7 +13,7 @@ function buildModal() {
     <div class="ios-modal avatar-picker-modal">
       <div class="avatar-picker-header">
         <div>
-          <span class="avatar-picker-kicker">Profile identity</span>
+          <span class="avatar-picker-kicker">Маълумоти профил</span>
           <h3>Аватари худро интихоб кунед</h3>
           <p>Яке аз аватарҳои омодаро интихоб кунед ё аксро аз галерея гиред.</p>
         </div>

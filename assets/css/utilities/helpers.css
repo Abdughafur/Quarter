@@ -17,6 +17,11 @@
   display: none !important;
 }
 
+nav {
+  width: fit-content !important;
+  max-width: calc(100vw - 32px);
+}
+
 @media (min-width: 761px) {
   body {
     padding-bottom: 104px;
@@ -27,24 +32,25 @@
     right: auto;
     bottom: 18px;
     top: auto;
-    width: min(700px, calc(100vw - 36px));
-    max-width: 700px;
+    width: fit-content !important;
+    max-width: calc(100vw - 32px);
     box-sizing: border-box;
     height: 64px;
     margin: 0;
-    padding: 7px;
+    padding: 8px;
     flex-direction: row;
     border-radius: 999px;
     transform: translateX(-50%);
   }
 
   .nav-btn {
-    width: auto;
-    height: 50px;
-    flex: 1 1 0;
+    width: 48px;
+    min-width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
     flex-direction: row;
     gap: 8px;
-    border-radius: 999px;
+    border-radius: 50%;
     font-size: 0.72rem;
     white-space: nowrap;
   }
@@ -101,14 +107,16 @@
   }
 }
 
-/* Ensure nav and buttons stay capsule-shaped on mobile devices across themes/pages */
+/* Keep nav buttons circular on all screen sizes instead of capsule-shaped */
 @media (max-width: 760px) {
   nav {
+    width: fit-content !important;
+    max-width: calc(100vw - 16px);
     border-radius: 999px !important;
   }
 
   .nav-btn {
-    border-radius: 999px !important;
+    border-radius: 50% !important;
     height: 48px !important;
     min-width: 48px !important;
   }

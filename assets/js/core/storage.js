@@ -40,7 +40,7 @@ function normalizeGrades(value) {
       type: grade.type === "exam" ? "exam" : "regular",
       id: grade.id || uid(),
     }))
-    .slice(0, 50);
+    .slice(0, 100);
 }
 
 function normalizeSettings(value) {

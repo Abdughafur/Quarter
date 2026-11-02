@@ -43,11 +43,27 @@
 }
 
 .percent-minai-card {
-  margin-top: 18px;
+  margin: 0;
 }
 
 .percent-minai-card .minai-coming-soon-art img {
   width: min(100%, 88px);
+}
+
+#tab-prosent .percent-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(260px, 360px);
+  gap: 18px;
+  align-items: start;
+}
+
+#tab-prosent .percent-board-card {
+  margin: 0;
+}
+
+#tab-prosent .percent-minai-card {
+  align-self: stretch;
+  height: 100%;
 }
 
 .percent-export-fields {
@@ -270,6 +286,12 @@
     max-width: 1480px;
   }
 
+  #tab-prosent .percent-layout {
+    grid-template-columns: minmax(0, 1.65fr) minmax(260px, 360px);
+    gap: 20px;
+    align-items: stretch;
+  }
+
   #tab-prosent .percent-columns {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 32px;
@@ -283,6 +305,33 @@
 
   #tab-prosent .percent-range-summary {
     gap: 32px;
+  }
+}
+
+@media (max-width: 1099px) {
+  #tab-prosent .percent-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  #tab-prosent .percent-layout {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  #tab-prosent .percent-board-card,
+  #tab-prosent .percent-minai-card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  #tab-prosent .percent-minai-card {
+    min-width: 0;
+  }
+
+  .percent-minai-card .minai-coming-soon-art img {
+    width: min(100%, 72px);
   }
 }
 

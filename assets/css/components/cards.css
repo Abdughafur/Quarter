@@ -260,15 +260,10 @@
       box-shadow 320ms ease;
   }
 
-  .result-details-toggle svg {
-    width: 18px;
-    height: 18px;
-    transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
-    will-change: transform;
-  }
-
-  .result-details-toggle[aria-expanded="true"] svg {
-    transform: rotate(180deg);
+  .result-details-icon {
+    font-size: 1.15rem;
+    font-weight: 900;
+    line-height: 1;
   }
 
   .result-details-toggle:active {
@@ -1206,6 +1201,7 @@
 
 /* Distinct result scoreboard: a single dark stage with quiet data rows. */
 #tab-home .hero {
+  min-height: 224px;
   padding: 0;
   border: 1px solid #1d3546;
   border-radius: 24px;
@@ -1228,7 +1224,7 @@
   justify-content: center;
   min-height: 48px;
   padding: 15px 18px 10px;
-  border-bottom: 1px solid rgba(148, 196, 219, 0.12);
+  border-bottom: 0;
 }
 
 #tab-home .hero > .top .small {
@@ -1257,6 +1253,19 @@
   border-radius: 19px;
   background: #122c3f;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+#tab-home .hero #avgLarge[hidden],
+#tab-home .hero .result-empty-illustration[hidden] {
+  display: none !important;
+}
+
+#tab-home .hero .result-empty-illustration {
+  display: block;
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  opacity: 0.9;
 }
 
 #tab-home .hero .large-number {
@@ -1404,6 +1413,14 @@
   font-size: 0.75rem;
 }
 
+#tab-home .hero .actions .result-details-toggle:disabled,
+#tab-home .hero .actions .export-action:disabled {
+  opacity: 0.42;
+  filter: saturate(0.55);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
 @media (max-width: 520px) {
   #tab-home .hero .actions {
     display: flex;
@@ -1489,7 +1506,7 @@
 }
 
 [data-theme="light"] #tab-home .hero > .top {
-  border-bottom-color: #e1edf2;
+  border-bottom: 0;
 }
 
 [data-theme="light"] #tab-home .hero > .top .small {

@@ -36,11 +36,18 @@ export function renderGradeBlocks(container, grades, labels, onToggle) {
   if (!container) return;
 
   container.textContent = "";
+  container.classList.toggle("is-empty", grades.length === 0);
 
   if (!grades.length) {
     const empty = document.createElement("div");
     empty.className = "empty";
-    empty.textContent = "Ҳоло ягон балл нест";
+    const illustration = document.createElement("img");
+    illustration.src = "assets/images/minai/write.png";
+    illustration.alt = "";
+    illustration.setAttribute("aria-hidden", "true");
+    const message = document.createElement("span");
+    message.textContent = "Ҳоло ягон балл нест";
+    empty.append(illustration, message);
     container.append(empty);
     return;
   }
