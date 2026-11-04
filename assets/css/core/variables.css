@@ -1,9 +1,15 @@
 /* variables.css */
 :root {
-  --primary: #3b82f6;
-  --primary2: #60a5fa;
-  --accent: #06b6d4;
-  --cyan: #60e0ff;
+  --brand: #0284c7;
+  --brand-strong: #0369a1;
+  --brand-accent: #06b6d4;
+  --brand-soft: rgba(2, 132, 199, 0.1);
+  --brand-border: rgba(2, 132, 199, 0.2);
+  --brand-contrast: #ffffff;
+  --primary: var(--brand);
+  --primary2: var(--brand-accent);
+  --accent: var(--brand-accent);
+  --cyan: #67e8f9;
   --bg: #f2f8ff;
   --bg2: #eaf6ff;
   --card: rgba(255, 255, 255, 0.96);

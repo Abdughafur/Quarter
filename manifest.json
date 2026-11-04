@@ -8,7 +8,7 @@
   "display_override": ["window-controls-overlay", "standalone", "browser"],
   "orientation": "portrait",
   "background_color": "#f8fafc",
-  "theme_color": "#4f46e5",
+  "theme_color": "#0284c7",
   "lang": "tg",
   "id": "./",
   "categories": ["productivity", "education"],

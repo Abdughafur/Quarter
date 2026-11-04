@@ -10,9 +10,9 @@
   --card2: rgba(239, 250, 255, 0.94);
   --border: rgba(14, 165, 233, 0.18);
   --soft: rgba(14, 165, 233, 0.08);
-  --primary: #0ea5e9;
-  --primary2: #38bdf8;
-  --accent: #22d3ee;
+  --primary: var(--brand);
+  --primary2: var(--brand-accent);
+  --accent: var(--brand-accent);
   --cyan: #67e8f9;
   --text: #0f172a;
   --muted: #475569;

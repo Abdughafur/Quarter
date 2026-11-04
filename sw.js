@@ -1,5 +1,5 @@
 /* sw.js */
-var CACHE_NAME = "choryak-cache";
+var CACHE_NAME = "choryak-cache-v4-3b-2";
 
 var PRECACHE = [
   "./",
@@ -45,6 +45,7 @@ var PRECACHE = [
   "./assets/css/components/keypad.css",
   "./assets/css/components/loader.css",
   "./assets/css/components/badges.css",
+  "./assets/css/components/context-menu.css",
   "./assets/css/pages/home.css",
   "./assets/css/pages/calendar.css",
   "./assets/css/pages/percent.css",
@@ -72,7 +73,8 @@ var PRECACHE = [
   "./assets/images/minai/hello.png",
   "./assets/images/minai/search.png",
   "./assets/images/minai/write.png",
-  "./assets/images/minai/smile.png"
+  "./assets/images/minai/smile.png",
+  "./assets/images/pics/mountain.webp"
 ];
 
 function isSameOrigin(request) {
@@ -87,36 +89,123 @@ function isNavigationRequest(request) {
   return request.mode === "navigate" || request.destination === "document";
 }
 
+function getCacheKey(request) {
+  return new URL(request.url).href;
+}
+
+function getUnversionedCacheKey(request) {
+  var url = new URL(request.url);
+  var queryKeys = Array.from(url.searchParams.keys());
+  if (
+    !isNavigationRequest(request) &&
+    queryKeys.length === 1 &&
+    queryKeys[0] === "v"
+  ) {
+    url.search = "";
+  }
+  return url.href;
+}
+
+function isVersionedRequest(request) {
+  var url = new URL(request.url);
+  var queryKeys = Array.from(url.searchParams.keys());
+  return (
+    !isNavigationRequest(request) &&
+    queryKeys.length === 1 &&
+    queryKeys[0] === "v"
+  );
+}
+
+function cacheResponse(cache, key, response) {
+  if (!response || !response.ok) return Promise.resolve(response);
+  return cache
+    .put(key, response.clone())
+    .then(function() {
+      return response;
+    })
+    .catch(function(error) {
+      console.warn("Unable to cache response:", key, error);
+      return response;
+    });
+}
+
 function networkFirst(request) {
   return caches.open(CACHE_NAME).then(function(cache) {
     return fetch(request)
       .then(function(response) {
-        if (response && response.ok) {
-          cache.put(request, response.clone());
-        }
-        return response;
+        return cacheResponse(cache, getCacheKey(request), response);
       })
       .catch(function() {
-        return cache.match(request) || cache.match("./index.html") || cache.match("/index.html") || cache.match("./");
+        return cache
+          .match(getCacheKey(request))
+          .then(function(cached) {
+            if (cached) return cached;
+            var fallbackKey = getUnversionedCacheKey(request);
+            return fallbackKey === getCacheKey(request)
+              ? null
+              : cache.match(fallbackKey);
+          })
+          .then(function(cached) {
+            return cached || cache.match("./index.html");
+          })
+          .then(function(cached) {
+            return cached || cache.match("/index.html");
+          })
+          .then(function(cached) {
+            return cached || cache.match("./");
+          });
       });
   });
 }
 
-function staleWhileRevalidate(request) {
-  return caches.open(CACHE_NAME).then(function(cache) {
-    return cache.match(request).then(function(cached) {
-      var updatePromise = fetch(request).then(function(response) {
-        if (response && response.ok) {
-          cache.put(request, response.clone());
-        }
-        return response;
-      }).catch(function() {
-        return cached || Response.error();
-      });
+function cacheVersionedAsset(request) {
+  var cacheKey = getCacheKey(request);
+  var fallbackKey = getUnversionedCacheKey(request);
 
-      return cached || updatePromise;
+  return caches.open(CACHE_NAME).then(function(cache) {
+    return cache.match(cacheKey).then(function(cached) {
+      if (cached) return cached;
+
+      return fetch(request)
+        .then(function(response) {
+          return cacheResponse(cache, cacheKey, response);
+        })
+        .catch(function(error) {
+          console.warn("Unable to fetch versioned asset:", cacheKey, error);
+          return cache.match(fallbackKey).then(function(fallback) {
+            return fallback || Response.error();
+          });
+        });
     });
   });
+}
+
+function staleWhileRevalidate(request, event) {
+  var cacheKey = getCacheKey(request);
+  var cachePromise = caches.open(CACHE_NAME);
+  var updatePromise = cachePromise.then(function(cache) {
+    return fetch(request).then(function(response) {
+      return cacheResponse(cache, cacheKey, response);
+    });
+  });
+
+  event.waitUntil(
+    updatePromise.catch(function(error) {
+      console.warn("Unable to refresh cached response:", cacheKey, error);
+    })
+  );
+
+  return cachePromise
+    .then(function(cache) {
+      return cache.match(cacheKey);
+    })
+    .then(function(cached) {
+      return cached || updatePromise;
+    })
+    .catch(function(error) {
+      console.warn("Unable to read cached response:", cacheKey, error);
+      return Response.error();
+    });
 }
 
 self.addEventListener("install", function(event) {
@@ -164,11 +253,20 @@ self.addEventListener("fetch", function(event) {
     return;
   }
 
+  if (event.request.headers.has("range")) {
+    return;
+  }
+
   if (isNavigationRequest(event.request)) {
     event.respondWith(networkFirst(event.request));
     return;
   }
 
-  event.respondWith(staleWhileRevalidate(event.request));
+  if (isVersionedRequest(event.request)) {
+    event.respondWith(cacheVersionedAsset(event.request));
+    return;
+  }
+
+  event.respondWith(staleWhileRevalidate(event.request, event));
 });
 // Created by Abdughafur - Believe GOD

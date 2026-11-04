@@ -70,13 +70,6 @@ export function renderGradeBlocks(container, grades, labels, onToggle) {
     if (container.classList.contains("grades-expanded")) {
       container.style.height = `${Math.min(container.scrollHeight, 520)}px`;
     }
-    const targetTop = container.scrollHeight - container.clientHeight;
-    if (targetTop <= 0) return;
-    try {
-      container.scrollTo({ top: targetTop, behavior: "smooth" });
-    } catch (error) {
-      container.scrollTop = targetTop;
-    }
   });
 }
 
@@ -284,15 +277,24 @@ export function renderGradeChart(container, grades) {
 
   const viewport = document.createElement("div");
   viewport.className = "chart-viewport";
+  viewport.tabIndex = 0;
+  viewport.setAttribute("role", "region");
+  viewport.setAttribute(
+    "aria-label",
+    "Диаграммаи баллҳо. Барои ҳаракат тугмаҳои тирчаи чап ва ростро истифода баред.",
+  );
+  viewport.setAttribute("aria-keyshortcuts", "ArrowLeft ArrowRight");
   viewport.append(svg);
   const controls = document.createElement("div");
   controls.className = "chart-scroll-controls";
+  const scrollButtons = [];
 
   const createScrollButton = (direction, label) => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "chart-scroll-button";
     button.setAttribute("aria-label", label);
+    button.title = label;
     button.textContent = direction === "left" ? "‹" : "›";
     button.addEventListener("click", () => {
       viewport.scrollBy({
@@ -303,13 +305,22 @@ export function renderGradeChart(container, grades) {
         behavior: chartScrollBehavior(),
       });
     });
+    scrollButtons.push(button);
     return button;
+  };
+
+  const updateScrollButtons = () => {
+    const maxScroll = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+    scrollButtons[0].disabled = viewport.scrollLeft <= 1;
+    scrollButtons[1].disabled = viewport.scrollLeft >= maxScroll - 1;
+    controls.hidden = maxScroll <= 1;
   };
 
   controls.append(
     createScrollButton("left", "Ба нуқтаҳои пешина"),
     createScrollButton("right", "Ба нуқтаҳои баъдӣ"),
   );
+  viewport.addEventListener("scroll", updateScrollButtons, { passive: true });
   container.append(viewport, controls);
   viewport.scrollLeft = previousScrollLeft;
 
@@ -320,10 +331,12 @@ export function renderGradeChart(container, grades) {
         left: maxScroll,
         behavior: previousPointCount ? chartScrollBehavior() : "auto",
       });
+      updateScrollButtons();
       return;
     }
 
     viewport.scrollLeft = Math.min(previousScrollLeft, maxScroll);
+    updateScrollButtons();
   });
 }
 

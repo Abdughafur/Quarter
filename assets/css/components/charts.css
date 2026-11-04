@@ -8,14 +8,18 @@
   height: 238px;
   margin-top: 12px;
   padding: 0;
-  border-radius: 18px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.3),
-    rgba(14, 165, 233, 0.06)
-  );
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(14, 165, 233, 0.16);
+  border-radius: 22px;
+  background:
+    radial-gradient(
+      circle at 90% 8%,
+      rgba(34, 211, 238, 0.14),
+      transparent 36%
+    ),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(233, 247, 253, 0.9));
+  box-shadow:
+    0 14px 34px rgba(15, 70, 98, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
   display: flex;
   overflow: hidden;
   overflow-x: hidden;
@@ -47,6 +51,11 @@
   overscroll-behavior-x: contain;
   touch-action: pan-x pan-y;
   -webkit-overflow-scrolling: touch;
+  outline: none;
+}
+
+.chart-viewport:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--primary);
 }
 
 .chart-viewport::-webkit-scrollbar {
@@ -65,37 +74,60 @@
   bottom: 10px;
   z-index: 3;
   display: flex;
-  gap: 6px;
-  padding: 4px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  gap: 5px;
+  padding: 5px;
+  border: 1px solid rgba(14, 165, 233, 0.17);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--card) 78%, transparent);
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
-  backdrop-filter: blur(12px);
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  box-shadow: 0 8px 22px rgba(15, 56, 80, 0.16);
+  backdrop-filter: blur(16px) saturate(150%);
+}
+
+.chart-scroll-controls[hidden] {
+  display: none;
 }
 
 .chart-scroll-button {
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: rgba(14, 165, 233, 0.12);
-  color: var(--text);
-  font-size: 1.3rem;
+  background: linear-gradient(145deg, var(--primary2), var(--primary));
+  color: #ffffff;
+  font-size: 1.55rem;
+  font-weight: 800;
   line-height: 1;
   cursor: pointer;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
 }
 
-.chart-scroll-button:active {
+.chart-scroll-button:hover:not(:disabled) {
+  box-shadow: 0 5px 12px rgba(14, 165, 233, 0.28);
+}
+
+.chart-scroll-button:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.chart-scroll-button:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+.chart-scroll-button:active:not(:disabled) {
   transform: scale(0.9);
 }
 
 .trend-grid line {
-  stroke: rgba(100, 116, 139, 0.16);
-  stroke-dasharray: 2 7;
+  stroke: rgba(83, 133, 155, 0.14);
+  stroke-dasharray: 3 8;
 }
 
 .trend-axis-label {
@@ -110,10 +142,10 @@
 
 .trend-lines path {
   fill: none;
-  stroke-width: 3;
+  stroke-width: 3.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 3px 5px rgba(14, 165, 233, 0.2));
+  filter: drop-shadow(0 4px 7px rgba(14, 165, 233, 0.24));
 }
 
 .trend-area {
@@ -121,37 +153,37 @@
 }
 
 .trend-columns rect {
-  opacity: 0.12;
+  opacity: 0.1;
 }
 
 .trend-columns .trend-up {
-  fill: #34c759;
+  fill: #10b981;
 }
 .trend-columns .trend-down {
-  fill: #ff3b30;
+  fill: #f97373;
 }
 .trend-columns .trend-flat {
-  fill: #0a84ff;
+  fill: #0ea5e9;
 }
 
 .trend-lines .trend-up {
-  stroke: #34c759;
+  stroke: #10b981;
 }
 .trend-lines .trend-down {
-  stroke: #ff3b30;
+  stroke: #f97373;
 }
 .trend-lines .trend-flat {
-  stroke: #0a84ff;
+  stroke: #0ea5e9;
 }
 
 .trend-points .trend-up {
-  fill: #34c759;
+  fill: #10b981;
 }
 .trend-points .trend-down {
-  fill: #ff3b30;
+  fill: #f97373;
 }
 .trend-points .trend-flat {
-  fill: #0a84ff;
+  fill: #0ea5e9;
 }
 
 .trend-up,
@@ -192,8 +224,32 @@
 .trend-points circle:focus-visible,
 .trend-points circle.selected {
   stroke: #ffffff;
-  stroke-width: 5;
+  stroke-width: 4;
   filter: drop-shadow(0 0 7px currentColor);
+}
+
+[data-theme="dark"] .chart {
+  border-color: rgba(125, 211, 252, 0.17);
+  background:
+    radial-gradient(
+      circle at 90% 8%,
+      rgba(34, 211, 238, 0.12),
+      transparent 36%
+    ),
+    linear-gradient(160deg, #0d1d2b, #07131f);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="dark"] .chart-scroll-controls {
+  border-color: rgba(125, 211, 252, 0.16);
+}
+
+[data-theme="dark"] .trend-grid line {
+  stroke: rgba(148, 188, 208, 0.15);
+}
+
+[data-theme="dark"] .trend-points circle {
+  stroke: #0b1a27;
 }
 
 .chart-empty {

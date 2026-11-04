@@ -232,6 +232,78 @@
   gap: 10px;
 }
 
+.calendar-picker-body.is-date-mode .calendar-year-list,
+.calendar-picker-body.is-date-mode .calendar-month-list {
+  display: none;
+}
+
+.calendar-date-form {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+
+.calendar-date-form[hidden] {
+  display: none;
+}
+
+.calendar-date-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.calendar-date-fields legend {
+  margin-bottom: 12px;
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 850;
+}
+
+.calendar-date-fields label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.calendar-date-fields label span {
+  color: var(--text);
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.calendar-date-part {
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.calendar-date-part:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 360px) {
+  .calendar-date-fields {
+    gap: 6px;
+  }
+
+  .calendar-date-part {
+    padding-inline: 4px;
+  }
+}
+
 .calendar-month-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

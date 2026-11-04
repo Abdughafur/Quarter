@@ -4,16 +4,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#06b6d4" />
-  <meta name="msapplication-navbutton-color" content="#06b6d4" />
+  <meta name="theme-color" content="#0284c7" />
+  <meta name="msapplication-navbutton-color" content="#0284c7" />
+  <meta name="description" content="Чоряк — барномаи ройгон барои ҳисоб кардани баҳои чоряк, пайгирии пешрафт ва нигоҳ доштани ёддоштҳои омӯзгор." />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Чоряк — ҳисобкунии баҳои чоряк" />
+  <meta property="og:description" content="Баллҳоро ҳисоб кунед, пешрафтро бинед ва кори омӯзгориро дар як ҷо ба тартиб дароред." />
+  <meta property="og:url" content="https://abdughafur.github.io/Quarter/" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Чоряк" />
-  <title>Чоряк</title>
+  <title>Чоряк — ҳисобкунии баҳои чоряк барои омӯзгорон</title>
+  <link rel="canonical" href="https://abdughafur.github.io/Quarter/" />
   <link rel="icon" href="assets/images/pics/logo.png" type="image/png" />
   <link rel="apple-touch-icon" href="assets/images/pics/logo.png" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="assets/css/main.css?v=4.5.2B2">
+  <link rel="stylesheet" href="assets/css/main.css?v=4.3B">
 
 </head>
 
@@ -258,42 +264,6 @@
     </section>
 
     <section id="tab-notes" class="tab">
-      <!-- Notes workspace switcher is temporarily disabled.
-      <div class="workspace-segmented-bar">
-        <div class="workspace-segmented-control" role="tablist">
-          <button class="workspace-segmented-btn active" type="button" data-action="switchNotesWorkspace"
-            data-workspace="notes" id="wsBtnNotes">
-            <svg viewBox="0 0 24 24" fill="none" width="18" height="18" aria-hidden="true">
-              <path d="M6 4.5A2.5 2.5 0 0 1 8.5 2H19v17H8.5A2.5 2.5 0 0 0 6 21.5v-17Z" stroke="currentColor"
-                stroke-width="1.8" stroke-linejoin="round" />
-              <path d="M6 5h10M10 8h5M10 11.5h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-            </svg>
-            <span>Ёддоштҳо</span>
-            <span class="workspace-badge" id="notesActiveCount">0</span>
-          </button>
-           Tasks workspace is temporarily disabled.
-          <button class="workspace-segmented-btn" type="button" data-action="switchNotesWorkspace" data-workspace="tasks" id="wsBtnTasks">
-            <svg viewBox="0 0 24 24" fill="none" width="18" height="18" aria-hidden="true">
-              <rect x="4" y="3" width="16" height="18" rx="3" stroke="currentColor" stroke-width="1.8" />
-              <path d="m8.5 10.5 2 2 4.5-4.5M8.5 16.5h7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            <span>Вазифаҳо</span>
-            <span class="workspace-badge" id="tasksActiveCount">0</span>
-          </button>
-          -->
-      <!-- Trash workspace is temporarily disabled.
-          <button class="workspace-segmented-btn" type="button" data-action="switchNotesWorkspace" data-workspace="trash" id="wsBtnTrash">
-            <svg viewBox="0 0 24 24" fill="none" width="18" height="18" aria-hidden="true">
-              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span>Сабад</span>
-            <span class="workspace-badge workspace-badge-trash" id="trashCount">0</span>
-          </button>
-          -->
-      </div>
-      </div>
-
-
       <div id="notesWorkspaceView" class="notes-workspace-view">
         <div class="notes-workspace">
           <div class="card notes-card notes-sidebar">
@@ -330,59 +300,6 @@
           </svg>
         </button>
       </div>
-
-      <!-- Tasks workspace is temporarily disabled.
-      <div id="tasksWorkspaceView" class="tasks-workspace-view is-hidden">
-        <div class="card tasks-card">
-          <div class="tasks-card-header">
-            <div class="tasks-title-block">
-              <h3>Вазифаҳои ман (To-Do)</h3>
-              <p>Рӯйхати вазифаҳо, масъулиятҳо ва корҳои анҷомдодашаванда.</p>
-            </div>
-            <div class="tasks-filter-pills" id="tasksFilterPills">
-              <button class="pill active" type="button" data-action="setTasksFilter" data-filter="all">Ҳама</button>
-              <button class="pill" type="button" data-action="setTasksFilter" data-filter="active">Фаъол</button>
-              <button class="pill" type="button" data-action="setTasksFilter" data-filter="completed">Иҷрошуда</button>
-            </div>
-          </div>
-
-          <div class="tasks-add-row">
-            <input id="tasksTaskInput" class="input-field" type="text" maxlength="160" placeholder="Вазифаи нав нависед ва тугмаи воридкуниро пахш кунед..." autocomplete="off" />
-            <button class="btn tasks-add-btn" type="button" data-action="addNoteTask" aria-label="Илова кардани вазифа">
-              <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-              <span>Илова</span>
-            </button>
-          </div>
-
-          <div id="mainTasksList" class="tasks-main-list"></div>
-        </div>
-      </div>
-      -->
-
-      <!-- Trash workspace is temporarily disabled.
-      <div id="trashWorkspaceView" class="trash-workspace-view is-hidden">
-        <div class="card trash-card">
-          <div class="trash-card-header">
-            <div class="trash-title-block">
-              <h3>Сабад (Trash)</h3>
-              <p>Ёддоштҳо ва вазифаҳои покшуда. Шумо метавонед онҳоро барқарор ё тамоман пок кунед.</p>
-            </div>
-            <button class="btn secondary danger-btn" type="button" data-action="showEmptyTrashConfirm">
-              <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              <span>Тоза кардани сабад</span>
-            </button>
-          </div>
-
-          <div class="trash-filter-pills" id="trashFilterPills">
-            <button class="pill active" type="button" data-action="setTrashFilter" data-filter="all">Ҳама</button>
-            <button class="pill" type="button" data-action="setTrashFilter" data-filter="notes">Ёддоштҳо</button>
-            <button class="pill" type="button" data-action="setTrashFilter" data-filter="tasks">Вазифаҳо</button>
-          </div>
-
-          <div id="trashItemsList" class="trash-items-list"></div>
-        </div>
-      </div>
-      -->
     </section>
 
     <section id="tab-calendar" class="tab" aria-labelledby="calendarTitle">
@@ -447,11 +364,11 @@
       </div>
     </section>
 
-    <section id="tab-more" class="tab">
+    <section id="tab-more" class="tab" aria-labelledby="moreTitle">
 
       <div id="more-home-view" class="more-subview active">
         <div class="card">
-          <h3 class="settings-title">Бештар</h3>
+          <h3 id="moreTitle" class="settings-title">Бештар</h3>
           <div class="more-options-container">
             <div class="option-list">
               <button class="more-profile-summary" type="button" data-action="showMoreProfile">
@@ -991,7 +908,7 @@
             </div>
             <div class="about">
               <p class="about-app-name"><strong>Чоряк</strong></p>
-              <p><strong>Нусха:</strong> v4.5.2B2 (Бета)</p>
+              <p><strong>Нусха:</strong> v4.3B (Бета)</p>
               <p><strong>Таҳиягар:</strong> Abdughafur (Абдуғафур)</p>
             </div>
           </div>
@@ -1002,7 +919,7 @@
               сохта шудааст. Барнома барои ҳамаи омӯзгорон ройгон пешниҳод мегардад.
             </p>
             <p>
-              Айни замон барнома дар нусхаи v4.5.2B2 (Бета) қарор дорад. Дар ин нусха ба устуворӣ, функсияҳои нав ва кори барнома
+              Айни замон барнома дар нусхаи v4.3B (Бета) қарор дорад. Дар ин нусха ба устуворӣ, функсияҳои нав ва кори барнома
               диққати махсус дода шудааст. Системаи барнома аз ҷониби мутахассисон ва корбарон санҷида шудааст.
               Фунскияҳои асосии барнома дуруст кор мекунад ва функсяҳои нав дар ҳоли санҷиш ҳастанд.
             </p>
@@ -1076,6 +993,27 @@
       </div>
       <div id="calendarYearList" class="calendar-year-list" role="listbox" aria-label="Интихоби сол" hidden></div>
       <div id="calendarMonthList" class="calendar-month-list" role="listbox" aria-label="Интихоби моҳ"></div>
+      <form id="calendarDateForm" class="calendar-date-form" novalidate hidden>
+        <fieldset class="calendar-date-fields">
+          <legend>Рӯз, моҳ ва солро ворид кунед</legend>
+          <label>
+            <span>Рӯз</span>
+            <input id="calendarDateDay" class="calendar-date-part" type="text" inputmode="numeric"
+              autocomplete="off" maxlength="2" pattern="[0-9]{1,2}" aria-label="Рӯзи сана">
+          </label>
+          <label>
+            <span>Моҳ</span>
+            <input id="calendarDateMonth" class="calendar-date-part" type="text" inputmode="numeric"
+              autocomplete="off" maxlength="2" pattern="[0-9]{1,2}" aria-label="Моҳи сана">
+          </label>
+          <label>
+            <span>Сол</span>
+            <input id="calendarDateYear" class="calendar-date-part" type="text" inputmode="numeric"
+              autocomplete="off" maxlength="4" pattern="[0-9]{4}" aria-label="Соли сана">
+          </label>
+        </fieldset>
+        <button class="btn" type="submit">Гузаштан</button>
+      </form>
     </div>
   </div>
 
@@ -1096,7 +1034,7 @@
     <div class="ios-modal share-modal">
       <button class="share-modal-close" type="button" data-action="closeShareModal"
         aria-label="Пӯшидан">&times;</button>
-      <span class="share-modal-kicker">Чоряк · v4.5.2B2 (Бета)</span>
+      <span class="share-modal-kicker">Чоряк · v4.3B (Бета)</span>
       <h3 id="shareModalTitle">Мубодилаи барнома</h3>
       <p>Рамзи QR-ро скан кунед ё пайвандро фиристед.</p>
       <div class="share-qr-frame">
@@ -1176,16 +1114,6 @@
     </div>
   </div>
 
-  <div id="emptyTrashConfirmModal" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="ios-modal">
-      <h3>Тоза кардани сабад</h3>
-      <p>Шумо мутмаин ҳастед, ки ҳамаи элементҳои сабад тамоман пок карда шаванд? Ин амал барқарор карда намешавад.</p>
-      <div class="modal-actions">
-        <button class="btn secondary" type="button" data-action="cancelEmptyTrash">Не</button>
-        <button class="btn danger-btn" type="button" data-action="confirmEmptyTrash">Бале, пок кунед</button>
-      </div>
-    </div>
-  </div>
 
   <div id="logoutModal" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="ios-modal">
@@ -1247,12 +1175,16 @@
     </div>
   </div>
 
-  <div class="tiny-screen-warning" aria-hidden="true">
-    <div class="tiny-screen-icon">📱</div>
-    <p>
-      Ин барнома барои дастгоҳҳое таҳия шудааст, ки экрани калонтар доранд.
-      Барои истифода ҳадди ақал экрани 280px лозим аст.
-    </p>
+  <div class="tiny-screen-warning" role="alert" aria-labelledby="tinyScreenTitle">
+    <div class="tiny-screen-card">
+      <img class="tiny-screen-logo" src="assets/images/pics/logo.png" alt="" />
+      <p class="tiny-screen-brand">Чоряк</p>
+      <h1 id="tinyScreenTitle">Экрани шумо хеле хурд аст</h1>
+      <p class="tiny-screen-message">
+        Барои истифодаи дурусти барнома экрани 280px ё калонтар лозим аст.
+      </p>
+      <p class="tiny-screen-requirement">Ҳадди ақал <strong>280px</strong></p>
+    </div>
   </div>
 
   <div id="toast"></div>
@@ -1330,7 +1262,7 @@
 
   <script type="module" src="assets/js/core/entry.js"></script>
   <script type="module" src="assets/js/core/pwa.js"></script>
-  <script type="module" src="assets/js/core/app.js?v=4.5.2B2"></script>
+  <script type="module" src="assets/js/core/app.js?v=4.3B"></script>
 </body>
 
 </html>

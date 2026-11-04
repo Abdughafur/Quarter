@@ -107,6 +107,7 @@ export const app = {
   toast: new Toast(),
   updateFrame: null,
   shouldBump: false,
+  shouldScrollGrades: false,
   initialized: false,
   notes: [],
   tasks: [],
@@ -759,6 +760,16 @@ export const app = {
 
       const tabButton = event.target.closest("[data-tab]");
       if (tabButton) this.nav(tabButton.dataset.tab, tabButton);
+    });
+
+    qs("calendarDateForm")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      this.goToCalendarDate();
+    });
+    document.querySelectorAll(".calendar-date-part").forEach((input) => {
+      input.addEventListener("input", () => {
+        input.value = input.value.replace(/\D/g, "").slice(0, input.maxLength);
+      });
     });
 
     const shareQrCode = qs("shareQrCode");
@@ -1473,7 +1484,7 @@ export const app = {
       openCalendarYearPicker: () =>
         this.openCalendarPicker("years", "Интихоби сол"),
       openCalendarDatePicker: () =>
-        this.openCalendarPicker("months", "Гузариш ба сана"),
+        this.openCalendarPicker("date", "Гузариш ба сана"),
       closeCalendarPicker: () => this.closeCalendarPicker(),
       selectCalendarYear: (payload) => this.selectCalendarYear(payload.year),
       selectCalendarMonth: (payload) => this.selectCalendarMonth(payload.month),
@@ -1591,15 +1602,21 @@ export const app = {
       lines.push(["Натиҷаи ниҳоӣ", "Балл ворид нашудааст"]);
     }
 
-    lines.push([
-      "Яклухткунӣ",
-      `Math.round(${stats.final}) = ${Math.round(stats.final)}`,
-    ]);
+    if (stats.regular.length || stats.exam.length) {
+      const rounded = Math.round(stats.final);
+      lines.push([
+        "Баҳои яклухт",
+        `${stats.final.toFixed(2)} = ${rounded} (${gradeLabel(rounded)})`,
+      ]);
+    }
 
     container.replaceChildren(
       ...lines.map(([label, formula]) => {
         const row = document.createElement("div");
         row.className = "result-calculation-line";
+        if (label === "Баҳои яклухт") {
+          row.classList.add("result-calculation-rounded");
+        }
 
         const title = document.createElement("strong");
         title.textContent = label;
@@ -1654,7 +1671,26 @@ export const app = {
       return;
     if (isInput && key !== "escape") return;
 
-    if (calendarActive && key === "arrowleft") {
+    if (
+      homeActive &&
+      (key === "arrowleft" || key === "arrowright") &&
+      !document.querySelector(
+        ".modal-backdrop.open, .note-modal-backdrop.open, .avatar-picker-backdrop.open",
+      )
+    ) {
+      const chartViewport = qs("gradeChart")?.querySelector(".chart-viewport");
+      if (chartViewport && chartViewport.scrollWidth > chartViewport.clientWidth + 1) {
+        event.preventDefault();
+        const direction = key === "arrowleft" ? -1 : 1;
+        const reducedMotion = window.matchMedia?.(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+        chartViewport.scrollBy({
+          left: direction * chartViewport.clientWidth * 0.72,
+          behavior: reducedMotion ? "auto" : "smooth",
+        });
+      }
+    } else if (calendarActive && key === "arrowleft") {
       event.preventDefault();
       this.changeCalendarMonth(-1);
     } else if (calendarActive && key === "arrowright") {
@@ -1792,7 +1828,7 @@ export const app = {
     });
 
     this.tone(450 + value * 30);
-    this.scheduleUpdate(true);
+    this.scheduleUpdate(true, true);
   },
 
   toggleGradesView() {
@@ -1911,20 +1947,23 @@ export const app = {
     this.scheduleUpdate(true);
   },
 
-  scheduleUpdate(anim = false) {
+  scheduleUpdate(anim = false, scrollGrades = false) {
     this.shouldBump = this.shouldBump || anim;
+    this.shouldScrollGrades = this.shouldScrollGrades || scrollGrades;
 
     if (this.updateFrame) return;
 
     this.updateFrame = requestAnimationFrame(() => {
       this.updateFrame = null;
       const shouldBump = this.shouldBump;
+      const shouldScrollGrades = this.shouldScrollGrades;
       this.shouldBump = false;
-      this.updateAll(shouldBump);
+      this.shouldScrollGrades = false;
+      this.updateAll(shouldBump, shouldScrollGrades);
     });
   },
 
-  updateAll(anim = false) {
+  updateAll(anim = false, scrollGrades = false) {
     this.save();
 
     const stats = calculateStats(this.grades);
@@ -1994,6 +2033,17 @@ export const app = {
     renderGradeBlocks(blocksContainer, this.grades, GRADE_LABELS, (id) =>
       this.toggleGrade(id),
     );
+    if (scrollGrades && blocksContainer) {
+      requestAnimationFrame(() => {
+        blocksContainer.scrollTo({
+          top: blocksContainer.scrollHeight - blocksContainer.clientHeight,
+          behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)")
+            .matches
+            ? "auto"
+            : "smooth",
+        });
+      });
+    }
     const gradesToggle = document.querySelector(".grades-toggle");
     if (gradesToggle) {
       const hasOverflow = Boolean(
@@ -2946,7 +2996,8 @@ export const app = {
     const title = qs("calendarPickerTitle");
     const yearList = qs("calendarYearList");
     const monthList = qs("calendarMonthList");
-    if (!panel || !title || !yearList || !monthList) return;
+    const dateForm = qs("calendarDateForm");
+    if (!panel || !title || !yearList || !monthList || !dateForm) return;
 
     let pickerBody = qs("calendarPickerBody");
     if (!pickerBody) {
@@ -2957,22 +3008,30 @@ export const app = {
       if (insertBefore) insertBefore.insertBefore(pickerBody, yearList);
       pickerBody.appendChild(yearList);
       pickerBody.appendChild(monthList);
+      pickerBody.appendChild(dateForm);
     }
 
     panel.classList.toggle("open", this.calendarPickerOpen);
     if (!this.calendarPickerOpen) return;
 
     const isYearMode = this.calendarPickerMode === "years";
+    const isDateMode = this.calendarPickerMode === "date";
     const activeYear =
       this.calendarPickerYear ?? this.calendarMonth.getFullYear();
     title.textContent =
       this.calendarPickerHeading ||
-      (isYearMode ? "Интихоби сол" : "Интихоби моҳ");
+      (isDateMode
+        ? "Гузариш ба сана"
+        : isYearMode
+          ? "Интихоби сол"
+          : "Интихоби моҳ");
 
     yearList.hidden = !isYearMode;
-    monthList.hidden = isYearMode;
+    monthList.hidden = isYearMode || isDateMode;
+    dateForm.hidden = !isDateMode;
     pickerBody.classList.toggle("is-year-mode", isYearMode);
-    pickerBody.classList.toggle("is-month-mode", !isYearMode);
+    pickerBody.classList.toggle("is-month-mode", !isYearMode && !isDateMode);
+    pickerBody.classList.toggle("is-date-mode", isDateMode);
 
     if (isYearMode) {
       const yearButtons = [];
@@ -3177,8 +3236,15 @@ export const app = {
   openCalendarPicker(mode = "months", heading = "Интихоби моҳ") {
     this.calendarPickerYear = this.calendarMonth.getFullYear();
     this.calendarPickerOpen = true;
-    this.calendarPickerMode = mode === "years" ? "years" : "months";
+    this.calendarPickerMode =
+      mode === "years" || mode === "date" ? mode : "months";
     this.calendarPickerHeading = heading;
+    if (this.calendarPickerMode === "date") {
+      const date = this.calendarSelectedDate;
+      setInputValue("calendarDateDay", String(date.getDate()));
+      setInputValue("calendarDateMonth", String(date.getMonth() + 1));
+      setInputValue("calendarDateYear", String(date.getFullYear()));
+    }
     document
       .querySelectorAll('[aria-controls="calendarPickerModal"]')
       .forEach((button) => button.setAttribute("aria-expanded", "true"));
@@ -3255,6 +3321,53 @@ export const app = {
       Number(month) - 1,
       Number(day),
     );
+    this.renderCalendar();
+  },
+
+  goToCalendarDate() {
+    const dayInput = qs("calendarDateDay");
+    const monthInput = qs("calendarDateMonth");
+    const yearInput = qs("calendarDateYear");
+    const dayText = dayInput?.value.trim() || "";
+    const monthText = monthInput?.value.trim() || "";
+    const yearText = yearInput?.value.trim() || "";
+    if (
+      !/^\d{1,2}$/.test(dayText) ||
+      !/^\d{1,2}$/.test(monthText) ||
+      !/^\d{4}$/.test(yearText)
+    ) {
+      this.toast.show("Лутфан санаи дурустро интихоб кунед.");
+      const invalidInput = !/^\d{1,2}$/.test(dayText)
+        ? dayInput
+        : !/^\d{1,2}$/.test(monthText)
+          ? monthInput
+          : yearInput;
+      invalidInput?.focus();
+      return;
+    }
+
+    const year = Number(yearText);
+    const month = Number(monthText);
+    const day = Number(dayText);
+    const date = new Date(year, month - 1, day);
+    if (
+      year < CALENDAR_MIN_YEAR ||
+      year > CALENDAR_MAX_YEAR ||
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    ) {
+      this.toast.show(
+        `Сана бояд дуруст ва аз ${CALENDAR_MIN_YEAR} то ${CALENDAR_MAX_YEAR} бошад.`,
+      );
+      dayInput?.focus();
+      return;
+    }
+
+    this.calendarSelectedDate = date;
+    this.calendarMonth = new Date(year, month - 1, 1);
+    this.calendarPickerYear = year;
+    this.closeCalendarPicker();
     this.renderCalendar();
   },
 

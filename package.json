@@ -1,6 +1,6 @@
 {
   "name": "choryak",
-  "version": "4.5.2-beta.2",
+  "version": "4.3.0-beta",
   "private": true,
   "description": "Offline-friendly academic grade calculator and notes app",
   "scripts": {

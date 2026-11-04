@@ -1,5 +1,5 @@
 ﻿/* login.js */
-/* Created by Abdughafur - ЧОРЯК v4.5.2B2 (Beta) */
+/* Created by Abdughafur - ЧОРЯК v4.3B (Beta) */
 import { clean, qs, setInputValue } from "../utils/helpers.js";
 import { saveState, loadState, DEFAULT_PROFILE } from "./storage.js";
 import { bindAvatarPicker } from "../ui/avatar-picker.js";
@@ -126,5 +126,5 @@ async function init() {
 
 void init();
 
-/* Created by Abdughafur - ЧОРЯК v4.5.2B2 (Beta) */
+/* Created by Abdughafur - ЧОРЯК v4.3B (Beta) */
 // Created by Abdughafur - Believe GOD

@@ -7,9 +7,9 @@
   --card: #07131f;
   --card2: #0d1f2f;
   --border: rgba(255, 255, 255, 0.08);
-  --primary: #7dd3fc;
-  --primary2: #38bdf8;
-  --accent: #22d3ee;
+  --primary: var(--brand);
+  --primary2: var(--brand-accent);
+  --accent: var(--brand-accent);
   --cyan: #67e8f9;
   --text: #e8f7ff;
   --muted: #8fa9bf;
