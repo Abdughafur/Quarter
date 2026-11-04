@@ -1514,7 +1514,6 @@ export const app = {
       confirmDeleteNote: () => this.confirmDeleteNote(),
       editSelectedNote: () => this.startInlineNoteEdit(),
       saveSelectedNoteEdit: () => this.saveSelectedNoteEdit(),
-      cancelSelectedNoteEdit: () => this.cancelSelectedNoteEdit(),
       clearSelectedNote: () => this.requestClearSelectedNote(),
       deleteSelectedNote: () => {
         this.activeNoteId = this.selectedNoteId;
@@ -2964,7 +2963,8 @@ export const app = {
     if (!this.calendarPickerOpen) return;
 
     const isYearMode = this.calendarPickerMode === "years";
-    const activeYear = this.calendarPickerYear ?? this.calendarMonth.getFullYear();
+    const activeYear =
+      this.calendarPickerYear ?? this.calendarMonth.getFullYear();
     title.textContent =
       this.calendarPickerHeading ||
       (isYearMode ? "Интихоби сол" : "Интихоби моҳ");
@@ -2983,10 +2983,7 @@ export const app = {
         button.textContent = String(year);
         button.dataset.action = "selectCalendarYear";
         button.dataset.year = String(year);
-        button.setAttribute(
-          "aria-pressed",
-          String(year === activeYear),
-        );
+        button.setAttribute("aria-pressed", String(year === activeYear));
         yearButtons.push(button);
       }
       yearList.replaceChildren(...yearButtons);
@@ -3598,13 +3595,6 @@ export const app = {
     this.toast.show("Ёддошт сабт шуд.");
   },
 
-  cancelSelectedNoteEdit() {
-    this.flushNoteAutosave();
-    this.editingNoteId = null;
-    this.creatingNoteInline = false;
-    this.renderNotes();
-  },
-
   requestClearSelectedNote() {
     this.flushNoteAutosave();
     this.selectedNoteId = null;
@@ -3907,7 +3897,6 @@ export const app = {
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
           </button>
           ${note ? '<button class="btn secondary note-toolbar-btn note-toolbar-delete" type="button" data-action="deleteSelectedNote">Пок кардан</button>' : ""}
-          <button class="btn secondary note-toolbar-btn" type="button" data-action="cancelSelectedNoteEdit">Лағв</button>
           <button class="btn note-toolbar-btn" type="button" data-action="saveSelectedNoteEdit">Сабт</button>
         </div>
         <div class="note-detail-edit-form">
@@ -4159,8 +4148,8 @@ whenReady(() => {
 });
 
 /*
-  Сopyright (c) 2026 Abdughafur Khujzoda. All rights reserved.
-  :) 
+  Copyright (c) 2026 Abdughafur Khujzoda.
+  Licensed under the MIT License.
 */
 
 // THE END

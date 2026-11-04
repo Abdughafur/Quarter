@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="tg" manifest="offline.appcache">
+<html lang="tg">
 
 <head>
   <meta charset="utf-8" />
@@ -13,7 +13,7 @@
   <link rel="icon" href="assets/images/pics/logo.png" type="image/png" />
   <link rel="apple-touch-icon" href="assets/images/pics/logo.png" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="assets/css/main.css?v=4.5.2B">
+  <link rel="stylesheet" href="assets/css/main.css?v=4.5.2B2">
 
 </head>
 
@@ -452,20 +452,20 @@
       <div id="more-home-view" class="more-subview active">
         <div class="card">
           <h3 class="settings-title">Бештар</h3>
-          <button class="more-profile-summary" type="button" data-action="showMoreProfile">
-            <span class="more-profile-avatar">
-              <img id="moreProfilePhoto" src="" alt="" />
-              <span id="moreProfileFallback">Ч</span>
-            </span>
-            <span class="more-profile-content">
-              <strong id="moreProfileName">Чоряк</strong>
-              <span id="moreProfileSchool">Рақами мактаб илова нашудааст</span>
-            </span>
-            <span class="more-profile-arrow" aria-hidden="true">›</span>
-          </button>
           <div class="more-options-container">
             <div class="option-list">
-            <button class="option-item" type="button" data-action="showMoreProfile">
+              <button class="more-profile-summary" type="button" data-action="showMoreProfile">
+                <span class="more-profile-avatar">
+                  <img id="moreProfilePhoto" src="" alt="" />
+                  <span id="moreProfileFallback">Ч</span>
+                </span>
+                <span class="more-profile-content">
+                  <strong id="moreProfileName">Чоряк</strong>
+                  <span id="moreProfileSchool">Рақами мактаб илова нашудааст</span>
+                </span>
+                <span class="more-profile-arrow" aria-hidden="true">›</span>
+              </button>
+              <button class="option-item" type="button" data-action="showMoreProfile" style="display:none;">
               <span class="option-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"
                   id="User-Profile-Focus--Streamline-Core-Gradient" xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -991,7 +991,7 @@
             </div>
             <div class="about">
               <p class="about-app-name"><strong>Чоряк</strong></p>
-              <p><strong>Нусха:</strong> v4.5.2B (Бета)</p>
+              <p><strong>Нусха:</strong> v4.5.2B2 (Бета)</p>
               <p><strong>Таҳиягар:</strong> Abdughafur (Абдуғафур)</p>
             </div>
           </div>
@@ -1002,7 +1002,7 @@
               сохта шудааст. Барнома барои ҳамаи омӯзгорон ройгон пешниҳод мегардад.
             </p>
             <p>
-              Айни замон барнома дар нусхаи v4.5.2B (Бета) қарор дорад. Дар ин нусха ба устуворӣ, функсияҳои нав ва кори барнома
+              Айни замон барнома дар нусхаи v4.5.2B2 (Бета) қарор дорад. Дар ин нусха ба устуворӣ, функсияҳои нав ва кори барнома
               диққати махсус дода шудааст. Системаи барнома аз ҷониби мутахассисон ва корбарон санҷида шудааст.
               Фунскияҳои асосии барнома дуруст кор мекунад ва функсяҳои нав дар ҳоли санҷиш ҳастанд.
             </p>
@@ -1096,7 +1096,7 @@
     <div class="ios-modal share-modal">
       <button class="share-modal-close" type="button" data-action="closeShareModal"
         aria-label="Пӯшидан">&times;</button>
-      <span class="share-modal-kicker">Чоряк · v4.5.2B (Бета)</span>
+      <span class="share-modal-kicker">Чоряк · v4.5.2B2 (Бета)</span>
       <h3 id="shareModalTitle">Мубодилаи барнома</h3>
       <p>Рамзи QR-ро скан кунед ё пайвандро фиристед.</p>
       <div class="share-qr-frame">
@@ -1170,7 +1170,6 @@
         <div class="note-modal-actions note-modal-actions-row">
           <button id="noteDeleteButton" class="btn secondary" type="button" data-action="showDeleteConfirm"
             style="display:none;">Пок кардан</button>
-          <button class="btn secondary" type="button" data-action="closeNoteModal">Лағв</button>
           <button id="noteSaveButton" class="btn" type="button" data-action="saveNote">Сабт</button>
         </div>
       </div>
@@ -1331,7 +1330,7 @@
 
   <script type="module" src="assets/js/core/entry.js"></script>
   <script type="module" src="assets/js/core/pwa.js"></script>
-  <script type="module" src="assets/js/core/app.js?v=4.5.2B"></script>
+  <script type="module" src="assets/js/core/app.js?v=4.5.2B2"></script>
 </body>
 
 </html>

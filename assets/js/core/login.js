@@ -1,5 +1,5 @@
 ﻿/* login.js */
-/* Created by Abdughafur - ЧОРЯК v4.5.2B (Beta) */
+/* Created by Abdughafur - ЧОРЯК v4.5.2B2 (Beta) */
 import { clean, qs, setInputValue } from "../utils/helpers.js";
 import { saveState, loadState, DEFAULT_PROFILE } from "./storage.js";
 import { bindAvatarPicker } from "../ui/avatar-picker.js";
@@ -106,10 +106,7 @@ async function init() {
     }
 
     if (!qs("privacyAgreementInput")?.checked) {
-      showNotice(
-        "Барои идома бо сиёсати махфият розӣ шавед.",
-        "error",
-      );
+      showNotice("Барои идома бо сиёсати махфият розӣ шавед.", "error");
       qs("privacyAgreementInput")?.focus();
       return;
     }
@@ -129,5 +126,5 @@ async function init() {
 
 void init();
 
-/* Created by Abdughafur - ЧОРЯК v4.5.2B (Beta) */
+/* Created by Abdughafur - ЧОРЯК v4.5.2B2 (Beta) */
 // Created by Abdughafur - Believe GOD

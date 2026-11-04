@@ -1,7 +1,7 @@
 /* sw.js */
-const CACHE_NAME = "choryak-cache-v4.5.2b-beta";
+var CACHE_NAME = "choryak-cache";
 
-const PRECACHE = [
+var PRECACHE = [
   "./",
   "./index.html",
   "./landing.html",
@@ -11,6 +11,16 @@ const PRECACHE = [
   "./assets/images/pics/logo.png",
   "./assets/images/pics/abdughafur.png",
   "./assets/images/pics/share-qr.svg",
+  "./assets/images/avatars/01.jpeg",
+  "./assets/images/avatars/02.jpeg",
+  "./assets/images/avatars/03.jpeg",
+  "./assets/images/avatars/04.jpeg",
+  "./assets/images/avatars/05.jpeg",
+  "./assets/images/avatars/06.jpeg",
+  "./assets/images/avatars/07.jpeg",
+  "./assets/images/avatars/08.jpeg",
+  "./assets/images/avatars/09.jpeg",
+  "./assets/images/avatars/10.jpeg",
   "./assets/css/main.css",
   "./assets/css/core/reset.css",
   "./assets/css/core/variables.css",
@@ -47,29 +57,28 @@ const PRECACHE = [
   "./assets/css/utilities/shadows.css",
   "./assets/css/utilities/radius.css",
   "./assets/css/utilities/helpers.css",
-  "./assets/js/core/app.js?v=4.5.2B",
+  "./assets/js/core/app.js",
   "./assets/js/core/entry.js",
   "./assets/js/core/login.js",
   "./assets/js/core/storage.js",
-  "./assets/js/core/stats.js?v=chat1",
+  "./assets/js/core/stats.js",
   "./assets/js/core/pwa.js",
   "./assets/js/ui/toast.js",
   "./assets/js/ui/modal.js",
   "./assets/js/ui/chart.js",
   "./assets/js/ui/avatar-picker.js",
   "./assets/js/utils/helpers.js",
-  "./assets/css/components/modal.css?v=4.5.2B",
   "./assets/images/minai/ai.png",
   "./assets/images/minai/hello.png",
   "./assets/images/minai/search.png",
   "./assets/images/minai/write.png",
-  "./assets/images/minai/smile.png",
+  "./assets/images/minai/smile.png"
 ];
 
 function isSameOrigin(request) {
   try {
     return new URL(request.url).origin === self.location.origin;
-  } catch {
+  } catch (e) {
     return false;
   }
 }
@@ -78,83 +87,88 @@ function isNavigationRequest(request) {
   return request.mode === "navigate" || request.destination === "document";
 }
 
-async function networkFirst(request) {
-  const cache = await caches.open(CACHE_NAME);
-
-  try {
-    const response = await fetch(request);
-    if (response && response.ok) {
-      await cache.put(request, response.clone());
-    }
-    return response;
-  } catch {
-    return (
-      (await cache.match(request)) ||
-      (await cache.match("./index.html")) ||
-      (await cache.match("/index.html"))
-    );
-  }
+function networkFirst(request) {
+  return caches.open(CACHE_NAME).then(function(cache) {
+    return fetch(request)
+      .then(function(response) {
+        if (response && response.ok) {
+          cache.put(request, response.clone());
+        }
+        return response;
+      })
+      .catch(function() {
+        return cache.match(request) || cache.match("./index.html") || cache.match("/index.html") || cache.match("./");
+      });
+  });
 }
 
-function staleWhileRevalidate(event) {
-  const request = event.request;
-  const cachePromise = caches.open(CACHE_NAME);
-  const update = cachePromise.then((cache) =>
-    fetch(request).then((response) => {
-      if (response && response.ok) {
-        return cache.put(request, response.clone()).then(() => response);
-      }
-      return response;
-    }),
-  );
-  event.waitUntil(update.catch(() => undefined));
-  return cachePromise
-    .then((cache) => cache.match(request))
-    .then((cached) => cached || update);
+function staleWhileRevalidate(request) {
+  return caches.open(CACHE_NAME).then(function(cache) {
+    return cache.match(request).then(function(cached) {
+      var updatePromise = fetch(request).then(function(response) {
+        if (response && response.ok) {
+          cache.put(request, response.clone());
+        }
+        return response;
+      }).catch(function() {
+        return cached || Response.error();
+      });
+
+      return cached || updatePromise;
+    });
+  });
 }
 
-self.addEventListener("install", (event) => {
+self.addEventListener("install", function(event) {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE))
-      .then(() => self.skipWaiting()),
+      .then(function(cache) {
+        return cache.addAll(PRECACHE);
+      })
+      .then(function() {
+        return self.skipWaiting();
+      })
   );
 });
 
-self.addEventListener("message", (event) => {
-  if (event.data?.type === "SKIP_WAITING") {
+self.addEventListener("message", function(event) {
+  if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 });
 
-self.addEventListener("activate", (event) => {
+self.addEventListener("activate", function(event) {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) =>
-        Promise.all(
+      .then(function(keys) {
+        return Promise.all(
           keys
-            .filter(
-              (key) => key.startsWith("choryak-cache-") && key !== CACHE_NAME,
-            )
-            .map((key) => caches.delete(key)),
-        ),
-      )
-      .then(() => self.clients.claim()),
+            .filter(function(key) {
+              return key.indexOf("choryak-cache") === 0 && key !== CACHE_NAME;
+            })
+            .map(function(key) {
+              return caches.delete(key);
+            })
+        );
+      })
+      .then(function() {
+        return self.clients.claim();
+      })
   );
 });
 
-self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET" || !isSameOrigin(event.request)) return;
-
-  const url = new URL(event.request.url);
+self.addEventListener("fetch", function(event) {
+  if (event.request.method !== "GET" || !isSameOrigin(event.request)) {
+    return;
+  }
 
   if (isNavigationRequest(event.request)) {
     event.respondWith(networkFirst(event.request));
     return;
   }
 
-  event.respondWith(staleWhileRevalidate(event));
+  event.respondWith(staleWhileRevalidate(event.request));
 });
 // Created by Abdughafur - Believe GOD

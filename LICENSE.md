@@ -1,32 +1,21 @@
-# LICENSE / ЛИЦЕНЗИЯ / ИҶОЗАТНОМА
+MIT License
 
-## 🇹🇯 Тоҷикӣ
+Copyright (c) 2026 Abdughafur Khujzoda
 
-© 2026 **Abdughafur Khujzoda**. Ҳамаи ҳуқуқҳо ҳифз шудаанд.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-Ин лоиҳа моликияти хусусии муаллиф мебошад. Нусхабардорӣ, тағйир додан, паҳн кардан, истифодаи тиҷоратӣ ё сохтани версияҳои тағйирёфта бе иҷозати хаттии муаллиф манъ аст.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
----
-
-## 🇬🇧 English
-
-© 2026 **Abdughafur Khujzoda**. All Rights Reserved.
-
-This project is proprietary software. Copying, modifying, distributing, commercial use, or creating derivative works without the author's written permission is prohibited.
-
----
-
-## 🇷🇺 Русский
-
-© 2026 **Abdughafur Khujzoda**. Все права защищены.
-
-Проект является частной собственностью автора. Копирование, изменение, распространение, коммерческое использование или создание производных версий без письменного разрешения автора запрещены.
-
----
-
-<div align="center">
-
-**Crafted with ❤️ in Tajikistan**
-**Designed & Developed by Abdughafur Khujzoda**
-
-</div>
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

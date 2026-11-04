@@ -1,4 +1,4 @@
-# ✨ Чоряк v4.5.2B (Beta)
+# ✨ Чоряк v4.5.2B2 (Beta)
 
 ### Quarterly Grade Calculator
 
@@ -28,7 +28,7 @@ Modern web application for quarterly grade calculation and percentage analytics.
 
 ### ⚠ Литсензия
 
-© 2026 Abdughafur — Ҳамаи ҳуқуқҳо ҳифз шудаанд.
+Лоиҳа таҳти иҷозатномаи MIT нашр шудааст. Тафсилоти пурра дар [LICENSE.md](LICENSE.md) мавҷуд аст.
 
 ---
 
@@ -54,7 +54,7 @@ Modern web application for quarterly grade calculation and percentage analytics.
 
 ### ⚠ License
 
-© 2026 Abdughafur — All Rights Reserved.
+This project is licensed under the MIT License. See [LICENSE.md](LICENSE.md) for details.
 
 ---
 
@@ -80,7 +80,7 @@ Modern web application for quarterly grade calculation and percentage analytics.
 
 ### ⚠ Лицензия
 
-© 2026 Abdughafur — Все права защищены.
+Этот проект распространяется по лицензии MIT. Полные условия доступны в [LICENSE.md](LICENSE.md).
 
 ---
 
