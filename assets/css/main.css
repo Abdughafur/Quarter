@@ -1,10 +1,10 @@
-/* main.css - Чоряк v4.3B (Beta)
+/* main.css - Чоряк v4.5.3B (Beta)
  Copyright (c) 2026 Abdughafur. All rights reserved.
 */
 @import url("./core/reset.css");
-@import url("./core/variables.css?v=4.3B");
-@import url("./themes/light.css?v=4.3B");
-@import url("./themes/dark.css?v=4.3B");
+@import url("./core/variables.css?v=4.5.3B");
+@import url("./themes/light.css?v=4.5.3B");
+@import url("./themes/dark.css?v=4.5.3B");
 @import url("./themes/glass.css");
 @import url("./core/base.css");
 @import url("./core/typography.css");
@@ -18,17 +18,17 @@
 @import url("./components/cards.css");
 @import url("./components/inputs.css");
 @import url("./components/switches.css");
-@import url("./components/modal.css?v=4.3B");
+@import url("./components/modal.css?v=4.5.3B");
 @import url("./components/toast.css");
 @import url("./components/charts.css");
 @import url("./components/keypad.css");
 @import url("./components/loader.css");
 @import url("./components/badges.css");
 @import url("./pages/home.css");
-@import url("./pages/calendar.css?v=4.3B");
+@import url("./pages/calendar.css?v=4.5.3B");
 @import url("./pages/percent.css");
 @import url("./pages/ai.css");
-@import url("./pages/settings.css?v=4.3B");
+@import url("./pages/settings.css?v=4.5.3B1");
 @import url("./pages/login.css");
 @import url("./pages/landing.css");
 @import url("./utilities/spacing.css");

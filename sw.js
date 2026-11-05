@@ -1,5 +1,5 @@
 /* sw.js */
-var CACHE_NAME = "choryak-cache-v4-3b-2";
+var CACHE_NAME = "choryak-cache-v4-5-3b1";
 
 var PRECACHE = [
   "./",
