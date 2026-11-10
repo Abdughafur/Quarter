@@ -42,6 +42,80 @@
   font-weight: 800;
 }
 
+#logoutFinalModal .logout-swipe-track {
+  --logout-swipe-progress: 0%;
+  position: relative;
+  min-height: 58px;
+  margin-top: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(14, 165, 233, 0.22);
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(220, 38, 38, 0.14) 0%,
+      rgba(220, 38, 38, 0.14) var(--logout-swipe-progress),
+      rgba(148, 163, 184, 0.12) var(--logout-swipe-progress),
+      rgba(148, 163, 184, 0.12) 100%
+    ),
+    var(--card2);
+  color: var(--muted);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#logoutFinalModal .modal-actions {
+  grid-template-columns: 1fr;
+}
+
+#logoutFinalModal .logout-swipe-track:focus-visible {
+  outline: 3px solid rgba(14, 165, 233, 0.5);
+  outline-offset: 3px;
+}
+
+#logoutFinalModal .logout-swipe-label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 0 68px;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 850;
+  text-align: center;
+  pointer-events: none;
+}
+
+#logoutFinalModal .logout-swipe-thumb {
+  position: absolute;
+  top: 4px;
+  left: calc(4px + var(--logout-swipe-x, 0px));
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid rgba(220, 38, 38, 0.18);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ef4444, #dc2626);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 5px 14px rgba(220, 38, 38, 0.25);
+  cursor: grab;
+  touch-action: none;
+}
+
+#logoutFinalModal .logout-swipe-thumb:active {
+  cursor: grabbing;
+}
+
+[data-theme="dark"] #logoutFinalModal .logout-swipe-track {
+  border-color: rgba(56, 189, 248, 0.26);
+}
+
 .share-modal-backdrop {
   z-index: 2100;
   padding: 16px;

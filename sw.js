@@ -1,5 +1,7 @@
 /* sw.js */
-var CACHE_NAME = "choryak-cache-v4-5-3b1";
+var APP_VERSION = "5.5.3B4";
+var CACHE_NAME =
+  "choryak-cache-v" + APP_VERSION.toLowerCase().replace(/\./g, "-");
 
 var PRECACHE = [
   "./",
@@ -9,7 +11,7 @@ var PRECACHE = [
   "./privacy.html",
   "./manifest.json",
   "./assets/images/pics/logo.png",
-  "./assets/images/pics/abdughafur.png",
+  "./assets/images/pics/abdughafur.webp",
   "./assets/images/pics/share-qr.svg",
   "./assets/images/avatars/01.jpeg",
   "./assets/images/avatars/02.jpeg",
@@ -69,11 +71,11 @@ var PRECACHE = [
   "./assets/js/ui/chart.js",
   "./assets/js/ui/avatar-picker.js",
   "./assets/js/utils/helpers.js",
-  "./assets/images/minai/ai.png",
-  "./assets/images/minai/hello.png",
-  "./assets/images/minai/search.png",
-  "./assets/images/minai/write.png",
-  "./assets/images/minai/smile.png",
+  "./assets/images/minai/ai.webp",
+  "./assets/images/minai/hello.webp",
+  "./assets/images/minai/search.webp",
+  "./assets/images/minai/write.webp",
+  "./assets/images/minai/smile.webp",
   "./assets/images/pics/mountain.webp"
 ];
 

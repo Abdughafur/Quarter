@@ -25,9 +25,26 @@ async function route() {
   }
 }
 
-void route().catch(() => {
-  if (currentPage !== "landing.html") {
-    window.location.replace("landing.html");
+function showStorageNotice(message) {
+  let notice = document.getElementById("storage-error-notice");
+  if (!notice) {
+    notice = document.createElement("div");
+    notice.id = "storage-error-notice";
+    notice.className = "storage-error-notice";
+    notice.setAttribute("role", "alert");
+    document.body.prepend(notice);
   }
+  notice.textContent = message;
+}
+
+window.addEventListener("choryak-storage-warning", (event) => {
+  if (event.detail?.message) showStorageNotice(event.detail.message);
+});
+
+void route().catch((error) => {
+  console.error("Could not check the saved profile.", error);
+  showStorageNotice(
+    "Маълумоти сабтшударо кушода натавонистем. Маълумот пок нашудааст; дастрасии хотираи браузерро санҷед ва саҳифаро аз нав кушоед.",
+  );
 });
 // Created by Abdughafur - Believe GOD

@@ -15,7 +15,7 @@
     <link rel="icon" href="assets/images/pics/logo.png" type="image/png" />
     <link rel="apple-touch-icon" href="assets/images/pics/logo.png" />
     <link rel="manifest" href="manifest.json" />
-    <link rel="stylesheet" href="assets/css/main.css?v=4.5.3B1" />
+    <link rel="stylesheet" href="assets/css/main.css?v=5.5.3B4" />
   </head>
 
   <body class="profile-page" data-theme="light">
@@ -97,18 +97,78 @@
               inputmode="text"
               aria-label="Насаби шумо"
             />
-            <input
-              id="profileSchoolInput"
-              class="input-field profile-setup-input"
-              type="number"
-              placeholder="Рақами мактаб"
-              autocomplete="off"
-              inputmode="numeric"
-              min="0"
-              step="1"
-              pattern="[0-9]*"
-              aria-label="Рақами мактаб"
-            />
+            <div class="profile-school-fields" aria-label="Рақамҳои мактаб">
+              <label class="profile-school-field profile-school-field-primary" for="profileSchoolInput">
+                <span class="profile-school-label">
+                  <strong>Мактаби асосӣ</strong>
+                  <span>Ҳатмӣ</span>
+                </span>
+                <input
+                  id="profileSchoolInput"
+                  class="input-field profile-setup-input"
+                  type="text"
+                  placeholder="Рақами мактаб"
+                  autocomplete="off"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  maxlength="4"
+                  aria-label="Рақами мактаби асосӣ"
+                  required
+                />
+              </label>
+              <label class="profile-school-field" for="profileSchool2Input">
+                <span class="profile-school-label">
+                  <strong>Мактаби иловагӣ</strong>
+                  <span>Ихтиёрӣ</span>
+                </span>
+                <input
+                  id="profileSchool2Input"
+                  class="input-field profile-setup-input"
+                  type="text"
+                  placeholder="Рақами мактаби дуюм"
+                  autocomplete="off"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  maxlength="4"
+                  aria-label="Рақами мактаби дуюм, ихтиёрӣ"
+                />
+              </label>
+              <label class="profile-school-field" for="profileSchool3Input">
+                <span class="profile-school-label">
+                  <strong>Мактаби иловагӣ</strong>
+                  <span>Ихтиёрӣ</span>
+                </span>
+                <input
+                  id="profileSchool3Input"
+                  class="input-field profile-setup-input"
+                  type="text"
+                  placeholder="Рақами мактаби сеюм"
+                  autocomplete="off"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  maxlength="4"
+                  aria-label="Рақами мактаби сеюм, ихтиёрӣ"
+                />
+              </label>
+              <label class="profile-school-field" for="profileSchool4Input">
+                <span class="profile-school-label">
+                  <strong>Мактаби иловагӣ</strong>
+                  <span>Ихтиёрӣ</span>
+                </span>
+                <input id="profileSchool4Input" class="input-field profile-setup-input"
+                  type="text" placeholder="Рақами мактаби чорум" autocomplete="off"
+                  inputmode="numeric" pattern="[0-9]*" maxlength="4" aria-label="Рақами мактаби чорум, ихтиёрӣ" />
+              </label>
+              <label class="profile-school-field" for="profileSchool5Input">
+                <span class="profile-school-label">
+                  <strong>Мактаби иловагӣ</strong>
+                  <span>Ихтиёрӣ</span>
+                </span>
+                <input id="profileSchool5Input" class="input-field profile-setup-input"
+                  type="text" placeholder="Рақами мактаби панҷум" autocomplete="off"
+                  inputmode="numeric" pattern="[0-9]*" maxlength="4" aria-label="Рақами мактаби панҷум, ихтиёрӣ" />
+              </label>
+            </div>
 
             <label class="login-privacy-agreement" for="privacyAgreementInput">
               <input id="privacyAgreementInput" type="checkbox" required />

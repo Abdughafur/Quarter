@@ -51,6 +51,13 @@ const CALENDAR_WEEKDAYS = [
 ];
 const CALENDAR_MIN_YEAR = 1900;
 const CALENDAR_MAX_YEAR = 2100;
+const PROFILE_EDIT_SCHOOL_INPUT_IDS = [
+  "profileEditSchoolInput",
+  "profileEditSchool2Input",
+  "profileEditSchool3Input",
+  "profileEditSchool4Input",
+  "profileEditSchool5Input",
+];
 
 const setStretchState = (element, offsetX, offsetY, angle, scale) => {
   element.style.setProperty("--stretch-x", `${offsetX}px`);
@@ -109,8 +116,11 @@ export const app = {
   shouldBump: false,
   shouldScrollGrades: false,
   initialized: false,
+  storageWarningShown: false,
+  logoutInProgress: false,
+  logoutSwipeReset: null,
+  mobileMorePreviousTab: null,
   notes: [],
-  tasks: [],
   calendarMonth: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   calendarSelectedDate: new Date(),
   calendarPickerYear: new Date().getFullYear(),
@@ -136,12 +146,21 @@ export const app = {
     if (this.initialized) return;
     this.initialized = true;
 
+    window.addEventListener("choryak-storage-warning", (event) => {
+      if (this.storageWarningShown) return;
+      this.storageWarningShown = true;
+      this.toast.show(
+        event.detail?.message ||
+          "Сабти маълумот бо мушкил рӯ ба рӯ шуд. Маълумоти мавҷуда нигоҳ дошта шуд.",
+        7000,
+      );
+    });
+
     const state = await loadState();
     this.grades = state.grades;
     this.pct = state.pct;
     this.settings = state.settings;
     this.notes = Array.isArray(state.notes) ? state.notes : [];
-    this.tasks = Array.isArray(state.tasks) ? state.tasks : [];
     this.activeNoteId = null;
 
     document.addEventListener(
@@ -150,7 +169,7 @@ export const app = {
         if (
           this.settings.uiKit !== "perfect" &&
           !event.target.closest(
-            ".theme-options, #uiKitRange, #profileMenu, .block",
+            ".theme-options, #uiKitRange, #profileMenu, .block, .nav-btn, .logout-swipe-track",
           )
         ) {
           event.stopImmediatePropagation();
@@ -185,6 +204,7 @@ export const app = {
     }
 
     this.bind(state.info);
+    this.bindLogoutSwipe();
     this.info = state.info || {};
     this.profile = state.profile || this.profile;
     if (this.checkFirstRun()) return;
@@ -208,6 +228,12 @@ export const app = {
 
     const buttons = Array.from(nav.querySelectorAll(".nav-btn"));
     if (!buttons.length) return;
+    const visibleButtons = () =>
+      buttons.filter((button) => button.getClientRects().length > 0);
+    const navigationTarget = (button) =>
+      button?.dataset.tab === "tab-calendar" && this.isPhoneLayout()
+        ? nav.querySelector(".mobile-more-trigger")
+        : button;
 
     const indicator = nav.querySelector(".nav-active-indicator");
     const updateIndicator = (button) => {
@@ -228,13 +254,14 @@ export const app = {
       );
     };
     const updatePosition = (button) => {
+      const target = navigationTarget(button);
       buttons.forEach((item) => {
-        const selected = item === button;
+        const selected = item === target;
         item.classList.toggle("active", selected);
         if (selected) item.setAttribute("aria-current", "page");
         else item.removeAttribute("aria-current");
       });
-      updateIndicator(button);
+      updateIndicator(target);
     };
     const active = nav.querySelector(".nav-btn.active") || buttons[0];
     updatePosition(active);
@@ -259,7 +286,7 @@ export const app = {
 
     const refreshButtonData = () => {
       navRect = nav.getBoundingClientRect();
-      buttonCenters = buttons.map((button) => {
+      buttonCenters = visibleButtons().map((button) => {
         const rect = button.getBoundingClientRect();
         return {
           btn: button,
@@ -277,8 +304,9 @@ export const app = {
     };
     const moveIndicator = (clientX) => {
       if (!indicator || !navRect || !buttonCenters.length) return;
-      const firstButton = buttons[0].getBoundingClientRect();
-      const lastButton = buttons[buttons.length - 1].getBoundingClientRect();
+      const visible = visibleButtons();
+      const firstButton = visible[0].getBoundingClientRect();
+      const lastButton = visible[visible.length - 1].getBoundingClientRect();
       const navStyle = getComputedStyle(nav);
       const paddingLeft = Number.parseFloat(navStyle.paddingLeft) || 0;
       const origin = navRect.left + nav.clientLeft + paddingLeft;
@@ -290,6 +318,7 @@ export const app = {
     };
     const canDrag = () =>
       !document.body.classList.contains("more-subview-open") &&
+      !document.body.classList.contains("mobile-more-menu-open") &&
       !document.querySelector(
         ".modal-backdrop.open, .note-modal-backdrop.open, .avatar-picker-backdrop.open",
       );
@@ -367,7 +396,14 @@ export const app = {
         suppressNextClick = false;
       }, 0);
       if (nearest.btn.dataset.tab) {
-        this.nav(nearest.btn.dataset.tab, nearest.btn);
+        if (
+          nearest.btn.classList.contains("mobile-more-trigger") &&
+          this.isPhoneLayout()
+        ) {
+          this.openMobileMoreMenu();
+        } else {
+          this.nav(nearest.btn.dataset.tab, nearest.btn);
+        }
       }
     };
 
@@ -746,6 +782,25 @@ export const app = {
     });
 
     document.addEventListener("click", (event) => {
+      if (event.target.closest("#mobileMoreBackdrop")) {
+        this.closeMobileMoreMenu(false, true);
+        return;
+      }
+
+      const mobileMoreTrigger = event.target.closest(".mobile-more-trigger");
+      if (mobileMoreTrigger && this.isPhoneLayout()) {
+        event.preventDefault();
+        this.toggleMobileMoreMenu();
+        return;
+      }
+
+      if (
+        !event.target.closest("#mobileMoreMenu") &&
+        !qs("mobileMoreMenu")?.hidden
+      ) {
+        this.closeMobileMoreMenu();
+      }
+
       const actionButton = event.target.closest("[data-action]");
       if (actionButton?.dataset.dragged) {
         delete actionButton.dataset.dragged;
@@ -783,13 +838,14 @@ export const app = {
       if (shareQrFallback) shareQrFallback.hidden = false;
     });
 
-    this.bindNotesSwitcherGesture();
-
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
         this.closeShareModal();
         this.closeResultDetailsModal();
         this.closeCalendarPicker();
+        if (!qs("mobileMoreMenu")?.hidden) {
+          this.closeMobileMoreMenu(true, true);
+        }
       }
     });
 
@@ -1274,6 +1330,7 @@ export const app = {
 
   showLogoutFinalConfirm() {
     qs("logoutModal")?.classList.remove("open");
+    this.resetLogoutSwipe();
     qs("logoutFinalModal")?.classList.add("open");
     this.tone(450, "sine", 0.06);
   },
@@ -1285,15 +1342,116 @@ export const app = {
 
   closeLogoutFinalModal() {
     qs("logoutFinalModal")?.classList.remove("open");
+    this.resetLogoutSwipe();
     this.tone(300, "sine", 0.04);
   },
 
-  async confirmLogoutFinal() {
-    this.toast.show("Баромадан ва тоза кардани маълумот...", {
-      duration: 1800,
+  bindLogoutSwipe() {
+    const track = qs("logoutSwipeTrack");
+    const thumb = track?.querySelector(".logout-swipe-thumb");
+    if (!track || !thumb) return;
+
+    let progress = 0;
+    let pointerId = null;
+    let startX = 0;
+    let startProgress = 0;
+    const maxTravel = () =>
+      Math.max(0, track.clientWidth - thumb.offsetWidth - 8);
+
+    const updateProgress = (value) => {
+      progress = Math.max(0, Math.min(100, value));
+      thumb.style.setProperty(
+        "--logout-swipe-x",
+        `${(maxTravel() * progress) / 100}px`,
+      );
+      track.style.setProperty("--logout-swipe-progress", `${progress}%`);
+      track.setAttribute("aria-valuenow", String(Math.round(progress)));
+      track.setAttribute(
+        "aria-valuetext",
+        progress >= 90 ? "Омода барои пок кардан" : "Барои пок кардан лағжонед",
+      );
+    };
+
+    const finishSwipe = (event) => {
+      if (event.pointerId !== pointerId) return;
+      pointerId = null;
+      if (thumb.hasPointerCapture?.(event.pointerId)) {
+        thumb.releasePointerCapture(event.pointerId);
+      }
+
+      if (event.type === "pointerup" && progress >= 90) {
+        updateProgress(100);
+        void this.confirmLogoutFinal();
+      } else {
+        updateProgress(0);
+      }
+    };
+
+    thumb.addEventListener("pointerdown", (event) => {
+      if (this.logoutInProgress || event.button > 0) return;
+      pointerId = event.pointerId;
+      startX = event.clientX;
+      startProgress = progress;
+      thumb.setPointerCapture?.(pointerId);
+      event.preventDefault();
     });
-    await clearState();
-    window.location.reload();
+
+    thumb.addEventListener("pointermove", (event) => {
+      if (event.pointerId !== pointerId) return;
+      const travel = Math.max(1, maxTravel());
+      updateProgress(
+        startProgress + ((event.clientX - startX) / travel) * 100,
+      );
+    });
+
+    thumb.addEventListener("pointerup", finishSwipe);
+    thumb.addEventListener("pointercancel", finishSwipe);
+    thumb.addEventListener("lostpointercapture", (event) => {
+      if (event.pointerId === pointerId) updateProgress(0);
+      pointerId = null;
+    });
+
+    track.addEventListener("keydown", (event) => {
+      if (this.logoutInProgress) return;
+      if (event.key === "Home") {
+        event.preventDefault();
+        updateProgress(0);
+      } else if (event.key === "End") {
+        event.preventDefault();
+        updateProgress(100);
+        void this.confirmLogoutFinal();
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        const nextProgress = Math.min(100, progress + 10);
+        updateProgress(nextProgress);
+        if (nextProgress === 100) void this.confirmLogoutFinal();
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        updateProgress(progress - 10);
+      }
+    });
+    this.logoutSwipeReset = () => updateProgress(0);
+  },
+
+  resetLogoutSwipe() {
+    this.logoutSwipeReset?.();
+  },
+
+  async confirmLogoutFinal() {
+    if (this.logoutInProgress) return;
+    this.logoutInProgress = true;
+    try {
+      await clearState();
+      window.location.reload();
+    } catch (error) {
+      this.logoutInProgress = false;
+      this.resetLogoutSwipe();
+      console.error("Could not clear saved data during logout.", error);
+      this.toast.show(
+        "Маълумот пок карда нашуд. Пеш аз баромадан ҳамаи равзанаҳои барномаро пӯшед ва дубора кӯшиш кунед.",
+        7000,
+      );
+    }
   },
 
   bindProfile() {
@@ -1301,6 +1459,14 @@ export const app = {
       qs(fieldId)?.addEventListener("input", (event) =>
         this.sanitizeLettersOnly(event),
       );
+    });
+    PROFILE_EDIT_SCHOOL_INPUT_IDS.forEach((fieldId) => {
+      qs(fieldId)?.addEventListener("input", (event) => {
+        const school = String(event.target.value || "")
+          .replace(/\D/g, "")
+          .slice(0, 4);
+        event.target.value = school && Number(school) > 0 ? school : "";
+      });
     });
 
     document.addEventListener("click", (event) => {
@@ -1359,6 +1525,12 @@ export const app = {
     this.setProfileMenuOpen(false);
     setInputValue("profileEditNameInput", this.profile.name || "");
     setInputValue("profileEditSurnameInput", this.profile.surname || "");
+    const schools = Array.isArray(this.profile.schools)
+      ? this.profile.schools
+      : [this.profile.school, this.profile.school2, this.profile.school3];
+    PROFILE_EDIT_SCHOOL_INPUT_IDS.forEach((id, index) => {
+      setInputValue(id, schools[index] || "");
+    });
     qs("profileNameModal")?.classList.add("open");
     setTimeout(() => qs("profileEditNameInput")?.focus(), 80);
   },
@@ -1367,24 +1539,55 @@ export const app = {
     qs("profileNameModal")?.classList.remove("open");
   },
 
-  saveProfileName() {
+  async saveProfileName() {
     const name = clean(qs("profileEditNameInput")?.value || "");
     const surname = clean(qs("profileEditSurnameInput")?.value || "");
-
-    if (!name || !surname) {
-      this.toast.show("Лутфан ному насабро пурра ворид кунед.");
+    const schoolValues = PROFILE_EDIT_SCHOOL_INPUT_IDS.map((id) => {
+      const number = String(qs(id)?.value || "")
+        .replace(/\D/g, "")
+        .slice(0, 4);
+      return number && Number(number) > 0 ? number : "";
+    });
+    const seenSchoolNumbers = new Set();
+    const duplicateSchoolIndex = schoolValues.findIndex((number) => {
+      if (!number) return false;
+      const schoolNumber = Number(number);
+      if (seenSchoolNumbers.has(schoolNumber)) return true;
+      seenSchoolNumbers.add(schoolNumber);
+      return false;
+    });
+    if (duplicateSchoolIndex !== -1) {
+      this.toast.show("Рақамҳои мактаб набояд такрор шаванд.");
+      qs(PROFILE_EDIT_SCHOOL_INPUT_IDS[duplicateSchoolIndex])?.focus();
       return;
     }
 
+    const schools = schoolValues.filter(Boolean).slice(0, 5);
+    const [school = ""] = schools;
+
+    if (!name || !surname || !school) {
+      this.toast.show("Лутфан ному насаб ва рақами мактаби асосиро пур кунед.");
+      return;
+    }
+
+    const previousProfile = this.profile;
     this.profile = {
       ...this.profile,
       name,
       surname,
+      school,
+      schools,
     };
-    this.save();
     this.updateProfileUI(this.profile);
+    const result = await this.save();
+    if (!result) {
+      this.profile = previousProfile;
+      this.updateProfileUI(this.profile);
+      return;
+    }
+
     this.closeProfileNameModal();
-    this.toast.show("Ном сабт шуд.");
+    this.toast.show("Профил сабт шуд.");
   },
 
   bindSetupOverlay() {
@@ -1508,7 +1711,6 @@ export const app = {
       showLogoutFinalConfirm: () => this.showLogoutFinalConfirm(),
       cancelLogout: () => this.closeLogoutModal(),
       cancelLogoutFinal: () => this.closeLogoutFinalModal(),
-      confirmLogout: () => this.confirmLogoutFinal(),
       scrollToShortcuts: () => this.showSubView("more-shortcuts-view"),
       shareApp: () => this.shareApp(),
       closeShareModal: () => this.closeShareModal(),
@@ -1516,6 +1718,8 @@ export const app = {
       sendShareLink: () => this.sendShareLink(),
       installPwa: () => this.installPwa(),
       installPwaNow: () => this.installPwa(),
+      navigateMobileMore: (payload) =>
+        this.navigateFromMobileMore(payload?.targetTab),
       openNoteModal: (payload) => this.openNoteEntry(payload?.noteId),
       closeNoteModal: () => this.closeNoteModal(),
       saveNote: () => this.saveNote(),
@@ -1530,12 +1734,6 @@ export const app = {
         this.activeNoteId = this.selectedNoteId;
         this.showDeleteConfirm();
       },
-      toggleNotesSwitcher: () => this.toggleNotesSwitcher(),
-      selectNotesWorkspace: (payload) =>
-        this.selectNotesWorkspace(payload?.view),
-      addNoteTask: () => this.addNoteTask(),
-      toggleNoteTask: (payload) => this.toggleNoteTask(payload?.taskId),
-      deleteNoteTask: (payload) => this.deleteNoteTask(payload?.taskId),
     };
 
     actions[name]?.(payload);
@@ -2881,8 +3079,91 @@ export const app = {
     return canvas;
   },
 
+  isPhoneLayout() {
+    return window.matchMedia("(max-width: 520px)").matches;
+  },
+
+  toggleMobileMoreMenu() {
+    const menu = qs("mobileMoreMenu");
+    const trigger = document.querySelector(".mobile-more-trigger");
+    if (!menu || !trigger || !this.isPhoneLayout()) return;
+
+    if (!menu.hidden) {
+      this.closeMobileMoreMenu(true);
+      return;
+    }
+
+    this.openMobileMoreMenu();
+    menu.querySelector(".mobile-more-menu-option")?.focus();
+  },
+
+  openMobileMoreMenu() {
+    const menu = qs("mobileMoreMenu");
+    const trigger = document.querySelector(".mobile-more-trigger");
+    if (!menu || !trigger || !this.isPhoneLayout()) return;
+
+    menu.hidden = false;
+    qs("mobileMoreBackdrop").hidden = false;
+    this.mobileMorePreviousTab = document.body.dataset.activeTab || "tab-home";
+    document.body.classList.add("mobile-more-menu-open");
+    trigger.setAttribute("aria-expanded", "true");
+    this.updateMobileMoreMenuSelection();
+    this.updateNavHighlight?.(trigger);
+    trigger.removeAttribute("aria-current");
+  },
+
+  updateMobileMoreMenuSelection() {
+    const menu = qs("mobileMoreMenu");
+    if (!menu) return;
+    menu.querySelectorAll(".mobile-more-menu-option").forEach((option) => {
+      const selected =
+        option.dataset.targetTab === document.body.dataset.activeTab;
+      option.classList.toggle("active", selected);
+      if (selected) option.setAttribute("aria-current", "page");
+      else option.removeAttribute("aria-current");
+    });
+  },
+
+  closeMobileMoreMenu(restoreFocus = false, restorePreviousTab = false) {
+    const menu = qs("mobileMoreMenu");
+    const trigger = document.querySelector(".mobile-more-trigger");
+    const backdrop = qs("mobileMoreBackdrop");
+    if (!menu || !trigger) return;
+
+    menu.hidden = true;
+    if (backdrop) backdrop.hidden = true;
+    document.body.classList.remove("mobile-more-menu-open");
+    trigger.setAttribute("aria-expanded", "false");
+    if (
+      restorePreviousTab &&
+      this.mobileMorePreviousTab &&
+      document.body.dataset.activeTab !== this.mobileMorePreviousTab
+    ) {
+      const previousTab = this.mobileMorePreviousTab;
+      const previousButton = document.querySelector(
+        `.nav-btn[data-tab="${previousTab}"]`,
+      );
+      this.nav(previousTab, previousButton);
+    }
+    this.mobileMorePreviousTab = null;
+    const activeTab = document.body.dataset.activeTab;
+    const activeButton = document.querySelector(
+      `.nav-btn[data-tab="${activeTab}"]`,
+    );
+    if (activeButton) this.updateNavHighlight?.(activeButton);
+    if (restoreFocus) trigger.focus();
+  },
+
+  navigateFromMobileMore(tabId) {
+    if (tabId !== "tab-calendar" && tabId !== "tab-more") return;
+    this.closeMobileMoreMenu();
+    const tabButton = document.querySelector(`.nav-btn[data-tab="${tabId}"]`);
+    this.nav(tabId, tabButton);
+  },
+
   nav(id, button) {
     if (id !== "tab-notes") this.flushNoteAutosave();
+    this.closeMobileMoreMenu();
     document.body.dataset.activeTab = id;
 
     document
@@ -2909,6 +3190,7 @@ export const app = {
     this.updateNavHighlight?.(
       button || document.querySelector(`[data-tab="${id}"]`),
     );
+    this.updateMobileMoreMenuSelection();
 
     this.tone(600, "sine", 0.04);
   },
@@ -3396,11 +3678,16 @@ export const app = {
   },
 
   async confirmLogout() {
-    this.toast.show("Баромадан ва тоза кардани маълумот...", {
-      duration: 1800,
-    });
-    await clearState();
-    window.location.reload();
+    try {
+      await clearState();
+      window.location.reload();
+    } catch (error) {
+      console.error("Could not clear saved data during logout.", error);
+      this.toast.show(
+        "Маълумот пок карда нашуд. Пеш аз баромадан ҳамаи равзанаҳои барномаро пӯшед ва дубора кӯшиш кунед.",
+        7000,
+      );
+    }
   },
 
   openMoreSettingsSection(sectionId) {
@@ -3760,167 +4047,6 @@ export const app = {
     });
   },
 
-  toggleNotesSwitcher() {
-    const popover = qs("notesSwitcher");
-    const trigger = document.querySelector(".notes-switcher-trigger");
-    if (!popover || !trigger) return;
-    popover.dataset.view = popover.dataset.view || "notes";
-    const isOpen = popover.classList.toggle("is-open");
-    trigger.setAttribute("aria-expanded", String(isOpen));
-    if (isOpen) this.renderTasks();
-  },
-
-  bindNotesSwitcherGesture() {
-    const trigger = document.querySelector(".notes-switcher-trigger");
-    const popover = qs("notesSwitcher");
-    if (!trigger || !popover || trigger.dataset.gestureBound) return;
-    trigger.dataset.gestureBound = "true";
-
-    let pointerId = null;
-    let longPressTimer = null;
-    let gestureOpen = false;
-
-    const clearTarget = () => {
-      popover
-        .querySelectorAll(".is-drag-target")
-        .forEach((option) => option.classList.remove("is-drag-target"));
-    };
-
-    const closeFromGesture = () => {
-      clearTarget();
-      popover.classList.remove("is-open");
-      trigger.setAttribute("aria-expanded", "false");
-      gestureOpen = false;
-    };
-
-    trigger.addEventListener("pointerdown", (event) => {
-      if (event.pointerType === "mouse" && event.button !== 0) return;
-      pointerId = event.pointerId;
-      gestureOpen = false;
-      clearTimeout(longPressTimer);
-      longPressTimer = setTimeout(() => {
-        popover.dataset.view = popover.dataset.view || "notes";
-        popover.classList.add("is-open");
-        trigger.setAttribute("aria-expanded", "true");
-        gestureOpen = true;
-        this.renderTasks();
-      }, 260);
-    });
-
-    window.addEventListener("pointermove", (event) => {
-      if (event.pointerId !== pointerId || !gestureOpen) return;
-      const target = document.elementFromPoint(event.clientX, event.clientY);
-      const option = target?.closest?.(".notes-switcher-option");
-      clearTarget();
-      option?.classList.add("is-drag-target");
-    });
-
-    window.addEventListener(
-      "pointerup",
-      (event) => {
-        if (event.pointerId !== pointerId) return;
-        clearTimeout(longPressTimer);
-        if (!gestureOpen) {
-          pointerId = null;
-          return;
-        }
-        const target = document.elementFromPoint(event.clientX, event.clientY);
-        const option = target?.closest?.(".notes-switcher-option");
-        if (option) this.selectNotesWorkspace(option.dataset.view);
-        else closeFromGesture();
-        trigger.dataset.suppressClick = "true";
-        pointerId = null;
-      },
-      true,
-    );
-
-    trigger.addEventListener("pointercancel", () => {
-      clearTimeout(longPressTimer);
-      pointerId = null;
-      if (gestureOpen) closeFromGesture();
-    });
-
-    trigger.addEventListener("click", (event) => {
-      if (!trigger.dataset.suppressClick) return;
-      delete trigger.dataset.suppressClick;
-      event.stopPropagation();
-    });
-
-    qs("notesTaskInput")?.addEventListener("keydown", (event) => {
-      if (event.key !== "Enter") return;
-      event.preventDefault();
-      this.addNoteTask();
-    });
-  },
-
-  selectNotesWorkspace(view = "notes") {
-    const popover = qs("notesSwitcher");
-    const trigger = document.querySelector(".notes-switcher-trigger");
-    if (!popover || !trigger) return;
-    const selectedView = view === "tasks" ? "tasks" : "notes";
-    popover.dataset.view = selectedView;
-    popover
-      .querySelectorAll(".notes-switcher-option")
-      .forEach((option) =>
-        option.classList.toggle("active", option.dataset.view === selectedView),
-      );
-    popover.classList.remove("is-open");
-    trigger.setAttribute("aria-expanded", "false");
-    this.renderTasks();
-  },
-
-  renderTasks() {
-    const list = qs("notesTaskList");
-    if (!list) return;
-    setText("notesTaskCount", this.tasks.length);
-    list.innerHTML = "";
-    if (!this.tasks.length) {
-      list.innerHTML = `<div class="notes-task-empty"><span>✓</span><p>Ҳоло вазифа нест.<br>Вазифаи аввалро илова кунед.</p></div>`;
-      return;
-    }
-    this.tasks.forEach((task) => {
-      const item = document.createElement("div");
-      item.className = `notes-task-item${task.completed ? " is-complete" : ""}`;
-      item.innerHTML = `
-        <button class="notes-task-check" type="button" data-action="toggleNoteTask" data-task-id="${escapeHtml(task.id)}" aria-label="Иваз кардани ҳолати вазифа" aria-pressed="${task.completed}">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6.5 12.5 3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-        </button>
-        <span class="notes-task-title">${escapeHtml(task.title)}</span>
-        <button class="notes-task-delete" type="button" data-action="deleteNoteTask" data-task-id="${escapeHtml(task.id)}" aria-label="Пок кардани вазифа">×</button>`;
-      list.appendChild(item);
-    });
-  },
-
-  addNoteTask() {
-    const input = qs("notesTaskInput");
-    const title = clean(input?.value || "").slice(0, 160);
-    if (!title) return;
-    this.tasks.unshift({
-      id: uid(),
-      title,
-      completed: false,
-      createdAt: Date.now(),
-    });
-    if (input) input.value = "";
-    this.save();
-    this.renderTasks();
-    input?.focus();
-  },
-
-  toggleNoteTask(taskId) {
-    const task = this.tasks.find((item) => item.id === taskId);
-    if (!task) return;
-    task.completed = !task.completed;
-    this.save();
-    this.renderTasks();
-  },
-
-  deleteNoteTask(taskId) {
-    this.tasks = this.tasks.filter((task) => task.id !== taskId);
-    this.save();
-    this.renderTasks();
-  },
-
   renderNotes() {
     const list = qs("notesList");
     if (!list) return;
@@ -3947,8 +4073,8 @@ export const app = {
       image.className = "note-empty-image";
       image.alt = "";
       image.src = queryRaw
-        ? "assets/images/minai/search.png"
-        : "assets/images/minai/write.png";
+        ? "assets/images/minai/search.webp"
+        : "assets/images/minai/write.webp";
       const message = document.createElement("p");
       if (queryRaw) {
         const snippet =
@@ -4143,7 +4269,21 @@ export const app = {
   updateProfileUI(info = {}) {
     const name = clean(info.name || "");
     const surname = clean(info.surname || "");
-    const school = clean(info.school || "");
+    const schools = (Array.isArray(info.schools)
+      ? info.schools
+      : [info.school, info.school2, info.school3]
+    )
+      .map((number) => String(number || "").replace(/\D/g, "").slice(0, 4))
+      .filter((number) => number && Number(number) > 0)
+      .filter((number, index, list) => list.indexOf(number) === index)
+      .slice(0, 5);
+    const school = schools[0] || "";
+    const schoolSummary =
+      schools.length === 1
+        ? `Мактаби №${schools[0]}`
+        : schools.length > 1
+          ? `Мактабҳои ${schools.map((number) => `№${number}`).join(", ")}`
+          : "Рақами мактаб илова нашудааст";
     const avatar = String(info.avatar || "");
     const fullName = `${name}${surname ? ` ${surname}` : ""}`.trim();
     const fallback = fullName ? fullName.trim()[0].toUpperCase() : "Ч";
@@ -4158,10 +4298,7 @@ export const app = {
       school ? `Мактаби №${school}` : "Рақами мактаб илова нашудааст",
     );
     setText("profileDisplayName", fullName || "Чоряк");
-    setText(
-      "profileDisplaySchool",
-      school ? `Мактаби №${school}` : "Рақами мактаб илова нашудааст",
-    );
+    setText("profileDisplaySchool", schoolSummary);
     setText("profileAvatarPreviewFallback", fallback);
 
     const moreProfilePhoto = qs("moreProfilePhoto");
@@ -4199,7 +4336,7 @@ export const app = {
   },
 
   save() {
-    void saveState({
+    const savePromise = saveState({
       grades: this.grades,
       settings: this.settings,
       pct: this.pct,
@@ -4210,9 +4347,19 @@ export const app = {
       },
       profile: this.profile,
       notes: this.notes,
-      tasks: this.tasks,
+    }).catch((error) => {
+      console.error("Could not save app state.", error);
+      if (!this.storageWarningShown) {
+        this.storageWarningShown = true;
+        this.toast.show(
+          "Маълумот сабт нашуд. Дастрасии хотираи браузерро санҷед ва дубора кӯшиш кунед.",
+          7000,
+        );
+      }
+      return null;
     });
     this.updateProfileUI(this.profile);
+    return savePromise;
   },
 
   tone(freq, type = "sine", duration = 0.08, force = false) {
@@ -4257,7 +4404,13 @@ export const app = {
 };
 
 whenReady(() => {
-  void app.init();
+  void app.init().catch((error) => {
+    console.error("Could not initialize the app.", error);
+    app.toast.show(
+      "Маълумоти барномаро кушода натавонистем. Маълумоти мавҷуда пок нашудааст; дастрасии хотираи браузерро санҷед ва саҳифаро аз нав кушоед.",
+      9000,
+    );
+  });
 });
 
 /*

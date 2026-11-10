@@ -27,4 +27,23 @@
   transform: translate(-50%, 0);
   opacity: 1;
 }
+
+.storage-error-notice {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  z-index: 10000;
+  width: min(560px, calc(100% - 36px));
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+  color: var(--text);
+  font-size: 0.92rem;
+  font-weight: 750;
+  line-height: 1.5;
+  text-align: center;
+  transform: translateX(-50%);
+}
 /* Created by Abdughafur - Believe GOD */

@@ -156,6 +156,18 @@ nav {
   touch-action: none;
 }
 
+nav .nav-btn {
+  align-items: center;
+  justify-items: center;
+}
+
+nav .nav-btn > svg {
+  display: block;
+  align-self: center;
+  justify-self: center;
+  margin: 0;
+}
+
 .nav-btn.active {
   color: white;
   background: linear-gradient(135deg, var(--primary), var(--accent));
@@ -232,6 +244,150 @@ nav {
   .journal-floating-btn.notes-mode {
     right: calc(16px + 56px + 12px);
     bottom: 20px;
+  }
+}
+
+@media (max-width: 520px) {
+  .mobile-more-backdrop:not([hidden]) {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: block;
+    background: rgba(15, 23, 42, 0.12);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    animation: mobile-more-backdrop-in 160ms ease both;
+  }
+
+  body.mobile-more-menu-open nav {
+    z-index: 1101;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  body.mobile-more-menu-open .floating-add-note {
+    z-index: 1099 !important;
+  }
+
+  body.mobile-more-menu-open nav .nav-active-indicator,
+  body.mobile-more-menu-open nav .nav-btn:not(.mobile-more-trigger) {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  body.mobile-more-menu-open nav .mobile-more-trigger {
+    position: relative;
+    z-index: 3;
+    background: var(--card);
+    color: var(--primary);
+    box-shadow: 0 8px 24px rgba(2, 6, 23, 0.22);
+  }
+
+  body.mobile-more-menu-open .mobile-more-menu {
+    z-index: 4;
+  }
+
+  .nav-btn[data-tab="tab-calendar"] {
+    display: none;
+  }
+
+  .mobile-more-trigger .more-nav-icon {
+    display: none;
+  }
+
+  .mobile-more-trigger .calendar-nav-icon {
+    display: block;
+  }
+
+  .mobile-more-menu {
+    position: absolute;
+    right: 6px;
+    bottom: calc(100% + 10px);
+    z-index: 4;
+    display: grid;
+    width: min(220px, calc(100vw - 32px));
+    gap: 6px;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--card);
+    box-shadow: 0 14px 36px rgba(2, 6, 23, 0.22);
+    animation: mobile-more-menu-in 160ms var(--ease) both;
+  }
+
+  .mobile-more-menu[hidden] {
+    display: none;
+  }
+
+  .mobile-more-menu-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 48px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 12px;
+    color: var(--text);
+    background: transparent;
+    font-size: 0.86rem;
+    font-weight: 850;
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .mobile-more-menu-option:hover,
+  .mobile-more-menu-option:focus-visible,
+  .mobile-more-menu-option.active {
+    outline: none;
+    background: var(--soft);
+  }
+
+  .mobile-more-menu-option svg {
+    width: 21px;
+    height: 21px;
+    flex: 0 0 21px;
+    color: var(--primary);
+  }
+}
+
+@media (min-width: 521px) {
+  .mobile-more-menu {
+    display: none !important;
+  }
+
+  .mobile-more-trigger .more-nav-icon {
+    display: block;
+  }
+
+  .mobile-more-trigger .calendar-nav-icon {
+    display: none;
+  }
+}
+
+@keyframes mobile-more-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+    transform-origin: bottom right;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transform-origin: bottom right;
+  }
+}
+
+@keyframes mobile-more-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 

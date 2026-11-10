@@ -42,7 +42,7 @@ export function renderGradeBlocks(container, grades, labels, onToggle) {
     const empty = document.createElement("div");
     empty.className = "empty";
     const illustration = document.createElement("img");
-    illustration.src = "assets/images/minai/write.png";
+    illustration.src = "assets/images/minai/write.webp";
     illustration.alt = "";
     illustration.setAttribute("aria-hidden", "true");
     const message = document.createElement("span");
