@@ -569,6 +569,13 @@
   margin-top: 2px;
 }
 
+.login-backup-button {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 2px;
+  font-size: 0.86rem;
+}
+
 .profile-builder-card {
   max-width: 640px;
   margin: 0 auto;

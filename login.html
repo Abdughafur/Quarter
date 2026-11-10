@@ -15,7 +15,7 @@
     <link rel="icon" href="assets/images/pics/logo.png" type="image/png" />
     <link rel="apple-touch-icon" href="assets/images/pics/logo.png" />
     <link rel="manifest" href="manifest.json" />
-    <link rel="stylesheet" href="assets/css/main.css?v=5.5.3B4" />
+    <link rel="stylesheet" href="assets/css/main.css?v=4.5.3B4" />
   </head>
 
   <body class="profile-page" data-theme="light">
@@ -188,6 +188,10 @@
             >
               Сабт ва идома
             </button>
+            <button id="openLoginRestoreModal" class="btn secondary login-backup-button"
+              type="button">
+              Воридшавӣ аз нусхаи эҳтиётӣ
+            </button>
           </div>
         </section>
         <footer class="login-page-footer">
@@ -195,6 +199,51 @@
           шудаанд.
         </footer>
       </main>
+    </div>
+
+    <div id="loginRestoreModal" class="modal-backdrop" role="dialog" aria-modal="true"
+      aria-labelledby="loginRestoreTitle">
+      <div class="ios-modal backup-modal backup-restore-modal">
+        <div class="backup-modal-heading">
+          <span class="backup-modal-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M12 3 19 6v5c0 4.7-2.8 8.1-7 10-4.2-1.9-7-5.3-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+              <path d="M12 8v7m-3-3 3 3 3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <div>
+            <p class="backup-modal-eyebrow">ВОРИДШАВИИ МАҲАЛЛӢ</p>
+            <h3 id="loginRestoreTitle">Воридшавӣ аз нусха</h3>
+          </div>
+        </div>
+        <p class="backup-security-warning">
+          Нусха маълумоти шахсӣ, баҳоҳо ва ёддоштҳоро дар бар гирифта метавонад.
+          Барои амният файли нусхаро ба касе нафиристед ва дар шабакаҳои иҷтимоӣ нашр накунед.
+          Файл танҳо дар ҳамин дастгоҳ хонда мешавад.
+        </p>
+        <label class="backup-file-drop" for="loginRestoreFileInput">
+          <input id="loginRestoreFileInput" type="file" accept=".json,application/json" />
+          <span class="backup-file-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M12 16V4m0 0L8 8m4-4 4 4M5 14v5h14v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <span class="backup-file-copy">
+            <strong>Файли нусхаро интихоб кунед</strong>
+            <small>Нусхаи пурраи JSON · то 25 МБ</small>
+          </span>
+          <span class="backup-file-select">Интихоб</span>
+        </label>
+        <p id="loginRestoreStatus" class="backup-import-status" role="status" aria-live="polite">
+          Файлҳои нусхаи кӯҳна ва нав дастгирӣ мешаванд.
+        </p>
+        <div class="modal-actions">
+          <button id="cancelLoginRestore" class="btn secondary" type="button">Бозгашт</button>
+          <button id="confirmLoginRestore" class="btn" type="button" disabled>
+            Барқарорсозӣ
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="tiny-screen-warning" role="alert" aria-labelledby="tinyScreenTitle">

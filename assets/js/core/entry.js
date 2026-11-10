@@ -17,10 +17,7 @@ async function route() {
     return;
   }
 
-  if (
-    currentPage === "landing.html" ||
-    currentPage === "login.html"
-  ) {
+  if (currentPage === "landing.html" || currentPage === "login.html") {
     window.location.replace("index.html");
   }
 }

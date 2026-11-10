@@ -1,5 +1,5 @@
 /* sw.js */
-var APP_VERSION = "5.5.3B4";
+var APP_VERSION = "4.5.3B4";
 var CACHE_NAME =
   "choryak-cache-v" + APP_VERSION.toLowerCase().replace(/\./g, "-");
 
@@ -63,7 +63,15 @@ var PRECACHE = [
   "./assets/js/core/app.js",
   "./assets/js/core/entry.js",
   "./assets/js/core/login.js",
+  "./assets/js/core/backup.js",
   "./assets/js/core/storage.js",
+  "./assets/js/core/app/shared.js",
+  "./assets/js/core/app/features/recovery.js",
+  "./assets/js/core/app/features/profile.js",
+  "./assets/js/core/app/features/calculator.js",
+  "./assets/js/core/app/features/navigation.js",
+  "./assets/js/core/app/features/settings.js",
+  "./assets/js/core/app/features/notes.js",
   "./assets/js/core/stats.js",
   "./assets/js/core/pwa.js",
   "./assets/js/ui/toast.js",

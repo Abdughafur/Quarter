@@ -53,6 +53,15 @@
 .landing-cta span {
   font-size: 1.3rem;
 }
+.landing-restore-link {
+  display: inline-block;
+  margin-left: 12px;
+  color: #1677a8;
+  font-size: 0.86rem;
+  font-weight: 850;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .landing-note {
   color: #8aa0ae;
   font-size: 0.75rem;

@@ -1,4 +1,4 @@
-# ✨ Чоряк v4.5.3B (Beta)
+# ✨ Чоряк v4.5.3B4 (Beta)
 
 ### Quarterly Grade Calculator
 
@@ -24,6 +24,10 @@ Modern web application for quarterly grade calculation and percentage analytics.
 - 📱 Мубодилаи барнома бо QR-код
 - ⚡ Реҷаи сабук барои дастгоҳҳои камқувват
 - 💾 LocalStorage
+- 🔐 Нусхабардорӣ ва барқарорсозии маҳаллии маълумот дар JSON
+- 🔒 Санҷиши якпорчагии нусха ва дурусти ҳар бахш
+- 🧹 Ҳангоми баромадан маълумоти маҳаллӣ аз IndexedDB ва хотира пок мешавад
+- 🔄 Илова кардан ё иваз кардани маълумот ҳангоми барқарорсозӣ
 - 📱 Responsive Design
 
 ### ⚠ Литсензия
@@ -50,7 +54,18 @@ Modern web application for quarterly grade calculation and percentage analytics.
 - 📱 QR code app sharing
 - ⚡ Low-effects mode for low-end devices
 - 💾 LocalStorage
+- 🔐 Offline JSON backup and restore
+- 🔒 SHA-256 integrity and data-shape validation for new backups
+- 🧹 Logout removes app data from IndexedDB and browser storage
+- 🔄 Merge or replace saved data during restore
 - 📱 Responsive Design
+
+### App architecture
+
+`assets/js/core/app.js` is the startup and shared-state composition root. Calculator,
+calendar/navigation, profile, settings, notes, and recovery behavior live in
+`assets/js/core/app/features/`; reusable app constants and UI helpers live in
+`assets/js/core/app/shared.js`.
 
 ### ⚠ License
 
@@ -76,6 +91,10 @@ This project is licensed under the MIT License. See [LICENSE.md](LICENSE.md) for
 - 📱 QR-код для ссылки на приложение
 - ⚡ Облегчённый режим для слабых устройств
 - 💾 LocalStorage
+- 🔐 Локальное резервное копирование и восстановление JSON
+- 🔒 Проверка целостности и структуры резервной копии
+- 🧹 При выходе данные приложения удаляются из IndexedDB и хранилища браузера
+- 🔄 Объединение или замена данных при восстановлении
 - 📱 Адаптивный дизайн
 
 ### ⚠ Лицензия

@@ -19,7 +19,7 @@
   <link rel="icon" href="assets/images/pics/logo.png" type="image/png" />
   <link rel="apple-touch-icon" href="assets/images/pics/logo.png" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="assets/css/main.css?v=5.5.3B4">
+  <link rel="stylesheet" href="assets/css/main.css?v=4.5.3B4">
 
 </head>
 
@@ -570,6 +570,14 @@
               </a>
             </div>
           </div>
+          <div class="data-backup-actions" aria-label="Нусхабардории маълумот">
+            <button class="btn" type="button" data-action="showBackupModal">
+              Нусхаи эҳтиёти
+            </button>
+            <button class="btn secondary" type="button" data-action="showRestoreModal">
+              Барқарорсозӣ
+            </button>
+          </div>
         </div>
       </div>
 
@@ -907,7 +915,7 @@
             </div>
             <div class="about">
               <p class="about-app-name"><strong>Чоряк</strong></p>
-              <p><strong>Нусха:</strong> v5.5.3B4 (Бета)</p>
+              <p><strong>Нусха:</strong> v4.5.3B4 (Бета)</p>
               <p><strong>Таҳиягар:</strong> Abdughafur (Абдуғафур)</p>
             </div>
           </div>
@@ -918,7 +926,7 @@
               сохта шудааст. Барнома барои ҳамаи омӯзгорон ройгон пешниҳод мегардад.
             </p>
             <p>
-              Айни замон барнома дар нусхаи v5.5.3B4 (Бета) қарор дорад. Дар ин нусха ба устуворӣ, функсияҳои нав ва кори барнома
+              Айни замон барнома дар нусхаи v4.5.3B4 (Бета) қарор дорад. Дар ин нусха ба устуворӣ, функсияҳои нав ва кори барнома
               диққати махсус дода шудааст. Системаи барнома аз ҷониби мутахассисон ва корбарон санҷида шудааст.
               Фунскияҳои асосии барнома дуруст кор мекунад ва функсяҳои нав дар ҳоли санҷиш ҳастанд.
             </p>
@@ -1033,7 +1041,7 @@
     <div class="ios-modal share-modal">
       <button class="share-modal-close" type="button" data-action="closeShareModal"
         aria-label="Пӯшидан">&times;</button>
-      <span class="share-modal-kicker">Чоряк · v5.5.3B4 (Бета)</span>
+      <span class="share-modal-kicker">Чоряк · v4.5.3B4 (Бета)</span>
       <h3 id="shareModalTitle">Мубодилаи барнома</h3>
       <p>Рамзи QR-ро скан кунед ё пайвандро фиристед.</p>
       <div class="share-qr-frame">
@@ -1088,6 +1096,97 @@
       <div class="modal-actions">
         <button class="btn secondary" type="button" data-action="closePercentExport">Лағв</button>
         <button class="btn" type="button" data-action="exportPercentCanvas">Сохтан ва экспорт</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="backupExportModal" class="modal-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="backupExportTitle">
+    <div class="ios-modal backup-modal">
+      <div class="backup-modal-heading">
+        <span class="backup-modal-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 3 19 6v5c0 4.7-2.8 8.1-7 10-4.2-1.9-7-5.3-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+            <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <div>
+          <p class="backup-modal-eyebrow">МАЪЛУМОТИ ДАСТГОҲ</p>
+          <h3 id="backupExportTitle">Нусхаи эҳтиётӣ</h3>
+        </div>
+      </div>
+      <p>
+        Файл ному насаб, рақамҳои мактаб, баҳоҳо, ёддоштҳо ва танзимоти шуморо дар бар мегирад.
+        Барои амният файли нусхаро ба дигарон нафиристед ва дар ҷойи умумӣ нигоҳ надоред.
+        Файл танҳо дар ҳамин дастгоҳ сохта мешавад ва ба сервер фиристода намешавад.
+      </p>
+      <div class="modal-actions">
+        <button class="btn secondary" type="button" data-action="closeBackupExportModal">Бозгашт</button>
+        <button class="btn" type="button" data-action="downloadBackup">Зеркашии нусха</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="backupRestoreModal" class="modal-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="backupRestoreTitle">
+    <div class="ios-modal backup-modal backup-restore-modal">
+      <div class="backup-modal-heading">
+        <span class="backup-modal-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 3 19 6v5c0 4.7-2.8 8.1-7 10-4.2-1.9-7-5.3-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+            <path d="M12 8v7m-3-3 3 3 3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <div>
+          <p class="backup-modal-eyebrow">БАРҚАРОРСОЗИИ МАҲАЛЛӢ</p>
+          <h3 id="backupRestoreTitle">Барқарорсозии маълумот</h3>
+        </div>
+      </div>
+      <p class="backup-security-warning">
+        Нусха метавонад маълумоти шахсӣ дошта бошад. Барои амният онро ба касе нафиристед.
+        Файл танҳо дар ҳамин дастгоҳ санҷида мешавад ва ба сервер фиристода намешавад.
+      </p>
+      <label class="backup-file-drop" for="backupRestoreFileInput">
+        <input id="backupRestoreFileInput" type="file" accept=".json,application/json" />
+        <span class="backup-file-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 16V4m0 0L8 8m4-4 4 4M5 14v5h14v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <span class="backup-file-copy">
+          <strong>Файли нусхаро интихоб кунед</strong>
+          <small>JSON · то 25 МБ · санҷиши якпорчагӣ</small>
+        </span>
+        <span class="backup-file-select">Интихоб</span>
+      </label>
+      <p id="backupRestoreStatus" class="backup-import-status" role="status" aria-live="polite">
+        Файлҳои нусхаи кӯҳна ва нав дастгирӣ мешаванд.
+      </p>
+      <fieldset class="backup-restore-modes">
+        <legend>Усули барқарорсозӣ</legend>
+        <label class="backup-mode-option" for="backupRestoreModeMerge">
+          <input id="backupRestoreModeMerge" type="radio" name="backupRestoreMode" value="merge" checked />
+          <span>
+            <strong>Якҷоя кардан</strong>
+            <small>Баҳо ва ёддоштҳои мувофиқ нав мешаванд; дигар маълумот мемонад.</small>
+          </span>
+        </label>
+        <label class="backup-mode-option backup-mode-option--replace" for="backupRestoreModeReplace">
+          <input id="backupRestoreModeReplace" type="radio" name="backupRestoreMode" value="replace" />
+          <span>
+            <strong>Иваз кардани маълумот</strong>
+            <small>Ҳамаи маълумоти ҷорӣ бо нусха иваз мешавад.</small>
+          </span>
+        </label>
+      </fieldset>
+      <label id="backupReplaceConfirmWrap" class="backup-replace-confirm" hidden>
+        <input id="backupReplaceConfirm" type="checkbox" />
+        <span>Ман мефаҳмам, ки маълумоти ҷорӣ бо нусха иваз мешавад.</span>
+      </label>
+      <div class="modal-actions">
+        <button class="btn secondary" type="button" data-action="closeBackupRestoreModal">Бозгашт</button>
+        <button id="backupRestoreConfirmButton" class="btn" type="button"
+          data-action="confirmBackupRestore" disabled>Барқарорсозӣ</button>
       </div>
     </div>
   </div>
@@ -1342,7 +1441,7 @@
 
   <script type="module" src="assets/js/core/entry.js"></script>
   <script type="module" src="assets/js/core/pwa.js"></script>
-  <script type="module" src="assets/js/core/app.js?v=5.5.3B4"></script>
+  <script type="module" src="assets/js/core/app.js?v=4.5.3B4"></script>
 </body>
 
 </html>

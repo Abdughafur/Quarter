@@ -1,7 +1,13 @@
 ﻿/* login.js */
-/* Created by Abdughafur - ЧОРЯК v5.5.3B4 (Beta) */
+/* Created by Abdughafur - ЧОРЯК v4.5.3B4 (Beta) */
 import { clean, qs, setInputValue } from "../utils/helpers.js";
-import { saveState, loadState, DEFAULT_PROFILE } from "./storage.js";
+import {
+  saveState,
+  loadState,
+  DEFAULT_PROFILE,
+  restoreBackupData,
+} from "./storage.js";
+import { readBackupFile } from "./backup.js";
 import { bindAvatarPicker } from "../ui/avatar-picker.js";
 import { Toast } from "../ui/toast.js";
 
@@ -75,6 +81,133 @@ async function init() {
   function showNotice(message, type = "error") {
     toast.show(message, type === "success" ? 1600 : 3500);
   }
+
+  let pendingBackupData = null;
+  const restoreModal = qs("loginRestoreModal");
+  const restoreFileInput = qs("loginRestoreFileInput");
+  const restoreStatus = qs("loginRestoreStatus");
+  const restoreButton = qs("confirmLoginRestore");
+  const closeRestoreModal = () => {
+    restoreModal?.classList.remove("open");
+    pendingBackupData = null;
+  };
+
+  qs("openLoginRestoreModal")?.addEventListener("click", () => {
+    pendingBackupData = null;
+    if (restoreFileInput) restoreFileInput.value = "";
+    if (restoreButton) restoreButton.disabled = true;
+    if (restoreStatus) {
+      restoreStatus.textContent = "Файлҳои нусхаи кӯҳна ва нав дастгирӣ мешаванд.";
+      restoreStatus.dataset.state = "";
+    }
+    restoreModal?.classList.add("open");
+  });
+  qs("cancelLoginRestore")?.addEventListener("click", closeRestoreModal);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeRestoreModal();
+  });
+  restoreModal?.addEventListener("click", (event) => {
+    if (event.target === restoreModal) closeRestoreModal();
+  });
+  if (new URLSearchParams(window.location.search).get("restore") === "1") {
+    restoreModal?.classList.add("open");
+  }
+
+  restoreFileInput?.addEventListener("change", async (event) => {
+    const file = event.target.files?.[0];
+    pendingBackupData = null;
+    if (restoreButton) restoreButton.disabled = true;
+    if (!restoreStatus) return;
+    restoreStatus.dataset.state = "";
+    if (!file) {
+      restoreStatus.textContent = "Файли нусха интихоб нашуд.";
+      return;
+    }
+    restoreStatus.textContent = "Нусхаро санҷида истодаем...";
+
+    try {
+      const { backup, summary } = await readBackupFile(file);
+      if (!summary.hasProfile) {
+        throw new Error(
+          "Ин нусха профили пурра надорад. Барои ворид шудан нусхаи пурраи барномаро интихоб кунед.",
+        );
+      }
+      pendingBackupData = backup;
+      if (restoreButton) restoreButton.disabled = false;
+      restoreStatus.dataset.state = "success";
+      restoreStatus.textContent =
+        `Нусха омода аст: ${summary.grades} баҳо, ${summary.notes} ёддошт` +
+        (summary.hasProfile ? ", профил" : "") +
+        (summary.hasSettings ? ", танзимот." : ".");
+    } catch (error) {
+      console.error("Could not read the selected login backup.", error);
+      restoreStatus.textContent =
+        error.message || "Файли нусхаро хонда натавонистем.";
+      restoreStatus.dataset.state = "error";
+      showNotice(restoreStatus.textContent);
+    }
+  });
+
+  restoreButton?.addEventListener("click", async () => {
+    if (!pendingBackupData) {
+      showNotice("Аввал файли нусхаи эҳтиётиро интихоб кунед.");
+      return;
+    }
+    restoreButton.disabled = true;
+    try {
+      const result = await restoreBackupData(pendingBackupData, "replace");
+      const restoredState = await loadState();
+      const restoredProfile = restoredState.profile || DEFAULT_PROFILE;
+      setInputValue("profileNameInput", restoredProfile.name || "");
+      setInputValue("profileSurnameInput", restoredProfile.surname || "");
+      SCHOOL_INPUT_IDS.forEach((id, index) => {
+        setInputValue(id, restoredProfile.schools?.[index] || "");
+      });
+      if (restoredProfile.avatar && avatarImg) {
+        avatarImg.src = restoredProfile.avatar;
+        avatarImg.style.display = "block";
+        if (avatarFallback) avatarFallback.style.display = "none";
+      } else {
+        if (avatarImg) {
+          avatarImg.removeAttribute("src");
+          avatarImg.style.display = "none";
+        }
+        if (avatarFallback) avatarFallback.style.display = "block";
+      }
+
+      closeRestoreModal();
+      if (
+        restoredProfile.name &&
+        restoredProfile.surname &&
+        restoredProfile.school
+      ) {
+        showNotice(
+          result.indexedDbSaved && result.localBackupSaved
+            ? "Маълумот барқарор шуд. Барнома кушода мешавад."
+            : "Маълумот барқарор шуд, аммо яке аз роҳҳои нигоҳдорӣ дастрас нест.",
+          "success",
+        );
+        setTimeout(() => window.location.assign("index.html"), 700);
+      } else {
+        showNotice(
+          "Маълумот барқарор шуд. Профилро пур карда, ворид шавед.",
+          "success",
+        );
+      }
+    } catch (error) {
+      console.error("Could not restore the login backup.", error);
+      restoreButton.disabled = false;
+      if (restoreStatus) {
+        restoreStatus.dataset.state = "error";
+        restoreStatus.textContent =
+          error.message || "Маълумот барқарор нашуд.";
+      }
+      showNotice(
+        error.message ||
+          "Маълумот барқарор нашуд. Маълумоти қаблӣ нигоҳ дошта шудааст.",
+      );
+    }
+  });
 
   ["profileNameInput", "profileSurnameInput"].forEach((id) => {
     qs(id)?.addEventListener("input", (event) => {
@@ -190,5 +323,5 @@ void init().catch((error) => {
   );
 });
 
-/* Created by Abdughafur - ЧОРЯК v5.5.3B4 (Beta) */
+/* Created by Abdughafur - ЧОРЯК v4.5.3B4 (Beta) */
 // Created by Abdughafur - Believe GOD
