@@ -1,5 +1,5 @@
 ﻿/* login.js */
-/* Created by Abdughafur - ЧОРЯК v4.5.3B4 (Beta) */
+/* Created by Abdughafur - ЧОРЯК v4.5.3B16 (Beta) */
 import { clean, qs, setInputValue } from "../utils/helpers.js";
 import {
   saveState,
@@ -323,5 +323,5 @@ void init().catch((error) => {
   );
 });
 
-/* Created by Abdughafur - ЧОРЯК v4.5.3B4 (Beta) */
+/* Created by Abdughafur - ЧОРЯК v4.5.3B16 (Beta) */
 // Created by Abdughafur - Believe GOD

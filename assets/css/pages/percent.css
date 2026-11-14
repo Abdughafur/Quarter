@@ -46,8 +46,8 @@
   margin: 0;
 }
 
-.percent-minai-card .minai-coming-soon-art img {
-  width: min(100%, 88px);
+.percent-minai-card .percent-actions {
+  margin-top: 4px;
 }
 
 #tab-prosent .percent-layout {
@@ -86,12 +86,6 @@
 #percentExportModal .percent-export-modal {
   max-height: min(720px, calc(100dvh - 32px));
   overflow-y: auto;
-}
-
-#tab-prosent .clear-percent-btn:active,
-#tab-prosent .clear-percent-btn.is-pressing {
-  transform: translateY(-1px) scaleX(1.015);
-  box-shadow: 0 10px 22px rgba(220, 38, 38, 0.2);
 }
 
 #tab-prosent .percent-board-card {
@@ -328,10 +322,6 @@
 
   #tab-prosent .percent-minai-card {
     min-width: 0;
-  }
-
-  .percent-minai-card .minai-coming-soon-art img {
-    width: min(100%, 72px);
   }
 }
 

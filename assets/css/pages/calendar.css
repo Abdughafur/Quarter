@@ -487,9 +487,131 @@
   outline-offset: 3px;
 }
 
+#tab-calendar .calendar-lessons-card {
+  width: min(100%, 760px);
+  margin-inline: auto;
+  padding: 16px;
+}
+
+.calendar-lessons-header,
+.calendar-lessons-brand {
+  display: flex;
+  align-items: center;
+}
+
+.calendar-lessons-header {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.calendar-lessons-brand {
+  min-width: 0;
+  gap: 10px;
+}
+
+.calendar-lessons-brand img {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.calendar-lessons-brand > div {
+  min-width: 0;
+}
+
+.calendar-lessons-brand > div > span {
+  color: var(--primary);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.calendar-lessons-brand h3 {
+  margin: 1px 0 0;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.calendar-lessons-weekday {
+  max-width: 44%;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 850;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.calendar-lessons-list {
+  display: grid;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.calendar-lesson-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--soft);
+}
+
+.calendar-lesson-details {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.calendar-lesson-details strong {
+  color: var(--text);
+  font-size: 0.86rem;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.calendar-lesson-details span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.calendar-lesson-time {
+  padding: 7px 9px;
+  border-radius: 10px;
+  background: var(--brand-soft);
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.calendar-lessons-empty {
+  margin: 0;
+  padding: 13px;
+  border: 1px dashed var(--border);
+  border-radius: 13px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 750;
+  text-align: center;
+}
+
 @media (max-width: 520px) {
   #tab-calendar .calendar-shell {
     padding: 16px 12px;
+  }
+
+  #tab-calendar .calendar-lessons-card {
+    padding: 14px 12px;
   }
 
   .calendar-page-header {
@@ -559,6 +681,17 @@
 
   .calendar-weekdays {
     margin-top: 18px;
+  }
+}
+
+@media (max-width: 360px) {
+  .calendar-lesson-item {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .calendar-lesson-time {
+    justify-self: start;
   }
 }
 

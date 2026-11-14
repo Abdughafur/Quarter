@@ -27,20 +27,11 @@ nav {
     padding-bottom: 104px;
   }
 
-  nav {
-    left: 50%;
+  .nav-dock {
     right: auto;
     bottom: 18px;
     top: auto;
-    width: fit-content !important;
     max-width: calc(100vw - 32px);
-    box-sizing: border-box;
-    height: 64px;
-    margin: 0;
-    padding: 8px;
-    flex-direction: row;
-    border-radius: 999px;
-    transform: translateX(-50%);
   }
 
   .nav-btn {
@@ -96,9 +87,13 @@ nav {
     grid-template-columns: 74px 1fr 64px;
   }
 
+  .nav-dock {
+    left: 50%;
+    right: auto;
+    gap: 4px;
+  }
+
   nav {
-    left: 8px;
-    right: 8px;
     gap: 4px;
   }
 

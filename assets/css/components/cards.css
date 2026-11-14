@@ -647,9 +647,8 @@
     display: none;
   }
 
-  body.notes-detail-screen nav,
-  body.notes-detail-screen .floating-add-note,
-  body.notes-detail-screen .journal-floating-btn {
+  body.notes-detail-screen .nav-dock,
+  body.notes-detail-screen .floating-add-note {
     transform: translateY(140px);
     opacity: 0;
     pointer-events: none;
@@ -1869,10 +1868,6 @@
 .floating-add-note:active {
   transform: scale(0.96);
   box-shadow: 0 10px 22px rgba(14, 43, 77, 0.18);
-}
-
-.floating-add-note.is-stretching {
-  box-shadow: 0 20px 36px rgba(14, 43, 77, 0.28);
 }
 
 @media (max-width: 760px) {

@@ -22,8 +22,6 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
   display: flex;
   overflow: hidden;
-  overflow-x: hidden;
-  overflow-y: hidden;
   user-select: none;
 }
 
@@ -40,9 +38,9 @@
 
 .chart-viewport {
   min-width: 0;
-  width: 100%;
+  width: 0;
   max-width: 100%;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   height: 100%;
   overflow-x: auto;
   overflow-y: hidden;
@@ -51,6 +49,7 @@
   overscroll-behavior-x: contain;
   touch-action: pan-x pan-y;
   -webkit-overflow-scrolling: touch;
+  overflow-anchor: none;
   outline: none;
 }
 
@@ -68,63 +67,6 @@
   height: 100%;
 }
 
-.chart-scroll-controls {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  z-index: 3;
-  display: flex;
-  gap: 5px;
-  padding: 5px;
-  border: 1px solid rgba(14, 165, 233, 0.17);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--card) 88%, transparent);
-  box-shadow: 0 8px 22px rgba(15, 56, 80, 0.16);
-  backdrop-filter: blur(16px) saturate(150%);
-}
-
-.chart-scroll-controls[hidden] {
-  display: none;
-}
-
-.chart-scroll-button {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: linear-gradient(145deg, var(--primary2), var(--primary));
-  color: #ffffff;
-  font-size: 1.55rem;
-  font-weight: 800;
-  line-height: 1;
-  cursor: pointer;
-  transition:
-    opacity 160ms ease,
-    transform 160ms ease,
-    box-shadow 160ms ease;
-}
-
-.chart-scroll-button:hover:not(:disabled) {
-  box-shadow: 0 5px 12px rgba(14, 165, 233, 0.28);
-}
-
-.chart-scroll-button:focus-visible {
-  outline: 2px solid var(--text);
-  outline-offset: 2px;
-}
-
-.chart-scroll-button:disabled {
-  opacity: 0.38;
-  cursor: default;
-}
-
-.chart-scroll-button:active:not(:disabled) {
-  transform: scale(0.9);
-}
-
 .trend-grid line {
   stroke: rgba(83, 133, 155, 0.14);
   stroke-dasharray: 3 8;
@@ -138,6 +80,14 @@
 
 .trend-axis-end {
   text-anchor: end;
+}
+
+.trend-axis-start.trend-axis-single {
+  text-anchor: end;
+}
+
+.trend-axis-end.trend-axis-single {
+  text-anchor: start;
 }
 
 .trend-lines path {
@@ -238,10 +188,6 @@
     ),
     linear-gradient(160deg, #0d1d2b, #07131f);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-[data-theme="dark"] .chart-scroll-controls {
-  border-color: rgba(125, 211, 252, 0.16);
 }
 
 [data-theme="dark"] .trend-grid line {

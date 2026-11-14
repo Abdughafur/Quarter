@@ -9,6 +9,7 @@ const LEGACY_PREFIXES = ["chorak_v4.2", "chorak_v4.1", "chorak_v4.0"];
 const STATE_FORMAT_VERSION = 1;
 const BACKUP_FORMAT = "choryak-backup";
 const BACKUP_FORMAT_VERSION = 2;
+const MAX_LESSONS = 2000;
 const STORAGE_WARNING_EVENT = "choryak-storage-warning";
 const LOGOUT_CHANNEL_NAME = "choryak-storage";
 const LOGOUT_SIGNAL_KEY = "choryak:logout-event";
@@ -170,6 +171,161 @@ function normalizeNotes(value) {
     .slice(0, 200);
 }
 
+function normalizeLessonDay(value, fallbackDay = 1) {
+  if (value == null || value === "") return fallbackDay;
+  const numericDay = Number(value);
+  if (Number.isInteger(numericDay) && numericDay >= 1 && numericDay <= 7) {
+    return numericDay;
+  }
+  if (numericDay === 0) return 7;
+
+  const dayNames = {
+    mon: 1,
+    monday: 1,
+    "душанбе": 1,
+    "дш": 1,
+    tue: 2,
+    tuesday: 2,
+    "сешанбе": 2,
+    "сш": 2,
+    wed: 3,
+    wednesday: 3,
+    "чоршанбе": 3,
+    "чш": 3,
+    thu: 4,
+    thursday: 4,
+    "панҷшанбе": 4,
+    "пш": 4,
+    fri: 5,
+    friday: 5,
+    "ҷумъа": 5,
+    "ҷм": 5,
+    sat: 6,
+    saturday: 6,
+    "шанбе": 6,
+    "шн": 6,
+    sun: 7,
+    sunday: 7,
+    "якшанбе": 7,
+    "яш": 7,
+  };
+  return dayNames[String(value).trim().toLowerCase()] || fallbackDay;
+}
+
+function normalizeLessonTime(value) {
+  const match = /^(\d{1,2}):([0-5]\d)$/.exec(String(value ?? "").trim());
+  if (!match) return "";
+  const hour = Number(match[1]);
+  if (hour < 0 || hour > 23) return "";
+  return `${String(hour).padStart(2, "0")}:${match[2]}`;
+}
+
+function extractLessonRows(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => ({ item, fallbackDay: 1 }));
+  }
+  if (!isPlainRecord(value)) return [];
+
+  for (const key of ["lessons", "entries", "items"]) {
+    if (Array.isArray(value[key])) {
+      return value[key].map((item) => ({ item, fallbackDay: 1 }));
+    }
+  }
+
+  const days = isPlainRecord(value.days)
+    ? value.days
+    : isPlainRecord(value.week)
+      ? value.week
+      : isPlainRecord(value.schedule)
+        ? value.schedule
+        : value;
+  return Object.entries(days).flatMap(([dayKey, items]) =>
+    Array.isArray(items)
+      ? items.map((item) => ({
+          item,
+          fallbackDay: normalizeLessonDay(dayKey),
+        }))
+      : [],
+  );
+}
+
+function normalizeLessonSchedule(value) {
+  return extractLessonRows(value)
+    .slice(0, MAX_LESSONS)
+    .map(({ item, fallbackDay }) => {
+      const lesson = isPlainRecord(item)
+        ? item
+        : { subject: String(item ?? "") };
+      return {
+        ...lesson,
+        id: String(lesson.id || uid()).slice(0, 128),
+        day: normalizeLessonDay(
+          lesson.day ?? lesson.weekday ?? lesson.dayOfWeek,
+          fallbackDay,
+        ),
+        subject: String(
+          lesson.subject ?? lesson.title ?? lesson.name ?? lesson.lesson ?? "",
+        ).slice(0, 120),
+        start: normalizeLessonTime(
+          lesson.start ?? lesson.startTime ?? lesson.from,
+        ),
+        end: normalizeLessonTime(lesson.end ?? lesson.endTime ?? lesson.to),
+        room: String(lesson.room ?? lesson.classroom ?? "").slice(0, 64),
+      };
+    });
+}
+
+function normalizeLessons(value) {
+  const source = isPlainRecord(value) ? value : {};
+  const sourceSchools =
+    source.schools ?? source.bySchool ?? source.schoolSchedules;
+  const schoolEntries = isPlainRecord(sourceSchools)
+    ? Object.entries(sourceSchools)
+    : Object.entries(source).filter(
+        ([key, schedule]) =>
+          !["selectedSchool", "activeSchool"].includes(key) &&
+          (Array.isArray(schedule) || isPlainRecord(schedule)),
+      );
+  const schools = {};
+  let totalLessons = 0;
+
+  for (const [rawSchool, schedule] of schoolEntries.slice(0, 50)) {
+    const school = String(rawSchool).trim().slice(0, 64);
+    if (!school) continue;
+    const remaining = MAX_LESSONS - totalLessons;
+    if (remaining <= 0) break;
+    const lessons = normalizeLessonSchedule(schedule).slice(0, remaining);
+    schools[school] = lessons;
+    totalLessons += lessons.length;
+  }
+
+  return {
+    selectedSchool: String(
+      source.selectedSchool ?? source.activeSchool ?? "",
+    )
+      .trim()
+      .slice(0, 64),
+    schools,
+  };
+}
+
+function mergeLessons(currentValue, incomingValue) {
+  const current = normalizeLessons(currentValue);
+  const incoming = normalizeLessons(incomingValue);
+  const schools = { ...current.schools };
+
+  for (const [school, lessons] of Object.entries(incoming.schools)) {
+    const byId = new Map((schools[school] || []).map((lesson) => [lesson.id, lesson]));
+    lessons.forEach((lesson) => byId.set(lesson.id, lesson));
+    schools[school] = Array.from(byId.values());
+  }
+
+  return normalizeLessons({
+    selectedSchool: incoming.selectedSchool || current.selectedSchool,
+    schools,
+  });
+}
+
 function normalizeState(value) {
   const payload = value && typeof value === "object" ? value : {};
 
@@ -180,6 +336,7 @@ function normalizeState(value) {
     info: payload.info && typeof payload.info === "object" ? payload.info : {},
     profile: normalizeProfile(payload.profile ?? null),
     notes: normalizeNotes(payload.notes ?? []),
+    lessons: normalizeLessons(payload.lessons ?? null),
   };
 }
 
@@ -298,6 +455,62 @@ function validateBackupSections(mapped, present) {
       }
       if (note.id != null) noteIds.add(String(note.id));
     });
+  }
+
+  if (present.has("lessons")) {
+    const lessons = mapped.lessons;
+    if (!isPlainRecord(lessons)) {
+      throw new Error("The backup contains invalid lessons data.");
+    }
+    if (
+      lessons.selectedSchool != null &&
+      (typeof lessons.selectedSchool !== "string" &&
+        typeof lessons.selectedSchool !== "number")
+    ) {
+      throw new Error("The backup contains an invalid selected school.");
+    }
+    const schools =
+      lessons.schools ??
+      lessons.bySchool ??
+      lessons.schoolSchedules ??
+      {};
+    if (!isPlainRecord(schools)) {
+      throw new Error("The backup contains invalid lesson school data.");
+    }
+    let lessonCount = 0;
+    for (const [school, schedule] of Object.entries(schools)) {
+      if (
+        !school ||
+        school.length > 64 ||
+        (!isPlainRecord(schedule) && !Array.isArray(schedule))
+      ) {
+        throw new Error("The backup contains an invalid lesson schedule.");
+      }
+      const rows = extractLessonRows(schedule);
+      lessonCount += rows.length;
+      if (lessonCount > MAX_LESSONS) {
+        throw new Error("The backup contains too many lessons.");
+      }
+      rows.forEach(({ item }, index) => {
+        if (!isPlainRecord(item)) {
+          throw new Error(`The backup contains an invalid lesson at row ${index + 1}.`);
+        }
+        const subject = item.subject ?? item.title ?? item.name ?? item.lesson;
+        const room = item.room ?? item.classroom;
+        const start = item.start ?? item.startTime ?? item.from;
+        const end = item.end ?? item.endTime ?? item.to;
+        if (
+          (subject != null &&
+            (typeof subject !== "string" || subject.length > 120)) ||
+          (room != null && (typeof room !== "string" || room.length > 64)) ||
+          (start != null && start !== "" && !normalizeLessonTime(start)) ||
+          (end != null && end !== "" && !normalizeLessonTime(end))
+        ) {
+          throw new Error(`The backup contains invalid lesson content at row ${index + 1}.`);
+        }
+      });
+    }
+    mapped.lessons = normalizeLessons(lessons);
   }
 
   if (present.has("profile")) {
@@ -464,7 +677,8 @@ function getBackupSource(value) {
     pct: ["pct", "percentages", "percentage"],
     info: ["info", "information", "details"],
     profile: ["profile", "user", "teacher"],
-    notes: ["notes", "noteList", "journal"],
+    notes: ["notes", "noteList"],
+    lessons: ["lessons", "lessonSchedule"],
   };
   const mapped = {};
   const present = new Set();
@@ -620,6 +834,10 @@ export function inspectBackupData(value) {
   return {
     grades: state.grades.length,
     notes: state.notes.length,
+    lessons: Object.values(state.lessons.schools).reduce(
+      (total, schedule) => total + schedule.length,
+      0,
+    ),
     schools: state.profile.schools.length,
     hasProfile: Boolean(
       state.profile.name && state.profile.surname && state.profile.school,
@@ -632,7 +850,7 @@ export async function createBackupData() {
   const backup = {
     format: BACKUP_FORMAT,
     formatVersion: BACKUP_FORMAT_VERSION,
-    appVersion: "4.5.3B4",
+    appVersion: "4.5.3B16",
     exportedAt: new Date().toISOString(),
     data: await loadState(),
   };
@@ -721,6 +939,9 @@ export async function restoreBackupData(value, mode = "merge") {
       profile: present.has("profile")
         ? { ...current.profile, ...incomingProfile }
         : current.profile,
+      lessons: present.has("lessons")
+        ? mergeLessons(current.lessons, imported.lessons)
+        : current.lessons,
     });
   }
 
@@ -735,6 +956,7 @@ function readLegacyState() {
       pct: safeParseStorage(`${prefix}_pct`, null),
       info: safeParseStorage(`${prefix}_info`, null),
       profile: safeParseStorage(`${prefix}_profile`, null),
+      lessons: safeParseStorage(`${prefix}_lessons`, null),
     };
 
     const hasData = Object.values(candidate).some((value) => value != null);
@@ -778,6 +1000,7 @@ function hasUserData(state) {
         (Array.isArray(state.notes) && state.notes.length > 0) ||
         Object.values(state.profile || {}).some(Boolean) ||
         Number(state.pct?.total) > 0 ||
+        Object.keys(state.lessons?.schools || {}).length > 0 ||
         Object.values(state.info || {}).some(Boolean)),
   );
 }

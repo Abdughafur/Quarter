@@ -1,4 +1,7 @@
 /* chart.js */
+const chartStates = new WeakMap();
+const chartResizeObservers = new WeakMap();
+
 export function buildKeypad(container, handlers) {
   if (!container) return;
 
@@ -42,11 +45,11 @@ export function renderGradeBlocks(container, grades, labels, onToggle) {
     const empty = document.createElement("div");
     empty.className = "empty";
     const illustration = document.createElement("img");
-    illustration.src = "assets/images/minai/write.webp";
+    illustration.src = "assets/images/minai/smile.webp";
     illustration.alt = "";
     illustration.setAttribute("aria-hidden", "true");
     const message = document.createElement("span");
-    message.textContent = "Ҳоло ягон балл нест";
+    message.textContent = "Ҳоло ягон балл ворид нашудааст";
     empty.append(illustration, message);
     container.append(empty);
     return;
@@ -76,17 +79,42 @@ export function renderGradeBlocks(container, grades, labels, onToggle) {
 export function renderGradeChart(container, grades) {
   if (!container) return;
 
-  const previousPointCount = Number(container.dataset.pointCount || 0);
+  let state = chartStates.get(container);
+  if (!state) {
+    state = { grades, renderedWidth: null };
+    chartStates.set(container, state);
+  }
+  state.grades = grades;
+
+  if (
+    typeof ResizeObserver === "function" &&
+    !chartResizeObservers.has(container)
+  ) {
+    const observer = new ResizeObserver(() => {
+      const currentState = chartStates.get(container);
+      if (
+        currentState &&
+        container.clientWidth !== currentState.renderedWidth
+      ) {
+        renderGradeChart(container, currentState.grades);
+      }
+    });
+    observer.observe(container);
+    chartResizeObservers.set(container, observer);
+  }
+
+  const previousCount = Number(container.dataset.gradeCount || 0);
   const previousScrollLeft =
     container.querySelector(".chart-viewport")?.scrollLeft || 0;
-  container.dataset.pointCount = String(grades.length);
-
+  const viewportWidth = Math.max(0, container.clientWidth);
+  state.renderedWidth = viewportWidth;
+  container.dataset.gradeCount = String(grades.length);
   container.textContent = "";
 
   if (!grades.length) {
     const empty = document.createElement("div");
     empty.className = "chart-empty";
-    empty.textContent = "Баллҳоро ворид кунед";
+    empty.textContent = "Ҳоло ягон балл ворид нашудааст";
     container.append(empty);
     return;
   }
@@ -95,9 +123,10 @@ export function renderGradeChart(container, grades) {
   const left = 0;
   const right = 18;
   const pointGap = 54;
-  const viewportWidth = Math.max(0, container.clientWidth - 30);
+  const sidePadding = 24;
   const pointSpan = Math.max(0, grades.length - 1) * pointGap;
-  const width = Math.max(viewportWidth, 30 + pointSpan);
+  const edgePadding = Math.max(sidePadding, viewportWidth / 2);
+  const width = Math.max(viewportWidth, edgePadding * 2 + pointSpan);
   const height = 252;
   const plotTop = 30;
   const plotBottom = 170;
@@ -112,7 +141,7 @@ export function renderGradeChart(container, grades) {
   const points = grades.map((grade, index) => ({
     x:
       grades.length > 1
-        ? (width - pointSpan) / 2 + index * pointGap
+        ? edgePadding + index * pointGap
         : width / 2,
     y: chartValue(grade.val),
     value: grade.val,
@@ -187,7 +216,7 @@ export function renderGradeChart(container, grades) {
           : "trend-down";
     const column = document.createElementNS(svgNS, "rect");
     column.classList.add(direction);
-    const columnWidth = Math.min(18, Math.max(6, pointGap * 0.42));
+    const columnWidth = Math.min(18, Math.max(1, pointGap * 0.42));
     column.setAttribute("x", String(point.x - columnWidth / 2));
     column.setAttribute("y", String(point.y + 8));
     column.setAttribute("width", String(columnWidth));
@@ -223,6 +252,7 @@ export function renderGradeChart(container, grades) {
 
   const pointGroup = document.createElementNS(svgNS, "g");
   pointGroup.classList.add("trend-points");
+  const labelStep = Math.max(1, Math.ceil(points.length / 8));
   points.forEach((point, index) => {
     const circle = document.createElementNS(
       "http://www.w3.org/2000/svg",
@@ -238,7 +268,11 @@ export function renderGradeChart(container, grades) {
     circle.classList.add(direction);
     circle.setAttribute("cx", String(point.x));
     circle.setAttribute("cy", String(point.y));
-    circle.setAttribute("r", index === points.length - 1 ? "8" : "5");
+    const pointRadius = Math.max(1.5, Math.min(5, pointGap * 0.34));
+    circle.setAttribute(
+      "r",
+      String(index === points.length - 1 ? Math.min(8, pointRadius * 1.6) : pointRadius),
+    );
     circle.setAttribute("tabindex", "0");
     circle.setAttribute("aria-label", `Балл ${index + 1}: ${point.value}`);
     circle.dataset.index = String(index);
@@ -247,31 +281,46 @@ export function renderGradeChart(container, grades) {
         item.classList.remove("selected");
       });
       circle.classList.add("selected");
-      scrollToPoint(viewport, point.x);
     });
     pointGroup.append(circle);
 
-    const label = document.createElementNS(svgNS, "text");
-    label.classList.add("trend-point-value");
-    label.setAttribute("x", String(point.x + 9));
-    label.setAttribute("y", String(point.y - 9));
-    label.setAttribute("text-anchor", "start");
-    label.textContent = String(point.value);
-    pointGroup.append(label);
+    if (
+      pointGap >= 28 ||
+      index === 0 ||
+      index === points.length - 1 ||
+      index % labelStep === 0
+    ) {
+      const label = document.createElementNS(svgNS, "text");
+      label.classList.add("trend-point-value");
+      label.setAttribute("x", String(point.x + 9));
+      label.setAttribute("y", String(point.y - 9));
+      label.setAttribute("text-anchor", "start");
+      label.textContent = String(point.value);
+      pointGroup.append(label);
+    }
   });
   svg.append(pointGroup);
 
   const startLabel = document.createElementNS(svgNS, "text");
   startLabel.classList.add("trend-axis-label", "trend-axis-start");
-  startLabel.setAttribute("x", String(points[0].x));
+  const isSinglePoint = points.length === 1;
+  startLabel.setAttribute(
+    "x",
+    String(points[0].x - (isSinglePoint ? 10 : 0)),
+  );
   startLabel.setAttribute("y", String(height - 8));
+  if (isSinglePoint) startLabel.classList.add("trend-axis-single");
   startLabel.textContent = "Оғоз";
   svg.append(startLabel);
 
   const endLabel = document.createElementNS(svgNS, "text");
   endLabel.classList.add("trend-axis-label", "trend-axis-end");
-  endLabel.setAttribute("x", String(points.at(-1).x));
+  endLabel.setAttribute(
+    "x",
+    String(points.at(-1).x + (isSinglePoint ? 10 : 0)),
+  );
   endLabel.setAttribute("y", String(height - 8));
+  if (isSinglePoint) endLabel.classList.add("trend-axis-single");
   endLabel.textContent = "Ҳоло";
   svg.append(endLabel);
 
@@ -281,78 +330,15 @@ export function renderGradeChart(container, grades) {
   viewport.setAttribute("role", "region");
   viewport.setAttribute(
     "aria-label",
-    "Диаграммаи баллҳо. Барои ҳаракат тугмаҳои тирчаи чап ва ростро истифода баред.",
+    "Диаграммаи баллҳо",
   );
-  viewport.setAttribute("aria-keyshortcuts", "ArrowLeft ArrowRight");
   viewport.append(svg);
-  const controls = document.createElement("div");
-  controls.className = "chart-scroll-controls";
-  const scrollButtons = [];
-
-  const createScrollButton = (direction, label) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "chart-scroll-button";
-    button.setAttribute("aria-label", label);
-    button.title = label;
-    button.textContent = direction === "left" ? "‹" : "›";
-    button.addEventListener("click", () => {
-      viewport.scrollBy({
-        left:
-          direction === "left"
-            ? -viewport.clientWidth * 0.72
-            : viewport.clientWidth * 0.72,
-        behavior: chartScrollBehavior(),
-      });
-    });
-    scrollButtons.push(button);
-    return button;
-  };
-
-  const updateScrollButtons = () => {
-    const maxScroll = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
-    scrollButtons[0].disabled = viewport.scrollLeft <= 1;
-    scrollButtons[1].disabled = viewport.scrollLeft >= maxScroll - 1;
-    controls.hidden = maxScroll <= 1;
-  };
-
-  controls.append(
-    createScrollButton("left", "Ба нуқтаҳои пешина"),
-    createScrollButton("right", "Ба нуқтаҳои баъдӣ"),
-  );
-  viewport.addEventListener("scroll", updateScrollButtons, { passive: true });
-  container.append(viewport, controls);
-  viewport.scrollLeft = previousScrollLeft;
-
-  requestAnimationFrame(() => {
-    const maxScroll = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
-    if (grades.length > previousPointCount) {
-      viewport.scrollTo({
-        left: maxScroll,
-        behavior: previousPointCount ? chartScrollBehavior() : "auto",
-      });
-      updateScrollButtons();
-      return;
-    }
-
-    viewport.scrollLeft = Math.min(previousScrollLeft, maxScroll);
-    updateScrollButtons();
-  });
-}
-
-function scrollToPoint(container, pointX) {
-  const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth);
-  const target = Math.min(
-    maxScroll,
-    Math.max(0, pointX - container.clientWidth / 2),
-  );
-  container.scrollTo({ left: target, behavior: chartScrollBehavior() });
-}
-
-function chartScrollBehavior() {
-  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
-    ? "auto"
-    : "smooth";
+  container.append(viewport);
+  const maxScrollLeft = viewport.scrollWidth - viewport.clientWidth;
+  viewport.scrollLeft =
+    grades.length > previousCount
+      ? maxScrollLeft
+      : Math.min(previousScrollLeft, maxScrollLeft);
 }
 
 export function buildPercentRows(container, labels, onInput) {

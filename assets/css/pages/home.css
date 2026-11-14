@@ -141,23 +141,32 @@
   min-height: 0;
   border-radius: 16px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 16px;
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 1rem;
   font-weight: 900;
   background: linear-gradient(180deg, var(--card), var(--card2));
   border: 1px dashed var(--border);
-  text-align: center;
-  padding: 10px;
+  text-align: left;
+  padding: 14px;
+}
+
+#tab-home .blocks.is-empty .empty {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .empty img {
   display: block;
-  width: 72px;
-  height: 72px;
+  width: 84px;
+  height: 84px;
+  flex: 0 0 84px;
   object-fit: contain;
 }
 
@@ -276,15 +285,15 @@
   display: contents;
 }
 
-@media (min-width: 1100px) {
+@media (min-width: 761px) {
   body[data-active-tab="tab-home"] main.container {
     max-width: 1480px;
   }
 
   .calculator-desktop-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 32px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(16px, 2.2vw, 32px);
     align-items: start;
   }
 
@@ -296,13 +305,31 @@
   }
 
   .calculator-insights-column {
-    padding-left: 32px;
+    padding-left: clamp(16px, 2.2vw, 32px);
     border-left: 1px solid var(--border);
   }
 }
+
 /* Created by Abdughafur - Believe GOD */
 
 @media (max-width: 520px) {
+  #tab-home .calculator-input-column > .card.compact-card:first-child {
+    height: 180px;
+    min-height: 180px;
+  }
+
+  #tab-home .blocks.is-empty .empty {
+    gap: 12px;
+    padding: 0;
+    font-size: 0.9rem;
+  }
+
+  #tab-home .blocks.is-empty .empty img {
+    width: 72px;
+    height: 72px;
+    flex-basis: 72px;
+  }
+
   #tab-home .hero .hero-inner {
     grid-template-columns: minmax(0, 1.1fr) minmax(140px, 0.9fr);
     align-items: stretch;
@@ -317,7 +344,7 @@
     padding-right: 10px;
   }
 
-  #tab-home .hero .result-stat-cards {
+  #tab-home .hero:not(.result-details-open) .result-stat-cards {
     display: none;
   }
 

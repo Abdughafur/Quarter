@@ -79,7 +79,12 @@ export const navigationFeature = {
   },
 
   navigateFromMobileMore(tabId) {
-    if (tabId !== "tab-calendar" && tabId !== "tab-more") return;
+    if (
+      tabId !== "tab-calendar" &&
+      tabId !== "tab-lessons" &&
+      tabId !== "tab-more"
+    )
+      return;
     this.closeMobileMoreMenu();
     const tabButton = document.querySelector(`.nav-btn[data-tab="${tabId}"]`);
     this.nav(tabId, tabButton);
@@ -87,6 +92,13 @@ export const navigationFeature = {
 
   nav(id, button) {
     if (id !== "tab-notes") this.flushNoteAutosave();
+    if (
+      document.body.dataset.activeTab === "tab-lessons" &&
+      id !== "tab-lessons"
+    ) {
+      this.flushLessonsSave();
+      void this.save();
+    }
     this.closeMobileMoreMenu();
     document.body.dataset.activeTab = id;
 
@@ -101,15 +113,6 @@ export const navigationFeature = {
     (button || document.querySelector(`[data-tab="${id}"]`))?.classList.add(
       "active",
     );
-
-    const journalButton = document.querySelector(".journal-floating-btn");
-    if (journalButton) {
-      // hide floating journal button on journal and notes tabs
-      const shouldHideJournal = id === "tab-journal" || id === "tab-notes";
-      journalButton.classList.toggle("is-hidden", shouldHideJournal);
-      // keep notes-mode class for legacy positioning logic removed
-      journalButton.classList.toggle("notes-mode", false);
-    }
 
     this.updateNavHighlight?.(
       button || document.querySelector(`[data-tab="${id}"]`),
@@ -195,6 +198,54 @@ export const navigationFeature = {
       );
     }
     this.renderCalendarPicker();
+    this.renderCalendarLessons();
+  },
+
+  renderCalendarLessons() {
+    const weekdayLabel = qs("calendarLessonsWeekday");
+    const list = qs("calendarLessonsList");
+    if (!weekdayLabel || !list) return;
+
+    const selectedDate = this.calendarSelectedDate;
+    const weekday = ((selectedDate.getDay() + 6) % 7) + 1;
+    const weekdayName = CALENDAR_WEEKDAYS[selectedDate.getDay()];
+    setText("calendarLessonsWeekday", weekdayName);
+
+    const lessons = Object.entries(this.lessons?.schools || {})
+      .flatMap(([school, schedule]) =>
+        Array.isArray(schedule)
+          ? schedule
+              .filter((lesson) => Number(lesson.day) === weekday)
+              .map((lesson) => ({ ...lesson, school }))
+          : [],
+      )
+      .sort(
+        (first, second) =>
+          String(first.start || "").localeCompare(String(second.start || "")) ||
+          first.school.localeCompare(second.school),
+      );
+
+    if (!lessons.length) {
+      list.innerHTML =
+        '<p class="calendar-lessons-empty">Барои ин рӯз дарс сабт нашудааст.</p>';
+      return;
+    }
+
+    list.innerHTML = lessons
+      .map(
+        (lesson) => `
+          <article class="calendar-lesson-item">
+            <div class="calendar-lesson-details">
+              <strong>${escapeHtml(lesson.subject || "Дарси нав")}</strong>
+              <span>Мактаб ${escapeHtml(lesson.school)}</span>
+              <span>Синфхона ${escapeHtml(lesson.room || "нишон дода нашудааст")}</span>
+            </div>
+            <time class="calendar-lesson-time">
+              ${escapeHtml(lesson.start || "--:--")}–${escapeHtml(lesson.end || "--:--")}
+            </time>
+          </article>`,
+      )
+      .join("");
   },
 
   renderCalendarPicker() {

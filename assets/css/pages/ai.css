@@ -269,40 +269,30 @@
   box-shadow: 0 18px 36px rgba(14, 43, 77, 0.08);
 }
 
-.minai-coming-soon-art {
-  display: grid;
-  place-items: center;
-  padding: 8px 0 2px;
-}
-
-.minai-coming-soon-art img {
-  width: min(100%, 150px);
-  height: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 10px 18px rgba(14, 165, 233, 0.14));
-}
-
-.minai-coming-soon-badge {
-  display: inline-flex;
-  width: fit-content;
-  max-width: 100%;
-  align-self: center;
-  justify-self: center;
+.minai-card-heading {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 7px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(14, 165, 233, 0.2);
-  background: linear-gradient(135deg, rgba(125, 211, 252, 0.18), rgba(96, 165, 250, 0.12));
-  color: #0d5f7c;
-  font-size: 0.68rem;
-  font-weight: 900;
-  letter-spacing: 0.03em;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  justify-content: flex-start;
+  gap: 10px;
+  color: #17314a;
+  font-size: 1.1rem;
+  font-weight: 950;
+}
+
+.minai-card-heading img {
+  display: block;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 12px rgba(14, 165, 233, 0.14));
+}
+
+.minai-card-heading span {
+  line-height: 1.2;
 }
 
 .minai-coming-soon-title {
-  font-size: 1.04rem;
+  font-size: 0.96rem;
   font-weight: 900;
   color: #17314a;
 }
@@ -317,16 +307,13 @@
   text-align: left;
 }
 
-.minai-status-card .minai-coming-soon-art img {
-  width: min(100%, 88px);
-}
-
 .minai-status-card .minai-coming-soon-title {
-  text-align: center;
+  text-align: left;
 }
 
 .minai-status-list {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -352,14 +339,45 @@
 }
 
 .minai-status-progress {
+  grid-column: 1 / -1;
   grid-template-columns: 1fr;
   gap: 4px;
 }
 
 .minai-status-progress strong {
-  font-size: 0.76rem;
+  font-size: 0.82rem;
   font-weight: 750;
   text-align: left;
+}
+
+.minai-status-card .result-details-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  margin: 2px 0 0;
+  padding: 0 14px;
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0284c7, #22d3ee);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 900;
+  box-shadow: 0 8px 18px rgba(14, 165, 233, 0.16);
+}
+
+.minai-status-card .result-details-toggle:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.minai-status-card .result-details-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
 }
 
 .minai-status-message {
@@ -374,6 +392,16 @@
   text-align: left;
 }
 
+@media (max-width: 420px) {
+  .minai-status-list {
+    grid-template-columns: 1fr;
+  }
+
+  .minai-status-progress {
+    grid-column: auto;
+  }
+}
+
 [data-theme="dark"] .minai-coming-soon {
   background:
     radial-gradient(circle at 50% 12%, rgba(45, 212, 191, 0.18), transparent 28%),
@@ -382,13 +410,11 @@
   box-shadow: 0 18px 36px rgba(2, 12, 22, 0.16);
 }
 
-[data-theme="dark"] .minai-coming-soon-badge {
-  background: rgba(96, 165, 250, 0.12);
-  border-color: rgba(148, 196, 219, 0.2);
-  color: #d3f8ff;
+[data-theme="dark"] .minai-coming-soon-title {
+  color: #edf9ff;
 }
 
-[data-theme="dark"] .minai-coming-soon-title {
+[data-theme="dark"] .minai-card-heading {
   color: #edf9ff;
 }
 

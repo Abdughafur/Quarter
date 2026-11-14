@@ -134,10 +134,12 @@ export const profileFeature = {
       schools,
     };
     this.updateProfileUI(this.profile);
+    this.renderLessons?.();
     const result = await this.save();
     if (!result) {
       this.profile = previousProfile;
       this.updateProfileUI(this.profile);
+      this.renderLessons?.();
       return;
     }
 

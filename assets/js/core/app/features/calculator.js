@@ -8,9 +8,7 @@ export const calculatorFeature = {
   toggleResultDetails() {
     const toggle = document.querySelector(".result-details-toggle");
     const modal = document.querySelector("#resultDetailsModal");
-    const content = document.querySelector("#resultDetailsModalContent");
-    const results = document.querySelector("#resultStatCards");
-    if (!this.grades.length || !toggle || !modal || !content || !results)
+    if (!this.grades.length || !toggle || !modal)
       return;
 
     if (modal.classList.contains("open")) {
@@ -18,14 +16,6 @@ export const calculatorFeature = {
       return;
     }
 
-    const rows = [...results.querySelectorAll(".stat-row")].map((row) => {
-      const clone = row.cloneNode(true);
-      clone
-        .querySelectorAll("[id]")
-        .forEach((element) => element.removeAttribute("id"));
-      return clone;
-    });
-    content.replaceChildren(...rows);
     modal.classList.add("open");
     toggle.setAttribute("aria-expanded", "true");
     modal.querySelector(".result-details-modal-close")?.focus();
@@ -197,12 +187,14 @@ export const calculatorFeature = {
       }
     } else if (key === "p") {
       this.nav("tab-prosent");
-    } else if (key === "j") {
-      // navigate to journal tab
-      event.preventDefault();
-      this.nav("tab-journal");
     } else if (key === "z") {
       this.nav("tab-calendar");
+    } else if (
+      key === "l" &&
+      !qs("lessonsModal")?.classList.contains("open")
+    ) {
+      event.preventDefault();
+      this.nav("tab-lessons");
     } else if (key === "n") {
       if (notesActive) {
         if (
@@ -540,7 +532,6 @@ export const calculatorFeature = {
       }
     }
     renderGradeChart(qs("gradeChart"), this.grades);
-    this.bindChartScrollButtonStretch();
     this.percentUpdate();
   },
 

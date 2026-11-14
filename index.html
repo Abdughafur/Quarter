@@ -19,7 +19,7 @@
   <link rel="icon" href="assets/images/pics/logo.png" type="image/png" />
   <link rel="apple-touch-icon" href="assets/images/pics/logo.png" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="assets/css/main.css?v=4.5.3B4">
+  <link rel="stylesheet" href="assets/css/main.css?v=4.5.3B16">
 
 </head>
 
@@ -44,11 +44,11 @@
   </svg>
   <div id="splash" class="splash" aria-hidden="false">
     <div class="splash-inner">
-      <img class="splash-logo" src="assets/images/pics/logo.png" alt="Нишонаи барнома" />
-      <div class="splash-progress" role="progressbar" aria-label="Боркунии барнома">
+      <div class="splash-wordmark" data-text="Чоряк">Чоряк</div>
+      <div class="splash-progress" role="progressbar" aria-label="Боркунии барнома"
+        aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
         <span class="splash-progress-fill"></span>
       </div>
-      <div class="splash-title">Чоряк</div>
     </div>
   </div>
   <div id="noteConfirmModal" class="modal-backdrop" role="dialog" aria-modal="true">
@@ -69,8 +69,8 @@
           <div class="card compact-card">
             <div class="blocks is-empty" id="blocksContainer">
               <div class="empty">
-                <img src="assets/images/minai/write.webp" alt="" aria-hidden="true" />
-                <span>Ҳоло ягон балл нест</span>
+                <img src="assets/images/minai/smile.webp" alt="" aria-hidden="true" />
+                <span>Ҳоло ягон балл ворид нашудааст</span>
               </div>
             </div>
           </div>
@@ -106,7 +106,7 @@
                   <div class="label-small">-</div>
                 </div>
                 <img id="emptyResultIllustration" class="result-empty-illustration"
-                  src="assets/images/minai/write.webp" alt="" aria-hidden="true" />
+                  src="assets/images/minai/hello.webp" alt="" aria-hidden="true" />
               </div>
 
               <div class="stats-stack">
@@ -149,12 +149,6 @@
                 </div>
 
                 <div class="actions">
-                  <button class="result-details-toggle" type="button" data-action="toggleResultDetails"
-                    aria-controls="resultDetailsModal" aria-haspopup="dialog" aria-expanded="false"
-                    aria-label="Дидани ҳисоб" disabled>
-                    <span class="result-details-icon" aria-hidden="true">?</span>
-                    <span class="result-details-label">Дидани ҳисоб</span>
-                  </button>
                   <button class="btn export-action" type="button" data-action="downloadResult"
                     aria-label="Экспорт кардани натиҷа" title="Экспорт кардани натиҷа" disabled>
                     <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
@@ -178,10 +172,10 @@
           </div>
 
           <div class="card minai-card minai-coming-soon minai-status-card" aria-label="MinAI: маълумоти хонанда">
-            <div class="minai-coming-soon-art" aria-hidden="true">
-              <img src="assets/images/minai/smile.webp" alt="" />
+            <div class="minai-card-heading">
+              <img src="assets/images/minai/ai.webp" alt="" aria-hidden="true" />
+              <span>MinAI</span>
             </div>
-            <div class="minai-coming-soon-badge">MinAI v1.1S</div>
             <h3 class="minai-coming-soon-title">Маълумоти воридшуда оиди хонанда</h3>
             <div class="minai-status-list" aria-live="polite">
               <div class="minai-status-item">
@@ -197,6 +191,12 @@
                 <strong id="minaiProgress">Барои хулоса баровардани сатҳи пешравии хонанда маълумоти воридшуда кам аст.</strong>
               </div>
             </div>
+            <button class="result-details-toggle" type="button" data-action="toggleResultDetails"
+              aria-controls="resultDetailsModal" aria-haspopup="dialog" aria-expanded="false"
+              aria-label="Дидани ҳисоб" disabled>
+              <span class="result-details-icon" aria-hidden="true">?</span>
+              <span class="result-details-label">Дидани ҳисоб</span>
+            </button>
           </div>
         </div>
       </div>
@@ -242,24 +242,23 @@
 
         <div class="card minai-card minai-coming-soon minai-status-card percent-minai-card"
           aria-label="MinAI: сатҳи фоизии синф">
-          <div class="minai-coming-soon-art" aria-hidden="true">
-            <img src="assets/images/minai/smile.webp" alt="" />
+          <div class="minai-card-heading">
+            <img src="assets/images/minai/ai.webp" alt="" aria-hidden="true" />
+            <span>MinAI</span>
           </div>
-          <div class="minai-coming-soon-badge">MinAI v1.1S</div>
           <h3 class="minai-coming-soon-title">Сатҳи таҳсили синф</h3>
           <p id="percentMinaiStatus" class="minai-status-message" aria-live="polite">
             Шумораи умумии хонандагонро ворид кунед, баъд шумораи баллҳоро пур намоед.
           </p>
+          <div class="percent-actions">
+            <button class="btn percent-export-btn" type="button" data-action="openPercentExport">
+              Экспорт
+            </button>
+            <button class="btn clear-percent-btn" type="button" data-action="clearAllPercentages">
+              Тоза кардани фоизҳо
+            </button>
+          </div>
         </div>
-      </div>
-
-      <div class="percent-actions">
-        <button class="btn percent-export-btn" type="button" data-action="openPercentExport">
-          Экспорт
-        </button>
-        <button class="btn clear-percent-btn" type="button" data-action="clearAllPercentages">
-          Тоза кардани фоизҳо
-        </button>
       </div>
     </section>
 
@@ -342,25 +341,37 @@
             aria-controls="calendarPickerModal" aria-haspopup="dialog" aria-expanded="false">Гузариш ба сана</button>
         </div>
       </div>
+      <div class="card calendar-lessons-card" aria-labelledby="calendarLessonsTitle">
+        <div class="calendar-lessons-header">
+          <div class="calendar-lessons-brand">
+            <img src="assets/images/minai/ai.webp" alt="" aria-hidden="true" />
+            <div>
+              <span>MinAI</span>
+              <h3 id="calendarLessonsTitle">Дарсҳои рӯз</h3>
+            </div>
+          </div>
+          <span id="calendarLessonsWeekday" class="calendar-lessons-weekday"></span>
+        </div>
+        <div id="calendarLessonsList" class="calendar-lessons-list" aria-live="polite"></div>
+      </div>
     </section>
 
-    <section id="tab-journal" class="tab">
-      <div class="card journal-shell-card">
-        <div class="journal-top-badge">Журнал</div>
-        <div class="journal-coming-soon-card">
-          <div class="journal-badge">Ҳоло дастрас нест</div>
-          <h3 class="journal-title">Журнал</h3>
-          <p>
-            Бахши «Журнал» ҳоло дар марҳилаи таҳия қарор дорад ва айни замон дастрас нест.
-            Пас аз идомаи таҳияи барнома, имконияти дастрас шудани «Журнал» баррасӣ хоҳад шуд.
-            Барои гирифтани маълумоти бештар ба мо тамос гиред.
-          </p>
+    <section id="tab-lessons" class="tab" aria-labelledby="lessonsTitle">
+      <div class="card lessons-shell">
+        <div class="lessons-page-header">
+          <div>
+            <h2 id="lessonsTitle">Ҷадвали дарсҳо</h2>
+            <p>Ҷадвали ҳафтаина барои ҳар як мактаб</p>
+          </div>
+          <button class="btn lessons-add-button" type="button" data-action="openLessonsEditor"
+            aria-label="Илова кардани дарс">
+            <span aria-hidden="true">+</span>
+            <span>Дарси нав</span>
+          </button>
         </div>
-
-        <div class="journal-contact-row">
-          <a class="contact-btn" href="tel:+992928024414">Тамос</a>
-        </div>
-
+        <div id="lessonsSchoolTabs" class="lessons-school-tabs" role="tablist"
+          aria-label="Интихоби мактаб"></div>
+        <div id="lessonsWeekGrid" class="lessons-week-grid" aria-live="polite"></div>
       </div>
     </section>
 
@@ -874,8 +885,8 @@
             </div>
 
             <div class="shortcut-card">
-              <div class="kbd-wrap"><kbd>J</kbd></div>
-              <div class="shortcut-desc">Таб: Журнал</div>
+              <div class="kbd-wrap"><kbd>L</kbd></div>
+              <div class="shortcut-desc">Таб: Ҷадвали дарсҳо</div>
             </div>
 
             <div class="shortcut-card">
@@ -915,7 +926,7 @@
             </div>
             <div class="about">
               <p class="about-app-name"><strong>Чоряк</strong></p>
-              <p><strong>Нусха:</strong> v4.5.3B4 (Бета)</p>
+              <p><strong>Нусха:</strong> v4.5.3B16 (Бета)</p>
               <p><strong>Таҳиягар:</strong> Abdughafur (Абдуғафур)</p>
             </div>
           </div>
@@ -926,7 +937,7 @@
               сохта шудааст. Барнома барои ҳамаи омӯзгорон ройгон пешниҳод мегардад.
             </p>
             <p>
-              Айни замон барнома дар нусхаи v4.5.3B4 (Бета) қарор дорад. Дар ин нусха ба устуворӣ, функсияҳои нав ва кори барнома
+              Айни замон барнома дар нусхаи v4.5.3B16 (Бета) қарор дорад. Дар ин нусха ба устуворӣ, функсияҳои нав ва кори барнома
               диққати махсус дода шудааст. Системаи барнома аз ҷониби мутахассисон ва корбарон санҷида шудааст.
               Фунскияҳои асосии барнома дуруст кор мекунад ва функсяҳои нав дар ҳоли санҷиш ҳастанд.
             </p>
@@ -1029,10 +1040,15 @@
     <div class="ios-modal result-details-modal">
       <button class="result-details-modal-close" type="button" data-action="closeResultDetailsModal"
         aria-label="Пӯшидан">&times;</button>
-      <span class="share-modal-kicker">НАТИҶАҲО</span>
-      <h3 id="resultDetailsModalTitle">Натиҷаҳои чоряк</h3>
+      <div class="result-details-header">
+        <img src="assets/images/minai/ai.webp" alt="MinAI" />
+        <div class="result-details-heading">
+          <span class="result-details-kicker">MINAI · ҲИСОБ</span>
+          <h3 id="resultDetailsModalTitle">Натиҷаи чоряк</h3>
+          <p>Қадамҳои ҳисобкунии натиҷаи шумо</p>
+        </div>
+      </div>
       <div id="resultCalculationDetails" class="result-calculation-details" aria-live="polite"></div>
-      <div id="resultDetailsModalContent" class="result-details-modal-content" aria-live="polite"></div>
     </div>
   </div>
 
@@ -1041,7 +1057,7 @@
     <div class="ios-modal share-modal">
       <button class="share-modal-close" type="button" data-action="closeShareModal"
         aria-label="Пӯшидан">&times;</button>
-      <span class="share-modal-kicker">Чоряк · v4.5.3B4 (Бета)</span>
+      <span class="share-modal-kicker">Чоряк · v4.5.3B16 (Бета)</span>
       <h3 id="shareModalTitle">Мубодилаи барнома</h3>
       <p>Рамзи QR-ро скан кунед ё пайвандро фиристед.</p>
       <div class="share-qr-frame">
@@ -1212,6 +1228,64 @@
     </div>
   </div>
 
+  <div id="lessonsModal" class="modal-backdrop lessons-modal-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="lessonsEditorTitle" aria-hidden="true">
+    <div class="ios-modal lessons-editor">
+      <div class="lessons-editor-header">
+        <div>
+          <span class="lessons-editor-kicker">Ҷадвали ҳафтаина</span>
+          <h3 id="lessonsEditorTitle">Дарси нав</h3>
+        </div>
+        <button class="lessons-close-button" type="button" data-action="closeLessonsEditor"
+          aria-label="Пӯшидан">×</button>
+      </div>
+      <form id="lessonsForm">
+        <input id="lessonIdInput" type="hidden" />
+        <label class="lessons-field" for="lessonSubjectInput">
+          <span>Номи дарс</span>
+          <input id="lessonSubjectInput" class="input-field" type="text" maxlength="120"
+            autocomplete="off" required placeholder="Масалан: Математика" />
+        </label>
+        <div class="lessons-form-row">
+          <label class="lessons-field" for="lessonDayInput">
+            <span>Рӯзи ҳафта</span>
+            <select id="lessonDayInput" class="input-field" required>
+              <option value="1">Душанбе</option>
+              <option value="2">Сешанбе</option>
+              <option value="3">Чоршанбе</option>
+              <option value="4">Панҷшанбе</option>
+              <option value="5">Ҷумъа</option>
+              <option value="6">Шанбе</option>
+              <option value="7">Якшанбе</option>
+            </select>
+          </label>
+          <label class="lessons-field" for="lessonRoomInput">
+            <span>Синфхона (ихтиёрӣ)</span>
+            <input id="lessonRoomInput" class="input-field" type="text" maxlength="64"
+              autocomplete="off" placeholder="Масалан: 12" />
+          </label>
+        </div>
+        <div class="lessons-form-row">
+          <label class="lessons-field" for="lessonStartInput">
+            <span>Оғоз</span>
+            <input id="lessonStartInput" class="input-field" type="time" required />
+          </label>
+          <label class="lessons-field" for="lessonEndInput">
+            <span>Анҷом</span>
+            <input id="lessonEndInput" class="input-field" type="time" required />
+          </label>
+        </div>
+        <div class="lessons-editor-actions">
+          <button id="lessonDeleteButton" class="btn secondary" type="button" data-action="deleteLesson"
+            hidden>Нест кардан</button>
+          <div class="lessons-editor-actions-end">
+            <button class="btn secondary" type="button" data-action="closeLessonsEditor">Лағв</button>
+            <button class="btn" type="submit">Сабт</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <div id="logoutModal" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="ios-modal">
@@ -1341,22 +1415,8 @@
 
   <div id="toast"></div>
 
-  <button class="journal-floating-btn" type="button" data-tab="tab-journal" aria-label="Журнал">
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-journal-album"
-      viewBox="0 0 16 16" xmlns:xlink="http://www.w3.org/1999/xlink">
-      <path
-        d="M5.5 4a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-5a.5.5 0 0 0-.5-.5zm1 7a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1z">
-      </path>
-      <path
-        d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2">
-      </path>
-      <path
-        d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1z">
-      </path>
-    </svg>
-  </button>
-
   <div id="mobileMoreBackdrop" class="mobile-more-backdrop" hidden></div>
+  <div class="nav-dock">
   <nav>
     <div class="nav-active-indicator" aria-hidden="true"></div>
     <button class="nav-btn active" data-tab="tab-home" aria-label="Ҳисобкунак" title="Ҳисобкунак">
@@ -1397,26 +1457,36 @@
       </svg>
     </button>
 
-    <button class="nav-btn mobile-more-trigger" data-tab="tab-more" aria-label="Тақвим ва бештар"
-      title="Тақвим ва бештар"
-      aria-haspopup="true" aria-controls="mobileMoreMenu" aria-expanded="false">
-      <svg class="more-nav-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-        viewBox="0 0 24 24" fill="none" xmlns:xlink="http://www.w3.org/1999/xlink">
-        <path fill-rule="evenodd" clip-rule="evenodd"
-          d="M5 15C6.65685 15 8 13.6569 8 12C8 10.3431 6.65685 9 5 9C3.34315 9 2 10.3431 2 12C2 13.6569 3.34315 15 5 15ZM5 13C5.55228 13 6 12.5523 6 12C6 11.4477 5.55228 11 5 11C4.44772 11 4 11.4477 4 12C4 12.5523 4.44772 13 5 13Z"
-          fill="currentColor"></path>
-        <path fill-rule="evenodd" clip-rule="evenodd"
-          d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15ZM12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z"
-          fill="currentColor"></path>
-        <path fill-rule="evenodd" clip-rule="evenodd"
-          d="M22 12C22 13.6569 20.6569 15 19 15C17.3431 15 16 13.6569 16 12C16 10.3431 17.3431 9 19 9C20.6569 9 22 10.3431 22 12ZM20 12C20 12.5523 19.5523 13 19 13C18.4477 13 18 12.5523 18 12C18 11.4477 18.4477 11 19 11C19.5523 11 20 11.4477 20 12Z"
-          fill="currentColor"></path>
-      </svg>
-      <svg class="calendar-nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M4 8h16M4 16h11" stroke="currentColor" stroke-width="2"
+    <button class="nav-btn" data-tab="tab-lessons" aria-label="Ҷадвали дарсҳо" title="Ҷадвали дарсҳо">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M5 4.5h14A1.5 1.5 0 0 1 20.5 6v14H5A1.5 1.5 0 0 1 3.5 18.5V6A1.5 1.5 0 0 1 5 4.5Z"
+          stroke="currentColor" stroke-width="1.8" />
+        <path d="M7.5 8h9M7.5 11.5h9M7.5 15h5" stroke="currentColor" stroke-width="1.8"
           stroke-linecap="round" />
+        <path d="M7 2.5v4M17 2.5v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
       </svg>
     </button>
+  </nav>
+
+  <button class="nav-btn mobile-more-trigger" data-tab="tab-more" aria-label="Тақвим ва бештар"
+    title="Тақвим ва бештар" aria-haspopup="true" aria-controls="mobileMoreMenu" aria-expanded="false">
+    <svg class="more-nav-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+      viewBox="0 0 24 24" fill="none" xmlns:xlink="http://www.w3.org/1999/xlink">
+      <path fill-rule="evenodd" clip-rule="evenodd"
+        d="M5 15C6.65685 15 8 13.6569 8 12C8 10.3431 6.65685 9 5 9C3.34315 9 2 10.3431 2 12C2 13.6569 3.34315 15 5 15ZM5 13C5.55228 13 6 12.5523 6 12C6 11.4477 5.55228 11 5 11C4.44772 11 4 11.4477 4 12C4 12.5523 4.44772 13 5 13Z"
+        fill="currentColor"></path>
+      <path fill-rule="evenodd" clip-rule="evenodd"
+        d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15ZM12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z"
+        fill="currentColor"></path>
+      <path fill-rule="evenodd" clip-rule="evenodd"
+        d="M22 12C22 13.6569 20.6569 15 19 15C17.3431 15 16 13.6569 16 12C16 10.3431 17.3431 9 19 9C20.6569 9 22 10.3431 22 12ZM20 12C20 12.5523 19.5523 13 19 13C18.4477 13 18 12.5523 18 12C18 11.4477 18.4477 11 19 11C19.5523 11 20 11.4477 20 12Z"
+        fill="currentColor"></path>
+    </svg>
+    <svg class="calendar-nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 8h16M4 16h11" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" />
+    </svg>
+  </button>
     <div id="mobileMoreMenu" class="mobile-more-menu" role="group" aria-label="Бештар" hidden>
       <button type="button" class="mobile-more-menu-option" data-action="navigateMobileMore"
         data-target-tab="tab-calendar">
@@ -1428,6 +1498,16 @@
         <span>Тақвим</span>
       </button>
       <button type="button" class="mobile-more-menu-option" data-action="navigateMobileMore"
+        data-target-tab="tab-lessons">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M5 4.5h14A1.5 1.5 0 0 1 20.5 6v14H5A1.5 1.5 0 0 1 3.5 18.5V6A1.5 1.5 0 0 1 5 4.5Z"
+            stroke="currentColor" stroke-width="1.8" />
+          <path d="M7.5 8h9M7.5 11.5h9M7.5 15h5" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" />
+        </svg>
+        <span>Дарсҳо</span>
+      </button>
+      <button type="button" class="mobile-more-menu-option" data-action="navigateMobileMore"
         data-target-tab="tab-more">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <circle cx="5" cy="12" r="2" />
@@ -1437,11 +1517,11 @@
         <span>Бештар</span>
       </button>
     </div>
-  </nav>
+  </div>
 
   <script type="module" src="assets/js/core/entry.js"></script>
   <script type="module" src="assets/js/core/pwa.js"></script>
-  <script type="module" src="assets/js/core/app.js?v=4.5.3B4"></script>
+  <script type="module" src="assets/js/core/app.js?v=4.5.3B16"></script>
 </body>
 
 </html>

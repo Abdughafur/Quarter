@@ -1,14 +1,14 @@
 /* app.js */
-import { loadState, saveState } from "./storage.js";
+import { loadState, saveState } from "./storage.js?v=4.5.3B16";
 import { Toast } from "../ui/toast.js";
 import { clamp, clean, qs, setInputValue, whenReady } from "../utils/helpers.js";
 import { recoveryFeature } from "./app/features/recovery.js";
-import { profileFeature } from "./app/features/profile.js";
-import { calculatorFeature } from "./app/features/calculator.js";
-import { navigationFeature } from "./app/features/navigation.js";
+import { profileFeature } from "./app/features/profile.js?v=4.5.3B16";
+import { calculatorFeature } from "./app/features/calculator.js?v=4.5.3B16";
+import { navigationFeature } from "./app/features/navigation.js?v=4.5.3B16";
 import { settingsFeature } from "./app/features/settings.js";
 import { notesFeature } from "./app/features/notes.js";
-import { clearStretchState, setStretchState } from "./app/shared.js";
+import { lessonsFeature } from "./app/features/lessons.js?v=4.5.3B16";
 
 export const app = {
   ...recoveryFeature,
@@ -17,6 +17,7 @@ export const app = {
   ...navigationFeature,
   ...settingsFeature,
   ...notesFeature,
+  ...lessonsFeature,
   grades: [],
   pct: { total: 0, counts: {} },
   settings: {},
@@ -32,6 +33,8 @@ export const app = {
   pendingBackupData: null,
   mobileMorePreviousTab: null,
   notes: [],
+  lessons: { selectedSchool: "", schools: {} },
+  lessonsSaveTimer: null,
   calendarMonth: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   calendarSelectedDate: new Date(),
   calendarPickerYear: new Date().getFullYear(),
@@ -72,6 +75,7 @@ export const app = {
     this.pct = state.pct;
     this.settings = state.settings;
     this.notes = Array.isArray(state.notes) ? state.notes : [];
+    this.lessons = state.lessons || {};
     this.activeNoteId = null;
 
     document.addEventListener(
@@ -101,17 +105,40 @@ export const app = {
       this.systemThemeQuery.addListener(handleSystemThemeChange);
     }
 
-    this.bindResultDetailsToggle();
-    this.bindGradesToggle();
-    this.bindExportActionStretch();
-
     const splash = qs("splash");
     if (splash) {
+      const progress = splash.querySelector(".splash-progress");
+      const reducedMotion = window.matchMedia?.(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      const progressDelay = reducedMotion ? 80 : 1800;
+      const progressDuration = reducedMotion ? 160 : 1050;
+      const splashDuration = reducedMotion ? 500 : 3000;
+
       requestAnimationFrame(() => splash.classList.add("showing"));
+      if (progress) {
+        setTimeout(() => {
+          const startedAt = performance.now();
+          const updateProgress = (now) => {
+            const value = Math.min(
+              100,
+              Math.round(((now - startedAt) / progressDuration) * 100),
+            );
+            progress.setAttribute("aria-valuenow", String(value));
+            if (value < 100) requestAnimationFrame(updateProgress);
+          };
+          requestAnimationFrame(updateProgress);
+        }, progressDelay);
+      }
+
       setTimeout(() => {
+        progress?.setAttribute("aria-valuenow", "100");
         splash.classList.add("fading");
-        setTimeout(() => splash.classList.add("hide"), 420);
-      }, 3000);
+        setTimeout(() => {
+          splash.classList.add("hide");
+          splash.setAttribute("aria-hidden", "true");
+        }, 420);
+      }, splashDuration);
     }
 
     this.bind(state.info);
@@ -123,6 +150,7 @@ export const app = {
     const savePendingChanges = () => {
       if (this.logoutInProgress) return;
       this.flushNoteAutosave();
+      this.flushLessonsSave();
       void this.save();
     };
     window.addEventListener("pagehide", savePendingChanges);
@@ -144,6 +172,8 @@ export const app = {
     this.applySettings();
     this.updateAll();
     this.renderNotes();
+    this.bindLessons();
+    this.renderLessons();
     this.renderCalendar();
     this.bindCalendarSwipe();
 
@@ -156,17 +186,32 @@ export const app = {
     if (!nav) return;
 
     const buttons = Array.from(nav.querySelectorAll(".nav-btn"));
+    const moreTrigger = document.querySelector(".mobile-more-trigger");
+    const allButtons = moreTrigger ? [...buttons, moreTrigger] : buttons;
     if (!buttons.length) return;
     const visibleButtons = () =>
-      buttons.filter((button) => button.getClientRects().length > 0);
+      buttons.filter(
+        (button) =>
+          button.getClientRects().length > 0 &&
+          !(
+            this.isPhoneLayout() &&
+            button.classList.contains("mobile-more-trigger")
+          ),
+      );
     const navigationTarget = (button) =>
-      button?.dataset.tab === "tab-calendar" && this.isPhoneLayout()
-        ? nav.querySelector(".mobile-more-trigger")
+      ["tab-calendar", "tab-lessons"].includes(button?.dataset.tab) &&
+      this.isPhoneLayout()
+        ? moreTrigger
         : button;
 
     const indicator = nav.querySelector(".nav-active-indicator");
     const updateIndicator = (button) => {
       if (!indicator || !button) return;
+      if (button === moreTrigger) {
+        indicator.style.opacity = "0";
+        return;
+      }
+      indicator.style.opacity = "";
       const navRect = nav.getBoundingClientRect();
       const buttonRect = button.getBoundingClientRect();
       const paddingLeft =
@@ -184,7 +229,7 @@ export const app = {
     };
     const updatePosition = (button) => {
       const target = navigationTarget(button);
-      buttons.forEach((item) => {
+      allButtons.forEach((item) => {
         const selected = item === target;
         item.classList.toggle("active", selected);
         if (selected) item.setAttribute("aria-current", "page");
@@ -269,7 +314,12 @@ export const app = {
     const onPointerDown = (event) => {
       if (!canDrag()) return;
       if (event.pointerType === "mouse" && event.button !== 0) return;
-      if (!event.target.closest(".nav-btn")) return;
+      const button = event.target.closest(".nav-btn");
+      if (
+        !button ||
+        (this.isPhoneLayout() && button.classList.contains("mobile-more-trigger"))
+      )
+        return;
       pointerId = event.pointerId;
       startX = currentX = event.clientX;
       startY = event.clientY;
@@ -325,14 +375,7 @@ export const app = {
         suppressNextClick = false;
       }, 0);
       if (nearest.btn.dataset.tab) {
-        if (
-          nearest.btn.classList.contains("mobile-more-trigger") &&
-          this.isPhoneLayout()
-        ) {
-          this.openMobileMoreMenu();
-        } else {
-          this.nav(nearest.btn.dataset.tab, nearest.btn);
-        }
+        this.nav(nearest.btn.dataset.tab, nearest.btn);
       }
     };
 
@@ -353,311 +396,6 @@ export const app = {
     window.addEventListener("resize", () => {
       const selected = nav.querySelector(".nav-btn.active") || buttons[0];
       updateIndicator(selected);
-    });
-  },
-
-  bindResultDetailsToggle() {
-    const toggle = document.querySelector(".result-details-toggle");
-    if (!toggle || toggle.dataset.bound === "true") return;
-
-    toggle.dataset.bound = "true";
-    let pointerId = null;
-    let startX = 0;
-    let startY = 0;
-    let dragged = false;
-
-    toggle.addEventListener("pointerdown", (event) => {
-      if (event.pointerType === "mouse" && event.button !== 0) return;
-
-      pointerId = event.pointerId;
-      startX = event.clientX;
-      startY = event.clientY;
-      dragged = false;
-      toggle.classList.add("is-stretching");
-      document.documentElement.classList.add("button-stretching");
-      document.body.classList.add("button-stretching");
-      toggle.style.transformOrigin = "center";
-      toggle.style.transition =
-        "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
-      toggle.style.transform = "scale(0.975)";
-      try {
-        toggle.setPointerCapture?.(pointerId);
-      } catch (error) {}
-    });
-
-    toggle.addEventListener("pointermove", (event) => {
-      if (event.pointerId !== pointerId) return;
-
-      const deltaX = event.clientX - startX;
-      const deltaY = event.clientY - startY;
-      const distance = Math.hypot(deltaX, deltaY);
-      if (distance > 8) dragged = true;
-
-      const offsetX = Math.max(-3, Math.min(3, deltaX * 0.035));
-      const offsetY = Math.max(-2, Math.min(2, deltaY * 0.025));
-      const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
-      const scale = 1 + Math.min(distance * 0.0025, 0.075);
-
-      toggle.style.transformOrigin = "center";
-      toggle.style.transition =
-        "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)";
-      toggle.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg) scaleX(${scale}) rotate(${-angle}deg)`;
-      setStretchState(toggle, offsetX, offsetY, angle, scale);
-    });
-
-    const resetToggle = (event) => {
-      if (event.pointerId !== pointerId) return;
-
-      try {
-        toggle.releasePointerCapture?.(pointerId);
-      } catch (error) {}
-      toggle.classList.remove("is-stretching");
-      toggle.classList.add("is-releasing");
-      document.documentElement.classList.remove("button-stretching");
-      document.body.classList.remove("button-stretching");
-
-      if (dragged) {
-        toggle.dataset.dragged = "true";
-        setTimeout(() => delete toggle.dataset.dragged, 0);
-      }
-
-      pointerId = null;
-      setTimeout(() => {
-        toggle.classList.remove("is-releasing");
-        toggle.style.removeProperty("transform");
-        toggle.style.removeProperty("transition");
-        toggle.style.removeProperty("transform-origin");
-        clearStretchState(toggle);
-      }, 600);
-    };
-
-    toggle.addEventListener("pointerup", resetToggle);
-    toggle.addEventListener("pointercancel", resetToggle);
-    toggle.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      if (toggle.dataset.dragged) {
-        delete toggle.dataset.dragged;
-        return;
-      }
-      this.toggleResultDetails();
-    });
-  },
-
-  bindGradesToggle() {
-    const toggle = document.querySelector(".grades-toggle");
-    if (!toggle || toggle.dataset.bound === "true") return;
-
-    toggle.dataset.bound = "true";
-    let pointerId = null;
-    let startX = 0;
-    let startY = 0;
-    let dragged = false;
-
-    toggle.addEventListener("pointerdown", (event) => {
-      if (event.pointerType === "mouse" && event.button !== 0) return;
-
-      pointerId = event.pointerId;
-      startX = event.clientX;
-      startY = event.clientY;
-      dragged = false;
-      toggle.classList.add("is-stretching");
-      document.documentElement.classList.add("button-stretching");
-      document.body.classList.add("button-stretching");
-      toggle.style.transformOrigin = "center";
-      toggle.style.transition =
-        "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
-      toggle.style.transform = "scale(0.98)";
-      try {
-        toggle.setPointerCapture?.(pointerId);
-      } catch (error) {}
-    });
-
-    toggle.addEventListener("pointermove", (event) => {
-      if (event.pointerId !== pointerId) return;
-
-      const deltaX = event.clientX - startX;
-      const deltaY = event.clientY - startY;
-      const distance = Math.hypot(deltaX, deltaY);
-      if (distance > 8) dragged = true;
-
-      const offsetX = Math.max(-3, Math.min(3, deltaX * 0.04));
-      const offsetY = Math.max(-2, Math.min(2, deltaY * 0.025));
-      const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
-      const scale = 1 + Math.min(distance * 0.0025, 0.075);
-
-      toggle.style.transformOrigin = "center";
-      toggle.style.transition =
-        "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)";
-      toggle.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg) scaleX(${scale}) rotate(${-angle}deg)`;
-      setStretchState(toggle, offsetX, offsetY, angle, scale);
-    });
-
-    const resetToggle = (event) => {
-      if (event.pointerId !== pointerId) return;
-
-      try {
-        toggle.releasePointerCapture?.(pointerId);
-      } catch (error) {}
-      toggle.classList.remove("is-stretching");
-      toggle.classList.add("is-releasing");
-      document.documentElement.classList.remove("button-stretching");
-      document.body.classList.remove("button-stretching");
-
-      if (dragged) {
-        toggle.dataset.dragged = "true";
-        setTimeout(() => delete toggle.dataset.dragged, 0);
-      }
-
-      pointerId = null;
-      setTimeout(() => {
-        toggle.classList.remove("is-releasing");
-        toggle.style.removeProperty("transform");
-        toggle.style.removeProperty("transition");
-        toggle.style.removeProperty("transform-origin");
-        clearStretchState(toggle);
-      }, 600);
-    };
-
-    toggle.addEventListener("pointerup", resetToggle);
-    toggle.addEventListener("pointercancel", resetToggle);
-  },
-
-  bindExportActionStretch() {
-    document
-      .querySelectorAll(".export-action, .percent-export-btn")
-      .forEach((button) => {
-        if (button.dataset.stretchBound === "true") return;
-
-        button.dataset.stretchBound = "true";
-        let pointerId = null;
-        let startX = 0;
-        let startY = 0;
-        let dragged = false;
-
-        button.addEventListener("pointerdown", (event) => {
-          if (event.pointerType === "mouse" && event.button !== 0) return;
-
-          pointerId = event.pointerId;
-          startX = event.clientX;
-          startY = event.clientY;
-          dragged = false;
-          button.classList.add("is-stretching");
-          document.documentElement.classList.add("button-stretching");
-          document.body.classList.add("button-stretching");
-          button.style.transformOrigin = "center";
-          button.style.transition =
-            "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
-          button.style.transform = "scale(0.985)";
-          try {
-            button.setPointerCapture?.(pointerId);
-          } catch (error) {}
-        });
-
-        button.addEventListener("pointermove", (event) => {
-          if (event.pointerId !== pointerId) return;
-
-          const deltaX = event.clientX - startX;
-          const deltaY = event.clientY - startY;
-          const distance = Math.hypot(deltaX, deltaY);
-          if (distance > 8) dragged = true;
-
-          const offsetX = Math.max(-4, Math.min(4, deltaX * 0.035));
-          const offsetY = Math.max(-2, Math.min(2, deltaY * 0.02));
-          const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
-          const scale = 1 + Math.min(distance * 0.0018, 0.085);
-
-          button.style.transformOrigin = "center";
-          button.style.transition =
-            "transform 120ms cubic-bezier(0.22, 1, 0.36, 1), background 180ms ease, box-shadow 180ms ease";
-          button.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg) scaleX(${scale}) rotate(${-angle}deg)`;
-          setStretchState(button, offsetX, offsetY, angle, scale);
-        });
-
-        const resetButton = (event) => {
-          if (event.pointerId !== pointerId) return;
-
-          try {
-            button.releasePointerCapture?.(pointerId);
-          } catch (error) {}
-          button.classList.remove("is-stretching");
-          button.classList.add("is-releasing");
-          document.documentElement.classList.remove("button-stretching");
-          document.body.classList.remove("button-stretching");
-
-          if (dragged) {
-            button.dataset.dragged = "true";
-            setTimeout(() => delete button.dataset.dragged, 0);
-          }
-
-          pointerId = null;
-          setTimeout(() => {
-            button.classList.remove("is-releasing");
-            button.style.removeProperty("transform");
-            button.style.removeProperty("transition");
-            button.style.removeProperty("transform-origin");
-            clearStretchState(button);
-          }, 600);
-        };
-
-        button.addEventListener("pointerup", resetButton);
-        button.addEventListener("pointercancel", resetButton);
-      });
-  },
-
-  bindChartScrollButtonStretch() {
-    document.querySelectorAll(".chart-scroll-button").forEach((button) => {
-      if (button.dataset.stretchBound === "true") return;
-      button.dataset.stretchBound = "true";
-
-      let pointerId = null;
-      let startX = 0;
-      let startY = 0;
-      let moved = false;
-
-      button.addEventListener("pointerdown", (event) => {
-        if (event.pointerType === "mouse" && event.button !== 0) return;
-        pointerId = event.pointerId;
-        startX = event.clientX;
-        startY = event.clientY;
-        moved = false;
-        button.classList.add("is-stretching");
-        button.setPointerCapture?.(pointerId);
-      });
-
-      button.addEventListener("pointermove", (event) => {
-        if (event.pointerId !== pointerId) return;
-        const deltaX = event.clientX - startX;
-        const deltaY = event.clientY - startY;
-        const distance = Math.hypot(deltaX, deltaY);
-        if (distance > 5) moved = true;
-        setStretchState(
-          button,
-          Math.max(-5, Math.min(5, deltaX * 0.08)),
-          Math.max(-3, Math.min(3, deltaY * 0.06)),
-          Math.atan2(deltaY, deltaX) * (180 / Math.PI),
-          1 + Math.min(distance * 0.002, 0.075),
-        );
-      });
-
-      const finish = (event) => {
-        if (event.pointerId !== pointerId) return;
-        button.releasePointerCapture?.(pointerId);
-        button.classList.remove("is-stretching");
-        button.classList.add("is-releasing");
-        if (moved) {
-          button.dataset.dragged = "true";
-          setTimeout(() => delete button.dataset.dragged, 260);
-        }
-        pointerId = null;
-        setTimeout(() => {
-          button.classList.remove("is-releasing");
-          clearStretchState(button);
-        }, 360);
-      };
-
-      button.addEventListener("pointerup", finish);
-      button.addEventListener("pointercancel", finish);
     });
   },
 
@@ -741,6 +479,7 @@ export const app = {
       if (event.target.id === "resultDetailsModal")
         this.closeResultDetailsModal();
       if (event.target.id === "calendarPickerModal") this.closeCalendarPicker();
+      if (event.target.id === "lessonsModal") this.closeLessonsEditor();
       if (event.target.id === "backupExportModal") {
         this.closeBackupExportModal();
       }
@@ -778,258 +517,21 @@ export const app = {
         this.closeShareModal();
         this.closeResultDetailsModal();
         this.closeCalendarPicker();
+        const lessonsModalOpen = qs("lessonsModal")?.classList.contains("open");
+        if (
+          lessonsModalOpen &&
+          document.querySelector("[data-time-popover]:not([hidden])")
+        ) {
+          this.closeLessonsTimePicker();
+          return;
+        }
+        this.closeLessonsEditor();
+        this.closeLessonsSchoolMenu(!lessonsModalOpen);
         if (!qs("mobileMoreMenu")?.hidden) {
           this.closeMobileMoreMenu(true, true);
         }
       }
     });
-
-    document
-      .querySelectorAll(".mobile-subview-header .btn-back")
-      .forEach((headerControl) => {
-        let startX = 0;
-        let startY = 0;
-        let dragged = false;
-
-        headerControl.addEventListener("pointerdown", (event) => {
-          startX = event.clientX;
-          startY = event.clientY;
-          dragged = false;
-          document.documentElement.classList.add("button-stretching");
-          document.body.classList.add("button-stretching");
-          try {
-            headerControl.setPointerCapture?.(event.pointerId);
-          } catch (error) {}
-          headerControl.classList.add("is-dragging");
-          headerControl.style.transformOrigin = "center";
-          headerControl.style.transition =
-            "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
-          headerControl.style.transform = "scale(0.97)";
-        });
-
-        headerControl.addEventListener("pointermove", (event) => {
-          if (!headerControl.classList.contains("is-dragging")) return;
-
-          const deltaX = event.clientX - startX;
-          const deltaY = event.clientY - startY;
-          const distance = Math.hypot(deltaX, deltaY);
-          if (distance > 8) dragged = true;
-
-          const angle = (Math.atan2(deltaY, deltaX) * 180) / Math.PI;
-          const offsetX = Math.max(-3, Math.min(3, deltaX * 0.035));
-          const offsetY = Math.max(-3, Math.min(3, deltaY * 0.02));
-          const scale = 1 + Math.min(distance * 0.0025, 0.075);
-          headerControl.style.transformOrigin = "center";
-          headerControl.style.transition =
-            "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)";
-          headerControl.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg) scaleX(${scale}) rotate(${-angle}deg)`;
-          setStretchState(headerControl, offsetX, offsetY, angle, scale);
-        });
-
-        const resetDrag = (event) => {
-          if (!headerControl.classList.contains("is-dragging")) return;
-          try {
-            headerControl.releasePointerCapture?.(event.pointerId);
-          } catch (error) {}
-          headerControl.classList.remove("is-dragging");
-          headerControl.classList.add("is-releasing");
-          document.documentElement.classList.remove("button-stretching");
-          document.body.classList.remove("button-stretching");
-          setTimeout(() => {
-            headerControl.classList.remove("is-releasing");
-            headerControl.style.removeProperty("transition");
-            headerControl.style.removeProperty("transform");
-            headerControl.style.removeProperty("transform-origin");
-            clearStretchState(headerControl);
-          }, 600);
-          if (dragged) {
-            headerControl.dataset.dragged = "true";
-            setTimeout(() => delete headerControl.dataset.dragged, 0);
-          }
-        };
-
-        headerControl.addEventListener("pointerup", resetDrag);
-        headerControl.addEventListener("pointercancel", resetDrag);
-      });
-
-    const clearBackButtonDrags = () => {
-      document
-        .querySelectorAll(".mobile-subview-header .btn-back.is-dragging")
-        .forEach((headerControl) => {
-          headerControl.classList.remove("is-dragging");
-          headerControl.classList.add("is-releasing");
-          setTimeout(() => {
-            headerControl.classList.remove("is-releasing");
-            headerControl.style.removeProperty("transition");
-            headerControl.style.removeProperty("transform");
-            headerControl.style.removeProperty("transform-origin");
-            clearStretchState(headerControl);
-          }, 600);
-        });
-      document.documentElement.classList.remove("button-stretching");
-      document.body.classList.remove("button-stretching");
-    };
-
-    document.addEventListener("pointerup", clearBackButtonDrags);
-    document.addEventListener("pointercancel", clearBackButtonDrags);
-
-    const clearPercentButtons = document.querySelectorAll(".clear-percent-btn");
-
-    clearPercentButtons.forEach((clearButton) => {
-      let startX = 0;
-      let startY = 0;
-      let pointerId = null;
-      let dragged = false;
-
-      clearButton.addEventListener("pointerdown", (event) => {
-        if (event.pointerType === "mouse" && event.button !== 0) return;
-        event.preventDefault();
-
-        startX = event.clientX;
-        startY = event.clientY;
-        pointerId = event.pointerId;
-        dragged = false;
-        clearButton.classList.add("is-pressing");
-        document.documentElement.classList.add("button-stretching");
-        document.body.classList.add("button-stretching");
-        clearButton.style.transformOrigin = "center";
-        clearButton.style.transition =
-          "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
-        clearButton.style.transform = "translateY(-1px) scaleX(1.015)";
-        clearButton.setPointerCapture?.(pointerId);
-      });
-
-      clearButton.addEventListener("pointermove", (event) => {
-        if (event.pointerId !== pointerId) return;
-
-        const deltaX = event.clientX - startX;
-        const deltaY = event.clientY - startY;
-        const distance = Math.hypot(deltaX, deltaY);
-        if (distance > 8) dragged = true;
-
-        const offsetX = Math.max(-4, Math.min(4, deltaX * 0.04));
-        const offsetY = Math.max(-2, Math.min(2, deltaY * 0.02));
-        const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
-        const scale = 1 + Math.min(distance * 0.0025, 0.075);
-
-        clearButton.style.transformOrigin = "center";
-        clearButton.style.transition =
-          "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)";
-        clearButton.style.transform = `translate(${offsetX}px, ${offsetY - 1}px) rotate(${angle}deg) scaleX(${scale}) rotate(${-angle}deg)`;
-        setStretchState(clearButton, offsetX, offsetY - 1, angle, scale);
-      });
-
-      const resetClearButton = (event) => {
-        if (event.pointerId !== pointerId) return;
-
-        clearButton.releasePointerCapture?.(pointerId);
-        clearButton.classList.remove("is-pressing");
-        clearButton.classList.add("is-releasing");
-        document.documentElement.classList.remove("button-stretching");
-        document.body.classList.remove("button-stretching");
-
-        if (dragged) {
-          clearButton.dataset.dragged = "true";
-          setTimeout(() => delete clearButton.dataset.dragged, 0);
-        }
-
-        pointerId = null;
-        setTimeout(() => {
-          clearButton.classList.remove("is-releasing");
-          clearButton.style.removeProperty("transform");
-          clearButton.style.removeProperty("transition");
-          clearButton.style.removeProperty("transform-origin");
-          clearStretchState(clearButton);
-        }, 600);
-      };
-
-      clearButton.addEventListener("pointerup", resetClearButton);
-      clearButton.addEventListener("pointercancel", resetClearButton);
-    });
-
-    document
-      .querySelectorAll(
-        ".journal-floating-btn, .floating-add-note, .more-actions-row .capsule-btn",
-      )
-      .forEach((floatingButton) => {
-        let pointerId = null;
-        let startX = 0;
-        let startY = 0;
-        let dragged = false;
-
-        floatingButton.addEventListener("pointerdown", (event) => {
-          if (event.pointerType === "mouse" && event.button !== 0) return;
-
-          pointerId = event.pointerId;
-          startX = event.clientX;
-          startY = event.clientY;
-          dragged = false;
-          floatingButton.classList.add("is-stretching");
-          document.documentElement.classList.add("button-stretching");
-          document.body.classList.add("button-stretching");
-          floatingButton.style.transformOrigin = "center";
-          floatingButton.style.transition =
-            "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
-          floatingButton.style.transform = "scale(0.98)";
-          try {
-            floatingButton.setPointerCapture?.(pointerId);
-          } catch (error) {}
-        });
-
-        floatingButton.addEventListener("pointermove", (event) => {
-          if (event.pointerId !== pointerId) return;
-
-          const deltaX = event.clientX - startX;
-          const deltaY = event.clientY - startY;
-          const distance = Math.hypot(deltaX, deltaY);
-          if (distance > 8) dragged = true;
-
-          const offsetX = Math.max(-4, Math.min(4, deltaX * 0.035));
-          const offsetY = Math.max(-4, Math.min(4, deltaY * 0.035));
-          const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
-          const scale = 1 + Math.min(distance * 0.0025, 0.075);
-
-          floatingButton.style.transformOrigin = "center";
-          floatingButton.style.transition =
-            "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)";
-          floatingButton.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${angle}deg) scaleX(${scale}) rotate(${-angle}deg)`;
-          setStretchState(floatingButton, offsetX, offsetY, angle, scale);
-        });
-
-        const resetFloatingButton = (event) => {
-          if (event.pointerId !== pointerId) return;
-
-          try {
-            floatingButton.releasePointerCapture?.(pointerId);
-          } catch (error) {}
-          floatingButton.classList.remove("is-stretching");
-          floatingButton.classList.add("is-releasing");
-          document.documentElement.classList.remove("button-stretching");
-          document.body.classList.remove("button-stretching");
-
-          if (dragged) {
-            floatingButton.dataset.dragged = "true";
-            setTimeout(
-              () => delete floatingButton.dataset.dragged,
-              floatingButton.classList.contains("journal-floating-btn")
-                ? 260
-                : 0,
-            );
-          }
-
-          pointerId = null;
-          setTimeout(() => {
-            floatingButton.classList.remove("is-releasing");
-            floatingButton.style.removeProperty("transform");
-            floatingButton.style.removeProperty("transition");
-            floatingButton.style.removeProperty("transform-origin");
-            clearStretchState(floatingButton);
-          }, 600);
-        };
-
-        floatingButton.addEventListener("pointerup", resetFloatingButton);
-        floatingButton.addEventListener("pointercancel", resetFloatingButton);
-      });
 
     qs("notesList")?.addEventListener("click", (event) => {
       const noteCard = event.target.closest(".note-item");
@@ -1318,6 +820,12 @@ export const app = {
       closeCalendarPicker: () => this.closeCalendarPicker(),
       selectCalendarYear: (payload) => this.selectCalendarYear(payload.year),
       selectCalendarMonth: (payload) => this.selectCalendarMonth(payload.month),
+      openLessonsEditor: (payload) => this.openLessonsEditor(payload),
+      closeLessonsEditor: () => this.closeLessonsEditor(),
+      selectLessonsSchool: (payload) =>
+        this.selectLessonsSchool(payload.school),
+      editLesson: (payload) => this.openLessonsEditor(payload),
+      deleteLesson: (payload) => this.deleteLesson(payload.id),
       editProfile: () => this.showSubView("more-profile-view"),
       goToProfile: () => this.showSubView("more-profile-view"),
       saveSetupProfile: () => this.saveSetupProfile(),
@@ -1384,6 +892,7 @@ export const app = {
       },
       profile: this.profile,
       notes: this.notes,
+      lessons: this.lessons,
     }).catch((error) => {
       console.error("Could not save app state.", error);
       if (!this.storageWarningShown) {

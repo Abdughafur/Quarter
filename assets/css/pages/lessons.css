@@ -1,0 +1,351 @@
+#tab-lessons .lessons-shell {
+  width: min(100%, 1080px);
+  margin-inline: auto;
+  padding: 22px;
+}
+
+.lessons-page-header,
+.lessons-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.lessons-page-header {
+  margin-bottom: 18px;
+}
+
+.lessons-page-header h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.4rem;
+  font-weight: 950;
+}
+
+.lessons-page-header p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 750;
+}
+
+.lessons-add-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding-inline: 14px;
+  white-space: nowrap;
+}
+
+.lessons-add-button > span:first-child {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.lessons-add-button[hidden],
+#lessonDeleteButton[hidden] {
+  display: none;
+}
+
+.lessons-school-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding: 2px 2px 8px;
+  scrollbar-width: thin;
+}
+
+.lessons-school-tab {
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--card);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 850;
+  cursor: pointer;
+  transition: color 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+
+.lessons-school-tab:hover,
+.lessons-school-tab.is-active {
+  color: var(--primary);
+  border-color: var(--brand-border);
+  background: var(--brand-soft);
+}
+
+.lessons-week-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.lessons-day-card {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: linear-gradient(160deg, var(--card), var(--card2));
+  box-shadow: var(--shadow);
+}
+
+.lessons-day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.lessons-day-header h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.96rem;
+  font-weight: 900;
+}
+
+.lesson-add-day-button,
+.lessons-close-button {
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--primary);
+  background: var(--soft);
+  font: inherit;
+  font-size: 1.15rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.lessons-day-list {
+  display: grid;
+  gap: 8px;
+}
+
+.lesson-row {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--soft);
+}
+
+.lesson-time {
+  display: grid;
+  gap: 2px;
+  color: var(--primary);
+  font-size: 0.72rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.lesson-details {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.lesson-details strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 0.83rem;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lesson-details span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.lesson-edit-button {
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 9px;
+  color: var(--primary);
+  background: transparent;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.lesson-edit-button:hover {
+  background: var(--brand-soft);
+}
+
+.lessons-day-empty {
+  margin: 0;
+  padding: 10px 4px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.lessons-empty-state {
+  grid-column: 1 / -1;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 36px 20px;
+  border: 1px dashed var(--brand-border);
+  border-radius: 20px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.lessons-empty-state h3,
+.lessons-empty-state p {
+  margin: 0;
+}
+
+.lessons-empty-state h3 {
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.lessons-empty-state p {
+  max-width: 420px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.lessons-empty-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 15px;
+  color: var(--primary);
+  background: var(--brand-soft);
+  font-size: 1.5rem;
+}
+
+.lessons-modal-backdrop {
+  z-index: 2250;
+  align-items: center;
+}
+
+.lessons-editor {
+  width: min(560px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+
+.lessons-editor-header {
+  margin-bottom: 20px;
+}
+
+.lessons-editor-header h3 {
+  margin: 0;
+}
+
+.lessons-editor-kicker {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--primary);
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.lessons-close-button {
+  color: var(--muted);
+  font-size: 1.4rem;
+}
+
+.lessons-editor form {
+  display: grid;
+  gap: 14px;
+}
+
+.lessons-field {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.lessons-field .input-field {
+  min-width: 0;
+  min-height: 46px;
+  padding: 0 12px;
+  border-color: var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text);
+}
+
+.lessons-field input[type="time"] {
+  color-scheme: light;
+}
+
+body[data-theme="dark"] .lessons-field input[type="time"] {
+  color-scheme: dark;
+}
+
+.lessons-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.lessons-editor-actions,
+.lessons-editor-actions-end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lessons-editor-actions {
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.lessons-editor-actions-end {
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  #tab-lessons .lessons-shell {
+    padding: 16px;
+  }
+
+  .lessons-week-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 420px) {
+  .lessons-page-header {
+    align-items: flex-start;
+  }
+
+  .lessons-add-button {
+    min-height: 38px;
+    padding-inline: 10px;
+    font-size: 0.78rem;
+  }
+
+  .lessons-form-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
