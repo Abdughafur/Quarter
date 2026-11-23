@@ -126,8 +126,8 @@
 }
 .stat-icon.target {
   color: #ffffff;
-  background: linear-gradient(135deg, #3b82f6, #60a5fa);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.1);
+  background: #0284c7;
+  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.1);
 }
 
 .stat-value {
