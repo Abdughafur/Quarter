@@ -178,7 +178,7 @@ nav .nav-btn > svg {
 @media (max-width: 760px) {
   .nav-dock {
     bottom: 12px;
-    gap: 12px;
+    gap: 20px;
     max-width: calc(100vw - 16px);
   }
 
@@ -227,8 +227,10 @@ nav .nav-btn > svg {
 
   body.mobile-more-menu-open nav {
     position: relative;
-    z-index: 2;
-    filter: none;
+    z-index: 1;
+    filter: blur(6px);
+    opacity: 0.72;
+    pointer-events: none;
   }
 
   body.mobile-more-menu-open .floating-add-note {
@@ -237,8 +239,8 @@ nav .nav-btn > svg {
 
   body.mobile-more-menu-open nav .nav-active-indicator,
   body.mobile-more-menu-open nav .nav-btn {
-    opacity: 1;
-    pointer-events: auto;
+    opacity: 0.72;
+    pointer-events: none;
   }
 
   body.mobile-more-menu-open .nav-dock > .mobile-more-trigger {

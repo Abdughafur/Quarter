@@ -90,7 +90,7 @@ nav {
   .nav-dock {
     left: 50%;
     right: auto;
-    gap: 12px !important;
+    gap: 20px !important;
   }
 
   nav {

@@ -361,7 +361,7 @@
   margin: 2px 0 0;
   padding: 0 14px;
   border: 1px solid rgba(14, 165, 233, 0.2);
-  border-radius: 14px;
+  border-radius: 999px;
   background: linear-gradient(135deg, #0284c7, #22d3ee);
   color: #fff;
   font-size: 0.82rem;
@@ -370,7 +370,10 @@
 }
 
 .minai-status-card .result-details-toggle:disabled {
-  opacity: 0.45;
+  opacity: 1;
+  color: #ffffff;
+  background: #9ca3af;
+  border-color: #9ca3af;
   cursor: not-allowed;
   box-shadow: none;
 }
