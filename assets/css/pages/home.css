@@ -127,7 +127,7 @@
 .blocks::-webkit-scrollbar-thumb {
   min-height: 28px;
   border-radius: 999px;
-  background: linear-gradient(180deg, var(--primary), var(--accent));
+  background: #0284c7;
 }
 
 .blocks::-webkit-scrollbar-thumb:hover {
@@ -180,9 +180,7 @@
   padding: 0;
   display: grid;
   place-items: center;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 45%),
-    linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   color: white;
   box-shadow: none;
   position: relative;
@@ -192,9 +190,7 @@
 }
 
 .block.exam {
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.24), transparent 45%),
-    linear-gradient(135deg, #f59e0b, #f97316);
+  background: #f59e0b;
   box-shadow: none;
 }
 
@@ -253,18 +249,10 @@
 }
 
 .gradient-text {
-  background: linear-gradient(
-    90deg,
-    var(--accent),
-    var(--primary),
-    var(--cyan),
-    var(--accent)
-  );
-  background-size: 260% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradient 3s linear infinite;
+  color: #0284c7;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  animation: none;
 }
 
 .actions {
