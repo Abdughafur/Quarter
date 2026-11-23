@@ -6,7 +6,7 @@
   z-index: 1000;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   width: max-content;
   max-width: calc(100vw - 24px);
   transform: translateX(-50%);
@@ -154,12 +154,25 @@ nav .nav-btn > svg {
 }
 
 .nav-dock > .mobile-more-trigger {
-  flex: 0 0 48px;
+  flex: 0 0 64px;
+  width: 64px;
+  min-width: 64px;
+  height: 64px;
+  min-height: 64px;
+  padding: 0;
+  display: grid;
+  place-items: center;
   border: 1px solid var(--border);
+  border-radius: 50%;
   background: var(--card);
   color: var(--primary);
   box-shadow: 0 8px 24px rgba(2, 6, 23, 0.16);
   touch-action: manipulation;
+  position: relative;
+  z-index: 6;
+  filter: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 @media (max-width: 760px) {
@@ -181,8 +194,16 @@ nav .nav-btn > svg {
   }
 
   .nav-btn {
-    height: 48px;
+    flex: 0 0 clamp(38px, 13.6vw, 48px);
+    width: clamp(38px, 13.6vw, 48px);
+    min-width: clamp(38px, 13.6vw, 48px);
+    height: clamp(38px, 13.6vw, 48px);
     border-radius: 50%;
+  }
+
+  nav {
+    gap: clamp(4px, 1.4vw, 8px);
+    padding: clamp(5px, 1.8vw, 8px);
   }
 
 }
@@ -204,11 +225,9 @@ nav .nav-btn > svg {
   }
 
   body.mobile-more-menu-open nav {
-    background: transparent;
-    border-color: transparent;
-    box-shadow: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    position: relative;
+    z-index: 2;
+    filter: none;
   }
 
   body.mobile-more-menu-open .floating-add-note {
@@ -217,8 +236,8 @@ nav .nav-btn > svg {
 
   body.mobile-more-menu-open nav .nav-active-indicator,
   body.mobile-more-menu-open nav .nav-btn {
-    opacity: 0;
-    pointer-events: none;
+    opacity: 1;
+    pointer-events: auto;
   }
 
   body.mobile-more-menu-open .nav-dock > .mobile-more-trigger {
@@ -228,7 +247,15 @@ nav .nav-btn > svg {
   }
 
   body.mobile-more-menu-open .mobile-more-menu {
-    z-index: 4;
+    z-index: 5;
+    filter: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  body.mobile-more-menu-open .nav-dock {
+    isolation: isolate;
+    filter: none;
   }
 
   .nav-btn[data-tab="tab-calendar"] {
