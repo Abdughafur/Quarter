@@ -186,3 +186,28 @@ body.mobile-more-menu-open .nav-dock > .mobile-more-trigger {
   color: var(--primary) !important;
 }
 
+/* v4.6B: restore the red clear action after the global blue button rule. */
+#tab-prosent .clear-percent-btn {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+/* Percentage grade-count input blocks use the Quarter brand color. */
+#tab-prosent .percent-row .input-field {
+  background: #0284c7 !important;
+  border-color: #0284c7 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  caret-color: #ffffff;
+}
+
+#tab-prosent .percent-row .input-field::placeholder {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+#tab-prosent .percent-row .input-field:focus {
+  border-color: #0369a1 !important;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.18) !important;
+}
+
