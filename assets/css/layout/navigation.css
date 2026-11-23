@@ -56,7 +56,7 @@ nav {
   display: block;
   width: var(--nav-indicator-width, 48px);
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   box-shadow: 0 8px 18px rgba(14, 165, 233, 0.2);
   pointer-events: none;
   transform: translate3d(var(--nav-indicator-x, 0px), 0, 0)
@@ -125,7 +125,7 @@ nav .nav-btn > svg {
 
 .nav-btn.active {
   color: white;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   transform: none;
 }
 
@@ -136,7 +136,7 @@ nav .nav-btn > svg {
 
 .nav-btn.drag-target {
   color: white;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   transform: scaleX(1.06);
   transform-origin: var(--drag-origin, center);
   box-shadow: 0 8px 18px rgba(14, 165, 233, 0.2);
