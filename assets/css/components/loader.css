@@ -42,7 +42,7 @@
 .splash-title {
   max-width: 100%;
   color: var(--text);
-  font-size: clamp(1.5rem, 6vw, 2rem);
+  font-size: clamp(1.8rem, 7vw, 2.3rem);
   font-weight: 500;
   letter-spacing: 0.01em;
   line-height: 1.2;
@@ -104,7 +104,7 @@
   max-width: 100%;
   margin: 0 auto;
   color: var(--muted, var(--text));
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 500;
   line-height: 1.2;
   text-align: center;
@@ -117,13 +117,13 @@
 
 .splash .splash-developer > img {
   display: block !important;
-  width: 24px !important;
-  min-width: 24px !important;
-  max-width: 24px !important;
-  height: 24px !important;
-  min-height: 24px !important;
-  max-height: 24px !important;
-  flex: 0 0 24px !important;
+  width: 30px !important;
+  min-width: 30px !important;
+  max-width: 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  flex: 0 0 30px !important;
   aspect-ratio: 1 / 1 !important;
   border: 1px solid color-mix(in srgb, var(--brand, #0284c7) 24%, transparent) !important;
   border-radius: 50% !important;
@@ -133,7 +133,7 @@
 
 .splash-developer span {
   min-width: 0;
-  max-width: calc(100% - 31px);
+  max-width: calc(100% - 37px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -156,21 +156,21 @@
 @media (max-width: 360px) {
   .splash-developer {
     gap: 6px;
-    font-size: 0.66rem;
+    font-size: 0.74rem;
   }
 
   .splash .splash-developer > img {
-    width: 22px !important;
-    min-width: 22px !important;
-    max-width: 22px !important;
-    height: 22px !important;
-    min-height: 22px !important;
-    max-height: 22px !important;
-    flex-basis: 22px !important;
+    width: 27px !important;
+    min-width: 27px !important;
+    max-width: 27px !important;
+    height: 27px !important;
+    min-height: 27px !important;
+    max-height: 27px !important;
+    flex-basis: 27px !important;
   }
 
   .splash-developer span {
-    max-width: calc(100% - 29px);
+    max-width: calc(100% - 34px);
   }
 }
 

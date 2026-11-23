@@ -1,5 +1,5 @@
 /* sw.js */
-var APP_VERSION = "4.5.3B16";
+var APP_VERSION = "4.5.3B17";
 var CACHE_NAME =
   "choryak-cache-v" + APP_VERSION.toLowerCase().replace(/\./g, "-");
 
@@ -175,20 +175,25 @@ function cacheVersionedAsset(request) {
   var fallbackKey = getUnversionedCacheKey(request);
 
   return caches.open(CACHE_NAME).then(function(cache) {
-    return cache.match(cacheKey).then(function(cached) {
-      if (cached) return cached;
-
-      return fetch(request)
-        .then(function(response) {
+    return fetch(request)
+      .then(function(response) {
+        if (response && response.ok) {
           return cacheResponse(cache, cacheKey, response);
-        })
-        .catch(function(error) {
-          console.warn("Unable to fetch versioned asset:", cacheKey, error);
+        }
+
+        return cache.match(cacheKey).then(function(cached) {
+          return cached || response;
+        });
+      })
+      .catch(function(error) {
+        console.warn("Unable to fetch versioned asset:", cacheKey, error);
+        return cache.match(cacheKey).then(function(cached) {
+          if (cached) return cached;
           return cache.match(fallbackKey).then(function(fallback) {
             return fallback || Response.error();
           });
         });
-    });
+      });
   });
 }
 
