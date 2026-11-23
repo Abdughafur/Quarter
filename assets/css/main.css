@@ -1,10 +1,10 @@
-/* main.css - Чоряк v4.5.3B18 (Beta)
+/* main.css - Чоряк v4.5.3B20 (Beta)
  Copyright (c) 2026 Abdughafur. All rights reserved.
 */
 @import url("./core/reset.css");
-@import url("./core/variables.css?v=4.5.3B18");
-@import url("./themes/light.css?v=4.5.3B18");
-@import url("./themes/dark.css?v=4.5.3B18");
+@import url("./core/variables.css?v=4.5.3B20");
+@import url("./themes/light.css?v=4.5.3B20");
+@import url("./themes/dark.css?v=4.5.3B20");
 @import url("./themes/glass.css");
 @import url("./core/base.css");
 @import url("./core/typography.css");
@@ -13,23 +13,23 @@
 @import url("./layout/container.css");
 @import url("./layout/header.css");
 @import url("./layout/footer.css");
-@import url("./layout/navigation.css?v=4.5.3B18");
+@import url("./layout/navigation.css?v=4.5.3B20");
 @import url("./components/buttons.css");
 @import url("./components/cards.css");
 @import url("./components/inputs.css");
 @import url("./components/switches.css");
-@import url("./components/modal.css?v=4.5.3B18");
+@import url("./components/modal.css?v=4.5.3B20");
 @import url("./components/toast.css");
-@import url("./components/charts.css?v=4.5.3B18");
+@import url("./components/charts.css?v=4.5.3B20");
 @import url("./components/keypad.css");
-@import url("./components/loader.css?v=4.5.3B18");
+@import url("./components/loader.css?v=4.5.3B20");
 @import url("./components/badges.css");
-@import url("./pages/home.css?v=4.5.3B18");
-@import url("./pages/calendar.css?v=4.5.3B18");
+@import url("./pages/home.css?v=4.5.3B20");
+@import url("./pages/calendar.css?v=4.5.3B20");
 @import url("./pages/lessons.css");
 @import url("./pages/percent.css");
-@import url("./pages/ai.css?v=4.5.3B18");
-@import url("./pages/settings.css?v=4.5.3B18");
+@import url("./pages/ai.css?v=4.5.3B20");
+@import url("./pages/settings.css?v=4.5.3B20");
 @import url("./pages/login.css");
 @import url("./pages/landing.css");
 @import url("./utilities/spacing.css");
@@ -193,21 +193,25 @@ body.mobile-more-menu-open .nav-dock > .mobile-more-trigger {
   box-shadow: none !important;
 }
 
-/* Percentage grade-count input blocks use the Quarter brand color. */
+
+
+/* v4.6B correction: restore percentage inputs; style the main grade blocks instead. */
 #tab-prosent .percent-row .input-field {
+  background: var(--card2) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+  caret-color: var(--text);
+}
+
+#tab-home .blocks .block {
   background: #0284c7 !important;
-  border-color: #0284c7 !important;
   color: #ffffff !important;
   box-shadow: none !important;
-  caret-color: #ffffff;
 }
 
-#tab-prosent .percent-row .input-field::placeholder {
-  color: rgba(255, 255, 255, 0.82);
+#tab-home .blocks .block.exam {
+  background: #f59e0b !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
 }
-
-#tab-prosent .percent-row .input-field:focus {
-  border-color: #0369a1 !important;
-  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.18) !important;
-}
-
