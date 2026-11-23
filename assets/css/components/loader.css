@@ -5,6 +5,7 @@
   z-index: 9999;
   display: grid;
   place-items: center;
+  overflow: hidden;
   background: var(--bg, #ffffff);
   transition:
     opacity 0.48s ease,
@@ -21,46 +22,35 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  width: min(230px, 72vw);
-}
-
-.splash-logo {
-  width: 96px;
-  height: 96px;
-  object-fit: contain;
-  transform: translateY(-18px) scale(0.86);
-  opacity: 0;
-  filter: drop-shadow(0 14px 22px rgba(14, 43, 77, 0.16));
-  transition:
-    transform 620ms cubic-bezier(0.22, 0.9, 0.24, 1),
-    opacity 620ms ease;
+  width: min(280px, 76vw);
+  transform: translateY(-2vh);
 }
 
 .splash-title {
-  font-size: 1.05rem;
-  font-weight: 900;
   color: var(--text);
-  letter-spacing: 0.02em;
-  transform: translateY(8px) scale(0.98);
+  font-size: clamp(1.65rem, 6vw, 2rem);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
   opacity: 0;
+  transform: translateY(8px);
   transition:
     transform 620ms cubic-bezier(0.22, 0.9, 0.24, 1),
     opacity 620ms ease;
 }
 
 .splash-progress {
-  width: 178px;
+  width: min(190px, 68vw);
   height: 4px;
-  margin-top: 14px;
+  margin-top: 17px;
   overflow: hidden;
   border-radius: 999px;
   background: color-mix(in srgb, var(--text) 14%, transparent);
   opacity: 0;
-  transform: scaleX(0.7);
+  transform: scaleX(0.82);
   transition:
-    opacity 480ms ease 180ms,
-    transform 620ms cubic-bezier(0.22, 0.9, 0.24, 1) 180ms;
+    opacity 420ms ease 120ms,
+    transform 620ms cubic-bezier(0.22, 0.9, 0.24, 1) 120ms;
 }
 
 .splash-progress-fill {
@@ -69,18 +59,12 @@
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, var(--primary), var(--accent));
-  box-shadow: 0 0 12px rgba(14, 165, 233, 0.28);
-  transition: width 2.35s cubic-bezier(0.22, 0.8, 0.24, 1);
-}
-
-.splash.showing .splash-logo {
-  transform: translateY(0) scale(1);
-  opacity: 1;
+  box-shadow: 0 0 12px rgba(14, 165, 233, 0.24);
 }
 
 .splash.showing .splash-title {
-  transform: translateY(0) scale(1);
   opacity: 1;
+  transform: translateY(0);
 }
 
 .splash.showing .splash-progress {
@@ -89,12 +73,66 @@
 }
 
 .splash.showing .splash-progress-fill {
-  width: 88%;
+  animation: splash-progress-fill 1.05s cubic-bezier(0.22, 0.8, 0.24, 1) 1.8s forwards;
 }
 
-/* brief white fade after animation */
+.splash-developer {
+  position: absolute;
+  right: 16px;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  left: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-muted, var(--text));
+  font-size: 0.76rem;
+  font-weight: 500;
+  line-height: 1.2;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 650ms ease 220ms,
+    transform 650ms ease 220ms;
+}
+
+.splash-developer img {
+  display: block;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 27px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.splash.showing .splash-developer {
+  opacity: 0.88;
+  transform: translateY(0);
+}
+
+@keyframes splash-progress-fill {
+  to {
+    width: 100%;
+  }
+}
+
 .splash.fading {
   transition: opacity 360ms ease-in;
   opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash,
+  .splash-title,
+  .splash-progress,
+  .splash-developer {
+    transition-duration: 0.01ms;
+    transition-delay: 0ms;
+  }
+
+  .splash.showing .splash-progress-fill {
+    animation-duration: 0.01ms;
+    animation-delay: 0ms;
+  }
 }
 /* Created by Abdughafur - Believe GOD */
