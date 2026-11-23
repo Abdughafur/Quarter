@@ -158,3 +158,31 @@
 }
 
 /* Created by Abdughafur - Believe GOD */
+
+/* v4.6B polish: theme-aware action controls */
+body[data-theme="light"] #tab-home .hero .export-action,
+body[data-theme="light"] #tab-home .hero .export-action svg {
+  color: #ffffff !important;
+}
+
+/* Keep the MinAI calculation action visibly on-brand in both themes. */
+#tab-home .minai-status-card .result-details-toggle:not(:disabled) {
+  background: #0284c7 !important;
+  border-color: rgba(2, 132, 199, 0.28) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+/* The percentage clear action stays red, without a drop shadow. */
+#tab-prosent .clear-percent-btn {
+  box-shadow: none !important;
+}
+
+/* Opening the More menu must not turn its trigger into a dark-blue active tab. */
+.nav-dock > .mobile-more-trigger.active,
+.nav-dock > .mobile-more-trigger[aria-expanded="true"],
+body.mobile-more-menu-open .nav-dock > .mobile-more-trigger {
+  background: var(--card) !important;
+  color: var(--primary) !important;
+}
+
