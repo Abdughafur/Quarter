@@ -139,3 +139,22 @@
   cursor: default;
 }
 .dev-avatar-large .dev-avatar-photo { cursor: zoom-in; }
+
+
+/* v4.6B: flat brand-blue controls; preserve keypad styling */
+.btn:not(.secondary):not(.danger):not(.key),
+.contact-btn,
+.nav-btn.active,
+.nav-btn.drag-target,
+[data-ui-kit="perfect"] nav .nav-active-indicator,
+.avatar-gallery-btn {
+  background: #0284c7 !important;
+  box-shadow: none !important;
+}
+
+/* Red action controls keep their red color; remove only their shadow. */
+#logoutFinalModal .logout-swipe-thumb {
+  box-shadow: none !important;
+}
+
+/* Created by Abdughafur - Believe GOD */
