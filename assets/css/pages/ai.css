@@ -361,7 +361,7 @@
   margin: 2px 0 0;
   padding: 0 14px;
   border: 1px solid rgba(14, 165, 233, 0.2);
-  border-radius: 999px;
+  border-radius: 9999px !important;
   background: linear-gradient(135deg, #0284c7, #22d3ee);
   color: #fff;
   font-size: 0.82rem;
