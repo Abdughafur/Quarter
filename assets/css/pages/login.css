@@ -315,7 +315,7 @@
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -438,7 +438,7 @@
   width: 42px;
   height: 42px;
   border-radius: 14px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   color: white;
   display: flex;
   align-items: center;
@@ -643,7 +643,7 @@
 .profile-save-button {
   justify-self: start;
   padding: 14px 20px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   color: #ffffff;
   border: none;
   box-shadow: 0 18px 32px rgba(14, 165, 233, 0.18);
@@ -1034,7 +1034,7 @@
   font-size: 1rem;
   padding: 13px;
   border-radius: var(--radius);
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   color: #fff;
   font-weight: 1000;
   box-shadow: 0 8px 24px rgba(14, 165, 233, 0.28);
@@ -1478,7 +1478,7 @@
   min-height: 54px;
   margin-top: 6px;
   border-radius: 999px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   box-shadow: 0 10px 24px rgba(14, 165, 233, 0.2);
   font-size: 0.95rem;
 }
