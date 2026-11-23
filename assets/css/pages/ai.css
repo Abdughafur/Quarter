@@ -173,7 +173,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--primary), var(--accent));
+  background: #0284c7;
 }
 
 .ai-distribution-title {
@@ -208,7 +208,7 @@
   display: block;
   min-height: 3px;
   border-radius: 5px 5px 2px 2px;
-  background: linear-gradient(180deg, var(--accent), var(--primary));
+  background: #0284c7;
 }
 
 .ai-bar-item small {
@@ -362,7 +362,7 @@
   padding: 0 14px;
   border: 1px solid rgba(14, 165, 233, 0.2);
   border-radius: 9999px !important;
-  background: linear-gradient(135deg, #0284c7, #22d3ee);
+  background: #0284c7;
   color: #fff;
   font-size: 0.82rem;
   font-weight: 900;
@@ -615,7 +615,7 @@
 
 .minai-message--user {
   align-self: flex-end;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   color: white;
 }
 
