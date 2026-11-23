@@ -84,3 +84,58 @@
   }
 }
 /* Created by Abdughafur - Believe GOD */
+
+
+/* B18: stable result tile, compact percent actions and developer photo lightbox */
+#tab-home .hero .score-tile {
+  min-height: 154px;
+  justify-content: center;
+}
+#tab-home .hero .result-empty-illustration {
+  width: 124px;
+  height: 124px;
+}
+@media (max-width: 760px) {
+  #tab-prosent .percent-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    gap: 8px;
+  }
+  #tab-prosent .percent-actions .btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-inline: 8px;
+    font-size: clamp(0.72rem, 3vw, 0.82rem);
+    white-space: nowrap;
+  }
+}
+.developer-photo-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+  background: rgba(2, 6, 23, 0.58);
+  -webkit-backdrop-filter: blur(14px) saturate(135%);
+  backdrop-filter: blur(14px) saturate(135%);
+  cursor: zoom-out;
+}
+.developer-photo-lightbox.open {
+  display: flex;
+  animation: fade 180ms ease both;
+}
+.developer-photo-lightbox img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(88vw, 560px);
+  max-height: 86dvh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+  cursor: default;
+}
+.dev-avatar-large .dev-avatar-photo { cursor: zoom-in; }

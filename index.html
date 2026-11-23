@@ -19,7 +19,7 @@
   <link rel="icon" href="assets/images/pics/logo.png" type="image/png" />
   <link rel="apple-touch-icon" href="assets/images/pics/logo.png" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="assets/css/main.css?v=4.5.3B17">
+  <link rel="stylesheet" href="assets/css/main.css?v=4.5.3B18">
 
 </head>
 
@@ -260,7 +260,7 @@
               Экспорт
             </button>
             <button class="btn clear-percent-btn" type="button" data-action="clearAllPercentages">
-              Тоза кардани фоизҳо
+              Пок кардан
             </button>
           </div>
         </div>
@@ -688,7 +688,10 @@
           <div class="dev-profile-header">
             <div class="dev-avatar-large">
               <span>A</span>
-              <img src="https://avatars.githubusercontent.com/u/215494004?v=4" alt="Abdughafur"
+              <img class="dev-avatar-photo" src="https://avatars.githubusercontent.com/u/215494004?v=4" alt="Абдуғафур Хуҷзода"
+                role="button" tabindex="0" aria-label="Калон кардани акси таҳиягар"
+                onclick="document.getElementById('developerPhotoLightbox').classList.add('open')"
+                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('developerPhotoLightbox').classList.add('open')}"
                 onload="this.style.display='block'; this.previousElementSibling.style.display='none'"
                 onerror="this.style.display='none'; this.previousElementSibling.style.display='block'" />
             </div>
@@ -1526,7 +1529,13 @@
 
   <script type="module" src="assets/js/core/entry.js"></script>
   <script type="module" src="assets/js/core/pwa.js"></script>
-  <script type="module" src="assets/js/core/app.js?v=4.5.3B17"></script>
+  <script type="module" src="assets/js/core/app.js?v=4.5.3B18"></script>
+  <div id="developerPhotoLightbox" class="developer-photo-lightbox" role="dialog"
+    aria-modal="true" aria-label="Акси таҳиягар"
+    onclick="if(event.target===this)this.classList.remove('open')">
+    <img src="https://avatars.githubusercontent.com/u/215494004?v=4" alt="Абдуғафур Хуҷзода"
+      onclick="event.stopPropagation()" />
+  </div>
 </body>
 
 </html>

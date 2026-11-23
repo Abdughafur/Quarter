@@ -514,6 +514,7 @@ export const app = {
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
+        document.getElementById("developerPhotoLightbox")?.classList.remove("open");
         this.closeShareModal();
         this.closeResultDetailsModal();
         this.closeCalendarPicker();
