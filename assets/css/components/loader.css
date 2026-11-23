@@ -6,10 +6,19 @@
   display: grid;
   place-items: center;
   overflow: hidden;
+  box-sizing: border-box;
+  padding:
+    max(16px, env(safe-area-inset-top, 0px))
+    16px
+    max(16px, env(safe-area-inset-bottom, 0px));
   background: var(--bg, #ffffff);
-  transition:
-    opacity 0.48s ease,
-    visibility 0.48s ease;
+  transition: opacity 0.48s ease, visibility 0.48s ease;
+}
+
+.splash *,
+.splash *::before,
+.splash *::after {
+  box-sizing: border-box;
 }
 
 .splash.hide {
@@ -19,16 +28,21 @@
 }
 
 .splash-inner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: min(280px, 76vw);
-  transform: translateY(-2vh);
+  width: min(280px, calc(100vw - 40px));
+  transform: translate(-50%, calc(-50% - 2vh));
+  text-align: center;
 }
 
 .splash-title {
+  max-width: 100%;
   color: var(--text);
-  font-size: clamp(1.65rem, 6vw, 2rem);
+  font-size: clamp(1.5rem, 6vw, 2rem);
   font-weight: 500;
   letter-spacing: 0.01em;
   line-height: 1.2;
@@ -40,12 +54,13 @@
 }
 
 .splash-progress {
-  width: min(190px, 68vw);
+  width: clamp(128px, 48vw, 190px);
+  max-width: 100%;
   height: 4px;
-  margin-top: 17px;
+  margin-top: 16px;
   overflow: hidden;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--text) 14%, transparent);
+  background: color-mix(in srgb, var(--brand, #0284c7) 16%, transparent);
   opacity: 0;
   transform: scaleX(0.82);
   transition:
@@ -58,8 +73,8 @@
   width: 0;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--primary), var(--accent));
-  box-shadow: 0 0 12px rgba(14, 165, 233, 0.24);
+  background: var(--brand, #0284c7);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--brand, #0284c7) 28%, transparent);
 }
 
 .splash.showing .splash-title {
@@ -78,17 +93,21 @@
 
 .splash-developer {
   position: absolute;
-  right: 16px;
-  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-  left: 16px;
+  right: 12px;
+  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  left: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  color: var(--text-muted, var(--text));
-  font-size: 0.76rem;
+  gap: 7px;
+  width: calc(100% - 24px);
+  max-width: 100%;
+  margin: 0 auto;
+  color: var(--muted, var(--text));
+  font-size: 0.7rem;
   font-weight: 500;
   line-height: 1.2;
+  text-align: center;
   opacity: 0;
   transform: translateY(6px);
   transition:
@@ -96,29 +115,81 @@
     transform 650ms ease 220ms;
 }
 
-.splash-developer img {
-  display: block;
-  width: 27px;
-  height: 27px;
-  flex: 0 0 27px;
-  border-radius: 50%;
-  object-fit: cover;
+.splash .splash-developer > img {
+  display: block !important;
+  width: 24px !important;
+  min-width: 24px !important;
+  max-width: 24px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
+  flex: 0 0 24px !important;
+  aspect-ratio: 1 / 1 !important;
+  border: 1px solid color-mix(in srgb, var(--brand, #0284c7) 24%, transparent) !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
+.splash-developer span {
+  min-width: 0;
+  max-width: calc(100% - 31px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .splash.showing .splash-developer {
-  opacity: 0.88;
+  opacity: 0.9;
   transform: translateY(0);
 }
 
 @keyframes splash-progress-fill {
-  to {
-    width: 100%;
-  }
+  to { width: 100%; }
 }
 
 .splash.fading {
   transition: opacity 360ms ease-in;
   opacity: 0;
+}
+
+@media (max-width: 360px) {
+  .splash-developer {
+    gap: 6px;
+    font-size: 0.66rem;
+  }
+
+  .splash .splash-developer > img {
+    width: 22px !important;
+    min-width: 22px !important;
+    max-width: 22px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    max-height: 22px !important;
+    flex-basis: 22px !important;
+  }
+
+  .splash-developer span {
+    max-width: calc(100% - 29px);
+  }
+}
+
+@media (max-height: 420px) and (orientation: landscape) {
+  .splash-inner {
+    transform: translate(-50%, -50%);
+  }
+
+  .splash-title {
+    font-size: clamp(1.25rem, 5vh, 1.7rem);
+  }
+
+  .splash-progress {
+    margin-top: 10px;
+  }
+
+  .splash-developer {
+    bottom: max(6px, env(safe-area-inset-bottom, 0px));
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
