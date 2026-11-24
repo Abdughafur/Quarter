@@ -1,14 +1,14 @@
 /* app.js */
-import { loadState, saveState } from "./storage.js?v=4.5.3B16";
+import { loadState, saveState } from "./storage.js?v=4.5.3B21";
 import { Toast } from "../ui/toast.js";
 import { clamp, clean, qs, setInputValue, whenReady } from "../utils/helpers.js";
 import { recoveryFeature } from "./app/features/recovery.js";
-import { profileFeature } from "./app/features/profile.js?v=4.5.3B16";
-import { calculatorFeature } from "./app/features/calculator.js?v=4.5.3B16";
-import { navigationFeature } from "./app/features/navigation.js?v=4.5.3B16";
+import { profileFeature } from "./app/features/profile.js?v=4.5.3B21";
+import { calculatorFeature } from "./app/features/calculator.js?v=4.5.3B21";
+import { navigationFeature } from "./app/features/navigation.js?v=4.5.3B21";
 import { settingsFeature } from "./app/features/settings.js";
 import { notesFeature } from "./app/features/notes.js";
-import { lessonsFeature } from "./app/features/lessons.js?v=4.5.3B16";
+import { lessonsFeature } from "./app/features/lessons.js?v=4.5.3B21";
 
 export const app = {
   ...recoveryFeature,
