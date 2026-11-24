@@ -255,3 +255,50 @@ body.mobile-more-menu-open .nav-dock > .mobile-more-trigger {
       0 10px 30px rgba(0, 0, 0, 0.6) !important;
   }
 }
+
+
+
+/* QUARTER v4.6B — Result content only */
+
+/* Remove only the inner result card */
+#tab-home .hero #avgLarge.large {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 8px 0 !important;
+}
+
+/* Result number */
+#tab-home .hero #avgLarge .large-number {
+    font-size: clamp(4.6rem, 7.5vw, 5.5rem) !important;
+    font-weight: 900 !important;
+    line-height: 1.05 !important;
+    letter-spacing: -0.045em !important;
+    color: #0284c7 !important;
+}
+
+/* Result level label */
+#tab-home .hero #avgLarge .label-small {
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+    line-height: 1.4 !important;
+    color: #0284c7 !important;
+    margin-top: 4px !important;
+}
+
+/* QUARTER v4.6B — Result colors by theme */
+
+/* Light Mode */
+[data-theme="light"] #tab-home .hero #avgLarge .large-number,
+[data-theme="light"] #tab-home .hero #avgLarge .label-small {
+    color: #0284c7 !important;
+}
+
+/* Dark Mode */
+[data-theme="dark"] #tab-home .hero #avgLarge .large-number,
+[data-theme="dark"] #tab-home .hero #avgLarge .label-small {
+    color: #ffffff !important;
+}
+
+/* Keep the original main card untouched */
