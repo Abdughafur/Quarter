@@ -80,6 +80,7 @@ export const navigationFeature = {
 
   navigateFromMobileMore(tabId) {
     if (
+      tabId !== "tab-notes" &&
       tabId !== "tab-calendar" &&
       tabId !== "tab-lessons" &&
       tabId !== "tab-more"
