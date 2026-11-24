@@ -475,3 +475,80 @@ body::-webkit-scrollbar,
     color: var(--text);
   }
 }
+
+
+/* B23: viewport-safe mobile dock sizing and alignment */
+@media (max-width: 760px) {
+  .nav-dock {
+    box-sizing: border-box;
+    left: max(8px, env(safe-area-inset-left));
+    right: max(8px, env(safe-area-inset-right));
+    bottom: max(10px, env(safe-area-inset-bottom));
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    column-gap: clamp(8px, 2.5vw, 14px);
+    transform: none;
+  }
+
+  .nav-dock > nav {
+    box-sizing: border-box;
+    flex: 0 1 auto;
+    min-width: 0;
+    width: max-content;
+    max-width: calc(100% - 58px);
+    gap: clamp(3px, 1.1vw, 7px);
+    padding: clamp(4px, 1.2vw, 7px);
+  }
+
+  .nav-dock > nav .nav-btn {
+    box-sizing: border-box;
+    flex: 0 1 clamp(34px, 7.5vw, 46px);
+    width: clamp(34px, 7.5vw, 46px);
+    min-width: 0;
+    height: clamp(34px, 7.5vw, 46px);
+  }
+
+  .nav-dock > .mobile-more-trigger {
+    box-sizing: border-box;
+    flex: 0 0 clamp(44px, 8.5vw, 50px);
+    width: clamp(44px, 8.5vw, 50px);
+    min-width: 0;
+    height: clamp(44px, 8.5vw, 50px);
+    min-height: 0;
+  }
+
+  body.more-subview-open .nav-dock {
+    transform: translateY(calc(100% + 24px));
+  }
+}
+
+/* Extra compact layout for narrow phones (280px–360px). */
+@media (max-width: 360px) {
+  .nav-dock {
+    left: max(6px, env(safe-area-inset-left));
+    right: max(6px, env(safe-area-inset-right));
+    column-gap: 7px;
+  }
+
+  .nav-dock > nav {
+    max-width: calc(100% - 51px);
+    gap: 2px;
+    padding: 4px;
+  }
+
+  .nav-dock > nav .nav-btn {
+    flex: 0 1 34px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .nav-dock > .mobile-more-trigger {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+  }
+}
