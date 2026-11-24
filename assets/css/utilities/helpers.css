@@ -127,68 +127,53 @@ nav {
 /* Created by Abdughafur - Believe GOD */
 
 
-/* B24: final mobile navigation overrides (helpers.css loads after navigation.css). */
+
+/* B25: preserve original mobile dock dimensions; move secondary tabs into More. */
 @media (max-width: 760px) {
   .nav-dock {
+    box-sizing: border-box;
     left: max(8px, env(safe-area-inset-left)) !important;
     right: max(8px, env(safe-area-inset-right)) !important;
     width: auto !important;
     max-width: none !important;
     justify-content: space-between !important;
-    gap: clamp(7px, 2vw, 12px) !important;
+    gap: 12px !important;
     transform: none !important;
   }
-
   .nav-dock > nav {
-    flex: 0 1 auto !important;
+    box-sizing: border-box;
+    flex: 0 0 auto !important;
     width: max-content !important;
-    min-width: 0 !important;
-    max-width: calc(100% - 54px) !important;
-    gap: clamp(2px, 1vw, 6px) !important;
+    min-width: max-content !important;
+    max-width: none !important;
+    height: 64px !important;
+    padding: 8px !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
   }
-
   .nav-dock > nav .nav-btn {
-    flex: 0 1 clamp(34px, 7.2vw, 46px) !important;
-    width: clamp(34px, 7.2vw, 46px) !important;
-    min-width: 0 !important;
-    height: clamp(34px, 7.2vw, 46px) !important;
+    box-sizing: border-box;
+    flex: 0 0 48px !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 48px !important;
   }
-
   .nav-dock > .mobile-more-trigger {
-    flex: 0 0 clamp(42px, 8vw, 50px) !important;
-    width: clamp(42px, 8vw, 50px) !important;
-    min-width: 0 !important;
-    height: clamp(42px, 8vw, 50px) !important;
-    min-height: 0 !important;
+    box-sizing: border-box;
+    flex: 0 0 53px !important;
+    width: 53px !important;
+    min-width: 53px !important;
+    height: 53px !important;
+    min-height: 53px !important;
   }
-
   body.more-subview-open .nav-dock {
     transform: translateY(calc(100% + 24px)) !important;
   }
 }
-
-@media (max-width: 360px) {
-  .nav-dock {
-    left: max(6px, env(safe-area-inset-left)) !important;
-    right: max(6px, env(safe-area-inset-right)) !important;
-    gap: 6px !important;
-  }
-
-  .nav-dock > nav {
-    max-width: calc(100% - 48px) !important;
-    gap: 1px !important;
-    padding: 4px !important;
-  }
-
-  .nav-dock > nav .nav-btn {
-    flex: 0 1 33px !important;
-    width: 33px !important;
-    height: 33px !important;
-  }
-
-  .nav-dock > .mobile-more-trigger {
-    flex-basis: 40px !important;
-    width: 40px !important;
-    height: 40px !important;
+@media (max-width: 520px) {
+  .nav-dock > nav .nav-btn[data-tab="tab-notes"],
+  .nav-dock > nav .nav-btn[data-tab="tab-calendar"],
+  .nav-dock > nav .nav-btn[data-tab="tab-lessons"] {
+    display: none !important;
   }
 }
