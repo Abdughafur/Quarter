@@ -53,8 +53,7 @@
 [data-theme="dark"] .loader,
 [data-theme="dark"] .note-card,
 [data-theme="dark"] .note-item,
-[data-theme="dark"] .note-empty,
-[data-theme="dark"] .notes-card {
+[data-theme="dark"] .note-empty {
   background: #08131f;
   color: var(--text);
   border-color: rgba(255, 255, 255, 0.08);

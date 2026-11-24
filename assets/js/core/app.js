@@ -1,14 +1,19 @@
 /* app.js */
-import { loadState, saveState } from "./storage.js?v=4.5.3B21";
+import { loadState, saveState } from "./storage.js?v=4.5.4B";
 import { Toast } from "../ui/toast.js";
+import {
+  bindModalInteractionLock,
+  hasOpenModal,
+  isInsideOpenModal,
+} from "../ui/modal.js?v=4.5.4B";
 import { clamp, clean, qs, setInputValue, whenReady } from "../utils/helpers.js";
 import { recoveryFeature } from "./app/features/recovery.js";
-import { profileFeature } from "./app/features/profile.js?v=4.5.3B21";
-import { calculatorFeature } from "./app/features/calculator.js?v=4.5.3B21";
-import { navigationFeature } from "./app/features/navigation.js?v=4.5.3B21";
-import { settingsFeature } from "./app/features/settings.js";
-import { notesFeature } from "./app/features/notes.js";
-import { lessonsFeature } from "./app/features/lessons.js?v=4.5.3B21";
+import { profileFeature } from "./app/features/profile.js?v=4.5.4B";
+import { calculatorFeature } from "./app/features/calculator.js?v=4.5.4B";
+import { navigationFeature } from "./app/features/navigation.js?v=4.5.4B";
+import { settingsFeature } from "./app/features/settings.js?v=4.5.4B";
+import { notesFeature } from "./app/features/notes.js?v=4.5.4B";
+import { lessonsFeature } from "./app/features/lessons.js?v=4.5.4B";
 
 export const app = {
   ...recoveryFeature,
@@ -59,6 +64,7 @@ export const app = {
   async init() {
     if (this.initialized) return;
     this.initialized = true;
+    bindModalInteractionLock();
 
     window.addEventListener("choryak-storage-warning", (event) => {
       if (this.storageWarningShown) return;
@@ -84,8 +90,9 @@ export const app = {
         if (
           this.settings.uiKit !== "perfect" &&
           !event.target.closest(
-            ".theme-options, #uiKitRange, #profileMenu, .block, .nav-btn, .logout-swipe-track",
-          )
+            ".theme-options, .ui-kit-options, #profileMenu, .block, .nav-btn, .logout-swipe-track",
+          ) &&
+          !isInsideOpenModal(event.target)
         ) {
           event.stopImmediatePropagation();
         }
@@ -293,9 +300,7 @@ export const app = {
     const canDrag = () =>
       !document.body.classList.contains("more-subview-open") &&
       !document.body.classList.contains("mobile-more-menu-open") &&
-      !document.querySelector(
-        ".modal-backdrop.open, .note-modal-backdrop.open, .avatar-picker-backdrop.open",
-      );
+      !hasOpenModal();
     const startDragging = (event) => {
       dragging = true;
       nav.classList.add("is-dragging");
@@ -310,6 +315,15 @@ export const app = {
       pendingFrame = false;
       if (!dragging) return;
       moveIndicator(currentX);
+      if (document.documentElement.dataset.uiKit === "low") {
+        const target = nearestButton(currentX)?.btn;
+        allButtons.forEach((button) => {
+          button.classList.toggle("drag-target", button === target);
+        });
+      }
+    };
+    const clearDragTargets = () => {
+      allButtons.forEach((button) => button.classList.remove("drag-target"));
     };
     const onPointerDown = (event) => {
       if (!canDrag()) return;
@@ -332,6 +346,7 @@ export const app = {
         pointerId = null;
         dragging = false;
         nav.classList.remove("is-dragging");
+        clearDragTargets();
         updatePosition(nav.querySelector(".nav-btn.active") || buttons[0]);
         return;
       }
@@ -353,6 +368,7 @@ export const app = {
       pointerId = null;
       dragging = false;
       nav.classList.remove("is-dragging");
+      clearDragTargets();
       if (!wasDragging) return;
 
       try {
@@ -539,7 +555,40 @@ export const app = {
       if (!noteCard) return;
       const noteId = noteCard.dataset.noteId;
       if (!noteId) return;
+      noteCard.focus({ preventScroll: true });
       this.selectNote(noteId);
+    });
+
+    qs("notesList")?.addEventListener("keydown", (event) => {
+      const noteCard = event.target.closest(".note-item");
+      if (!noteCard) return;
+      const noteItems = [...qs("notesList").querySelectorAll(".note-item")];
+      const currentIndex = noteItems.indexOf(noteCard);
+      if (currentIndex < 0) return;
+
+      let nextIndex = currentIndex;
+      if (event.key === "ArrowDown") {
+        nextIndex = Math.min(currentIndex + 1, noteItems.length - 1);
+      } else if (event.key === "ArrowUp") {
+        nextIndex = Math.max(currentIndex - 1, 0);
+      } else if (event.key === "Home") {
+        nextIndex = 0;
+      } else if (event.key === "End") {
+        nextIndex = noteItems.length - 1;
+      } else if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        event.stopPropagation();
+        this.selectNote(noteCard.dataset.noteId);
+        return;
+      } else {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      const nextNote = noteItems[nextIndex];
+      nextNote.focus({ preventScroll: true });
+      this.selectNote(nextNote.dataset.noteId);
     });
 
     qs("noteSearchInput")?.addEventListener("input", () => this.renderNotes());
@@ -574,12 +623,10 @@ export const app = {
     window.addEventListener("pagehide", () => this.flushNoteAutosave());
     this.bindSwitches();
     this.bindThemeSelector();
-    const uiKitRange = qs("uiKitRange");
-    uiKitRange?.addEventListener("input", () => {
-      this.setUiKit(Number(uiKitRange.value), { commit: false });
-    });
-    uiKitRange?.addEventListener("change", () => {
-      this.setUiKit(Number(uiKitRange.value));
+    document.querySelectorAll('input[name="uiKitLevel"]').forEach((input) => {
+      input.addEventListener("change", () => {
+        if (input.checked) this.setUiKit(input.value);
+      });
     });
   },
 
@@ -609,7 +656,7 @@ export const app = {
       const theme = options[selectedIndex]?.dataset.themeValue;
       if (theme) {
         this.settings.theme = theme;
-        this.applySettings({ preserveUiKitRange: true });
+        this.applySettings();
       }
     };
 

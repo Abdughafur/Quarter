@@ -1,10 +1,10 @@
-/* main.css - Чоряк v4.5.3B21 (Beta)
+/* main.css - Чоряк v4.5.4B (Beta)
  Copyright (c) 2026 Abdughafur. All rights reserved.
 */
 @import url("./core/reset.css");
-@import url("./core/variables.css?v=4.5.3B21");
-@import url("./themes/light.css?v=4.5.3B21");
-@import url("./themes/dark.css?v=4.5.3B21");
+@import url("./core/variables.css?v=4.5.4B");
+@import url("./themes/light.css?v=4.5.4B");
+@import url("./themes/dark.css?v=4.5.4B");
 @import url("./themes/glass.css");
 @import url("./core/base.css");
 @import url("./core/typography.css");
@@ -13,23 +13,23 @@
 @import url("./layout/container.css");
 @import url("./layout/header.css");
 @import url("./layout/footer.css");
-@import url("./layout/navigation.css?v=4.5.3B25");
+@import url("./layout/navigation.css?v=4.5.4B");
 @import url("./components/buttons.css");
-@import url("./components/cards.css");
+@import url("./components/cards.css?v=4.5.4B");
 @import url("./components/inputs.css");
 @import url("./components/switches.css");
-@import url("./components/modal.css?v=4.5.3B21");
+@import url("./components/modal.css?v=4.5.4B");
 @import url("./components/toast.css");
-@import url("./components/charts.css?v=4.5.3B21");
+@import url("./components/charts.css?v=4.5.4B");
 @import url("./components/keypad.css");
-@import url("./components/loader.css?v=4.5.3B21");
+@import url("./components/loader.css?v=4.5.4B");
 @import url("./components/badges.css");
-@import url("./pages/home.css?v=4.5.3B21");
-@import url("./pages/calendar.css?v=4.5.3B21");
-@import url("./pages/lessons.css");
-@import url("./pages/percent.css");
-@import url("./pages/ai.css?v=4.5.3B21");
-@import url("./pages/settings.css?v=4.5.3B21");
+@import url("./pages/home.css?v=4.5.4B");
+@import url("./pages/calendar.css?v=4.5.4B");
+@import url("./pages/lessons.css?v=4.5.4B");
+@import url("./pages/percent.css?v=4.5.4B");
+@import url("./pages/ai.css?v=4.5.4B");
+@import url("./pages/settings.css?v=4.5.4B");
 @import url("./pages/login.css");
 @import url("./pages/landing.css");
 @import url("./utilities/spacing.css");
@@ -86,15 +86,7 @@
 /* Created by Abdughafur - Believe GOD */
 
 
-/* B18: stable result tile, compact percent actions and developer photo lightbox */
-#tab-home .hero .score-tile {
-  min-height: 154px;
-  justify-content: center;
-}
-#tab-home .hero .result-empty-illustration {
-  width: 124px;
-  height: 124px;
-}
+/* Compact percentage actions and developer photo lightbox */
 @media (max-width: 760px) {
   #tab-prosent .percent-actions {
     display: flex;
@@ -159,20 +151,6 @@
 
 /* Created by Abdughafur - Believe GOD */
 
-/* v4.6B polish: theme-aware action controls */
-body[data-theme="light"] #tab-home .hero .export-action,
-body[data-theme="light"] #tab-home .hero .export-action svg {
-  color: #ffffff !important;
-}
-
-/* Keep the MinAI calculation action visibly on-brand in both themes. */
-#tab-home .minai-status-card .result-details-toggle:not(:disabled) {
-  background: #0284c7 !important;
-  border-color: rgba(2, 132, 199, 0.28) !important;
-  color: #ffffff !important;
-  box-shadow: none !important;
-}
-
 /* The percentage clear action stays red, without a drop shadow. */
 #tab-prosent .clear-percent-btn {
   box-shadow: none !important;
@@ -192,9 +170,6 @@ body.mobile-more-menu-open .nav-dock > .mobile-more-trigger {
   color: #ffffff !important;
   box-shadow: none !important;
 }
-
-
-
 /* v4.6B correction: restore percentage inputs; style the main grade blocks instead. */
 #tab-prosent .percent-row .input-field {
   background: var(--card2) !important;
@@ -255,50 +230,3 @@ body.mobile-more-menu-open .nav-dock > .mobile-more-trigger {
       0 10px 30px rgba(0, 0, 0, 0.6) !important;
   }
 }
-
-
-
-/* QUARTER v4.6B — Result content only */
-
-/* Remove only the inner result card */
-#tab-home .hero #avgLarge.large {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    padding: 8px 0 !important;
-}
-
-/* Result number */
-#tab-home .hero #avgLarge .large-number {
-    font-size: clamp(4.6rem, 7.5vw, 5.5rem) !important;
-    font-weight: 900 !important;
-    line-height: 1.05 !important;
-    letter-spacing: -0.045em !important;
-    color: #0284c7 !important;
-}
-
-/* Result level label */
-#tab-home .hero #avgLarge .label-small {
-    font-size: 0.95rem !important;
-    font-weight: 800 !important;
-    line-height: 1.4 !important;
-    color: #0284c7 !important;
-    margin-top: 4px !important;
-}
-
-/* QUARTER v4.6B — Result colors by theme */
-
-/* Light Mode */
-[data-theme="light"] #tab-home .hero #avgLarge .large-number,
-[data-theme="light"] #tab-home .hero #avgLarge .label-small {
-    color: #0284c7 !important;
-}
-
-/* Dark Mode */
-[data-theme="dark"] #tab-home .hero #avgLarge .large-number,
-[data-theme="dark"] #tab-home .hero #avgLarge .label-small {
-    color: #ffffff !important;
-}
-
-/* Keep the original main card untouched */

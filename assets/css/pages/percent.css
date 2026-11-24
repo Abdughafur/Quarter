@@ -61,6 +61,22 @@
   margin: 0;
 }
 
+#tab-prosent .percent-column + .percent-column {
+  padding-left: 0;
+  border-left: 0;
+}
+
+#tab-prosent .percent-table {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 #tab-prosent .percent-minai-card {
   align-self: stretch;
   height: 100%;
@@ -86,14 +102,6 @@
 #percentExportModal .percent-export-modal {
   max-height: min(720px, calc(100dvh - 32px));
   overflow-y: auto;
-}
-
-#tab-prosent .percent-board-card {
-  padding: 18px;
-}
-
-#tab-prosent .percent-board-card::before {
-  display: none;
 }
 
 #tab-prosent .settings-title {
@@ -172,32 +180,6 @@
   min-width: 0;
 }
 
-#tab-prosent .percent-table {
-  gap: 0;
-  margin: 0;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: var(--card);
-  box-shadow: 0 12px 30px rgba(14, 43, 77, 0.06);
-}
-
-@media (max-width: 1099px) {
-  #tab-prosent .percent-row {
-    border-bottom: 0;
-  }
-
-  #tab-prosent .percent-column + .percent-column .percent-table {
-    border-top: 0;
-    border-radius: 0 0 18px 18px;
-  }
-
-  #tab-prosent .percent-column:first-child .percent-table {
-    border-bottom: 0;
-    border-radius: 18px 18px 0 0;
-  }
-}
-
 .percent-table {
   margin-top: 14px;
   display: grid;
@@ -216,16 +198,16 @@
 }
 
 #tab-prosent .percent-row {
-  min-height: 58px;
-  padding: 9px 12px;
-  border: 0;
-  border-bottom: 1px solid var(--soft);
-  border-radius: 0;
-  background: transparent;
+  min-height: 66px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--card), var(--card2));
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.045);
 }
 
 #tab-prosent .percent-row:last-child {
-  border-bottom: 0;
+  border-bottom: 1px solid var(--border);
 }
 
 /* Make the count inputs look like compact glass capsules */
@@ -293,8 +275,8 @@
   }
 
   #tab-prosent .percent-column + .percent-column {
-    padding-left: 32px;
-    border-left: 1px solid var(--border);
+    padding-left: 0;
+    border-left: 0;
   }
 
   #tab-prosent .percent-range-summary {
@@ -314,6 +296,91 @@
     gap: 14px;
   }
 
+  #tab-prosent .percent-columns {
+    gap: 8px;
+  }
+
+  #tab-prosent .percent-columns .percent-column .percent-table {
+    gap: 8px;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  #tab-prosent .percent-row {
+    grid-template-columns: 76px minmax(0, 1fr) 58px;
+    gap: 8px;
+    min-height: 62px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    background: linear-gradient(135deg, var(--card), var(--card2));
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.045);
+  }
+
+  #tab-prosent .grade-title {
+    padding-left: 0;
+    border-left: 0;
+    font-size: 0.88rem;
+  }
+
+  #tab-prosent .grade-title span {
+    margin-top: 2px;
+    font-size: 0.62rem;
+    line-height: 1.15;
+    letter-spacing: 0;
+  }
+
+  #tab-prosent .percent-row .input-field {
+    min-width: 0;
+    min-height: 38px;
+    padding: 6px 8px;
+    border-radius: 12px;
+  }
+
+  #tab-prosent .pct-out {
+    min-width: 0;
+    padding: 7px 4px;
+    border-radius: 10px;
+    background: var(--soft);
+    font-size: 0.82rem;
+    text-align: center;
+  }
+
+  #tab-prosent.active .percent-column:first-child {
+    --percent-row-stagger: 0ms;
+  }
+
+  #tab-prosent.active .percent-column:nth-child(2) {
+    --percent-row-stagger: 150ms;
+  }
+
+  #tab-prosent.active .percent-row {
+    animation: percent-row-enter 230ms cubic-bezier(0.22, 0.75, 0.2, 1) both;
+  }
+
+  #tab-prosent.active .percent-row:nth-child(1) {
+    animation-delay: var(--percent-row-stagger, 0ms);
+  }
+
+  #tab-prosent.active .percent-row:nth-child(2) {
+    animation-delay: calc(var(--percent-row-stagger, 0ms) + 30ms);
+  }
+
+  #tab-prosent.active .percent-row:nth-child(3) {
+    animation-delay: calc(var(--percent-row-stagger, 0ms) + 60ms);
+  }
+
+  #tab-prosent.active .percent-row:nth-child(4) {
+    animation-delay: calc(var(--percent-row-stagger, 0ms) + 90ms);
+  }
+
+  #tab-prosent.active .percent-row:nth-child(5) {
+    animation-delay: calc(var(--percent-row-stagger, 0ms) + 120ms);
+  }
+
   #tab-prosent .percent-board-card,
   #tab-prosent .percent-minai-card {
     width: 100%;
@@ -322,6 +389,23 @@
 
   #tab-prosent .percent-minai-card {
     min-width: 0;
+  }
+}
+
+@keyframes percent-row-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #tab-prosent.active .percent-row {
+    animation: none;
   }
 }
 

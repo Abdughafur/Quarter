@@ -142,6 +142,12 @@ nav .nav-btn > svg {
   box-shadow: 0 8px 18px rgba(14, 165, 233, 0.2);
 }
 
+[data-ui-kit="low"] nav.is-dragging .nav-btn.drag-target {
+  transition:
+    background-color 100ms ease,
+    color 100ms ease !important;
+}
+
 .nav-btn svg {
   width: 22px;
   height: 22px;
@@ -290,7 +296,7 @@ nav .nav-btn > svg {
     border-radius: 18px;
     background: var(--card);
     box-shadow: 0 14px 36px rgba(2, 6, 23, 0.22);
-    animation: mobile-more-menu-in 160ms var(--ease) both;
+    animation: mobile-more-menu-in 300ms var(--ease) both;
   }
 
   .mobile-more-menu[hidden] {
@@ -347,7 +353,12 @@ nav .nav-btn > svg {
 @keyframes mobile-more-menu-in {
   from {
     opacity: 0;
-    transform: translateY(6px) scale(0.97);
+    transform: translateY(4px) scale(1.04);
+    transform-origin: bottom right;
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(0) scale(1.01);
     transform-origin: bottom right;
   }
   to {

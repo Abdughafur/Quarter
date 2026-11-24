@@ -70,19 +70,53 @@ export const lessonsFeature = {
     const schools = this.getLessonsSchools();
     const selectedSchool = this.getSelectedLessonsSchool();
     this.lessons.selectedSchool = selectedSchool;
-    const addButton = document.querySelector(".lessons-add-button");
+    const addButton = document.querySelector(".floating-add-lesson");
     if (addButton) addButton.hidden = !selectedSchool;
 
+    const selectedSchoolIndex = schools.indexOf(selectedSchool);
     tabs.innerHTML = schools
-      .map(
-        (school) => `
-          <button class="lessons-school-tab${school === selectedSchool ? " is-active" : ""}"
+      .map((school, index) => `
+          <button id="lessonsSchoolTab${index}" class="lessons-school-tab${school === selectedSchool ? " is-active" : ""}"
             type="button" role="tab" aria-selected="${school === selectedSchool}"
+            aria-controls="lessonsWeekGrid" tabindex="${school === selectedSchool ? "0" : "-1"}"
             data-action="selectLessonsSchool" data-school="${escapeHtml(school)}">
             Мактаб ${escapeHtml(school)}
-          </button>`,
-      )
+          </button>`)
       .join("");
+    grid.setAttribute(
+      "aria-labelledby",
+      selectedSchool ? `lessonsSchoolTab${selectedSchoolIndex}` : "lessonsTitle",
+    );
+
+    if (tabs.dataset.keyboardBound !== "true") {
+      tabs.dataset.keyboardBound = "true";
+      tabs.addEventListener("keydown", (event) => {
+        const tab = event.target.closest('[role="tab"]');
+        if (!tab) return;
+        const schoolTabs = [...tabs.querySelectorAll('[role="tab"]')];
+        const currentIndex = schoolTabs.indexOf(tab);
+        if (currentIndex < 0 || !schoolTabs.length) return;
+
+        let nextIndex = currentIndex;
+        if (event.key === "ArrowRight") {
+          nextIndex = (currentIndex + 1) % schoolTabs.length;
+        } else if (event.key === "ArrowLeft") {
+          nextIndex = (currentIndex - 1 + schoolTabs.length) % schoolTabs.length;
+        } else if (event.key === "Home") {
+          nextIndex = 0;
+        } else if (event.key === "End") {
+          nextIndex = schoolTabs.length - 1;
+        } else {
+          return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        const nextTab = schoolTabs[nextIndex];
+        nextTab.focus();
+        this.selectLessonsSchool(nextTab.dataset.school);
+      });
+    }
 
     if (!selectedSchool) {
       grid.innerHTML = `
@@ -128,8 +162,6 @@ export const lessonsFeature = {
         <section class="lessons-day-card" aria-labelledby="lessonsDay${day.id}">
           <div class="lessons-day-header">
             <h3 id="lessonsDay${day.id}">${day.label}</h3>
-            <button class="lesson-add-day-button" type="button" data-action="openLessonsEditor"
-              data-day="${day.id}" aria-label="Иловаи дарс ба рӯзи ${day.label}">+</button>
           </div>
           <div class="lessons-day-list">${rows}</div>
         </section>`;
@@ -149,8 +181,16 @@ export const lessonsFeature = {
   selectLessonsSchool(school) {
     const selected = String(school || "");
     if (!this.getLessonsSchools().includes(selected)) return;
+    const restoreFocus = Boolean(
+      document.activeElement?.closest("#lessonsSchoolTabs [role='tab']"),
+    );
     this.lessons.selectedSchool = selected;
     this.renderLessons();
+    if (restoreFocus) {
+      [...document.querySelectorAll("#lessonsSchoolTabs [role='tab']")]
+        .find((tab) => tab.dataset.school === selected)
+        ?.focus({ preventScroll: true });
+    }
     this.queueLessonsSave();
   },
 

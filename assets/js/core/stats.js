@@ -13,6 +13,8 @@ export const GRADE_LABELS = Object.freeze({
 });
 
 const goalPlanCache = new Map();
+const MIN_TREND_SAMPLE_SIZE = 6;
+const SIGNIFICANT_TREND_CHANGE = 0.5;
 
 export function calculateStats(list = []) {
   const grades = Array.isArray(list) ? list : [];
@@ -69,6 +71,38 @@ function regressionSlope(values) {
   return denominator ? numerator / denominator : 0;
 }
 
+function analyzeTrend(values) {
+  if (values.length < MIN_TREND_SAMPLE_SIZE) {
+    return {
+      direction: "insufficient",
+      count: values.length,
+      required: MIN_TREND_SAMPLE_SIZE,
+    };
+  }
+
+  const splitIndex = Math.floor(values.length / 2);
+  const initialValues = values.slice(0, splitIndex);
+  const recentValues = values.slice(splitIndex);
+  const initialMedian = median(initialValues);
+  const recentMedian = median(recentValues);
+  const change = recentMedian - initialMedian;
+
+  return {
+    direction:
+      change >= SIGNIFICANT_TREND_CHANGE
+        ? "improving"
+        : change <= -SIGNIFICANT_TREND_CHANGE
+          ? "declining"
+          : "stable",
+    count: values.length,
+    initialCount: initialValues.length,
+    recentCount: recentValues.length,
+    initialMedian,
+    recentMedian,
+    change,
+  };
+}
+
 export function getPerformanceInsights(list = []) {
   const grades = Array.isArray(list)
     ? list.filter((grade) => Number.isFinite(Number(grade?.val)))
@@ -98,6 +132,7 @@ export function getPerformanceInsights(list = []) {
     mean,
     median: median(values),
     deviation: standardDeviation(values, mean),
+    trend: analyzeTrend(values),
     recentAverage: average(recentValues),
     slope,
     predicted,
@@ -131,18 +166,6 @@ export function getBalanceAdvice(stats) {
   }
 
   return "Ҳоло балли дарсӣ нест; натиҷа танҳо аз баллҳои корҳои санҷишӣ ҳисоб шудааст.";
-}
-
-export function getTrend(grades = []) {
-  if (grades.length < 4) return "Ҳоло маълумоти хонанда кам аст";
-
-  const first =
-    grades.slice(0, 3).reduce((sum, grade) => sum + grade.val, 0) / 3;
-  const last = grades.slice(-3).reduce((sum, grade) => sum + grade.val, 0) / 3;
-
-  if (last - first >= 0.7) return "беҳтар шуда истодааст";
-  if (first - last >= 0.7) return "паст шуда истодааст";
-  return "устувор аст";
 }
 
 export function getNeededPlan(grades = []) {

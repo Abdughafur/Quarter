@@ -46,15 +46,13 @@ export const settingsFeature = {
     this.save();
   },
 
-  setUiKit(value, { commit = true } = {}) {
-    const levels = ["low", "medium", "perfect"];
-    const normalizedValue = Math.max(0, Math.min(100, Number(value)));
-    const level = levels[Math.round(normalizedValue / 50)];
-    if (!level) return;
+  setUiKit(value) {
+    const level = String(value || "");
+    if (!["low", "medium", "perfect"].includes(level)) return;
 
     this.settings.uiKit = level;
-    this.applySettings({ preserveUiKitRange: !commit });
-    if (commit) this.save();
+    this.applySettings();
+    this.save();
   },
 
   toggleMinaiCalculator(value) {
@@ -92,7 +90,7 @@ export const settingsFeature = {
     }
   },
 
-  applySettings({ preserveUiKitRange = false } = {}) {
+  applySettings() {
     const root = document.documentElement;
     const body = document.body;
     const themeSetting = this.settings?.theme || "light";
@@ -126,23 +124,20 @@ export const settingsFeature = {
     setChecked("diagramToggle", this.settings.diagram);
     setChecked("minaiCalculatorToggle", this.settings.minaiCalculator);
     setChecked("minaiPercentToggle", this.settings.minaiPercent);
-    const uiKitIndex = ["low", "medium", "perfect"].indexOf(
+    const uiKitLevel = ["low", "medium", "perfect"].includes(
       this.settings.uiKit,
-    );
-    const uiKitRange = qs("uiKitRange");
-    if (uiKitRange && !preserveUiKitRange) {
-      uiKitRange.value = String(Math.max(uiKitIndex, 0) * 50);
-    }
-    const rangeProgress = uiKitRange
-      ? Number(uiKitRange.value)
-      : Math.max(uiKitIndex, 0) * 50;
-    uiKitRange?.style.setProperty("--range-progress", `${rangeProgress}%`);
-    const rangeLevel = Math.round(rangeProgress / 50);
-    setText("uiKitValue", ["Сабук", "Миёна", "Олӣ"][rangeLevel]);
-    uiKitRange?.setAttribute(
-      "aria-valuetext",
-      ["Сабук", "Миёна", "Олӣ"][rangeLevel],
-    );
+    )
+      ? this.settings.uiKit
+      : "medium";
+    const uiKitLabels = {
+      low: "Сабук",
+      medium: "Миёна",
+      perfect: "Олӣ",
+    };
+    document.querySelectorAll('input[name="uiKitLevel"]').forEach((input) => {
+      input.checked = input.value === uiKitLevel;
+    });
+    setText("uiKitValue", uiKitLabels[uiKitLevel]);
     document.querySelectorAll(".theme-option").forEach((button) => {
       const selected = button.dataset.themeValue === themeSetting;
       button.classList.toggle("is-active", selected);
