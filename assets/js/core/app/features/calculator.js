@@ -475,14 +475,13 @@ export const calculatorFeature = {
       this.grades.length ? gradeLabel(stats.final) : "—",
     );
     const trend = getTrend(this.grades);
-    const progressMessage =
-      trend === "беҳтар шуда истодааст"
+    const progressMessage = this.grades.length
+      ? trend === "беҳтар шуда истодааст"
         ? "Аз рӯйи баллҳои воридшуда хонанда пешравӣ карда истодааст."
         : trend === "паст шуда истодааст"
           ? "Аз рӯйи баллҳои воридшуда сатҳи таҳсили хонанда паст шуда истодааст."
-          : trend === "устувор аст"
-            ? "Аз рӯйи баллҳои воридшуда дар хонанда ягон тағйирот дида нашудааст."
-            : "Барои хулоса баровардани сатҳи пешравии хонанда маълумоти воридшуда кам аст.";
+          : "Аз рӯйи баллҳои воридшуда дар хонанда ягон тағйирот дида нашудааст."
+      : "Барои муайян кардани сатҳи пешравии хонанда баллҳоро ворид кунед.";
     setText("minaiProgress", progressMessage);
 
     const blocksContainer = qs("blocksContainer");
