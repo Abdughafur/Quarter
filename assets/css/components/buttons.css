@@ -89,4 +89,19 @@
   opacity: 0.96;
 }
 
+
+/* Disabled export button — no interaction */
+.btn.export-action:disabled,
+.btn.export-action:disabled:hover,
+.btn.export-action:disabled:active,
+.btn.export-action:disabled:focus {
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+    filter: none !important;
+}
+
+
 /* Created by Abdughafur - Believe GOD */

@@ -2192,4 +2192,21 @@
   object-fit: cover;
   display: none;
 }
+
+
+/* Disabled result details — preserve original colors */
+#tab-home .hero .actions .result-details-toggle:disabled {
+    opacity: 1 !important;
+    filter: none !important;
+    box-shadow: none !important;
+
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+}
+
+
 /* Created by Abdughafur - Believe GOD */
