@@ -215,3 +215,43 @@ body.mobile-more-menu-open .nav-dock > .mobile-more-trigger {
   color: #ffffff !important;
   box-shadow: none !important;
 }
+
+
+/* Mobile More trigger matches the navigation capsule instead of brand blue. */
+@media (max-width: 760px) {
+  .nav-dock > .mobile-more-trigger,
+  .nav-dock > .mobile-more-trigger.active,
+  .nav-dock > .mobile-more-trigger[aria-expanded="true"],
+  body.mobile-more-menu-open .nav-dock > .mobile-more-trigger {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: var(--text) !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 8px 32px rgba(0, 0, 0, 0.18) !important;
+  }
+
+  body[data-theme="light"] .nav-dock > .mobile-more-trigger,
+  body[data-theme="light"] .nav-dock > .mobile-more-trigger.active,
+  body[data-theme="light"] .nav-dock > .mobile-more-trigger[aria-expanded="true"],
+  body[data-theme="light"].mobile-more-menu-open .nav-dock > .mobile-more-trigger {
+    background: rgba(255, 255, 255, 0.96) !important;
+    border-color: rgba(0, 0, 0, 0.06) !important;
+    color: var(--text) !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+      0 10px 30px rgba(2, 6, 23, 0.04) !important;
+  }
+
+  body[data-theme="dark"] .nav-dock > .mobile-more-trigger,
+  body[data-theme="dark"] .nav-dock > .mobile-more-trigger.active,
+  body[data-theme="dark"] .nav-dock > .mobile-more-trigger[aria-expanded="true"],
+  body[data-theme="dark"].mobile-more-menu-open .nav-dock > .mobile-more-trigger {
+    background: rgba(6, 8, 10, 0.9) !important;
+    border-color: rgba(0, 0, 0, 0.6) !important;
+    color: var(--text) !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+      0 10px 30px rgba(0, 0, 0, 0.6) !important;
+  }
+}
