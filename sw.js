@@ -1,5 +1,5 @@
 /* sw.js */
-var APP_VERSION = "4.5.3B23";
+var APP_VERSION = "4.5.3B24";
 var CACHE_NAME =
   "choryak-cache-v" + APP_VERSION.toLowerCase().replace(/\./g, "-");
 
