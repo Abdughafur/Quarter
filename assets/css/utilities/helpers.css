@@ -125,3 +125,55 @@ nav {
   }
 }
 /* Created by Abdughafur - Believe GOD */
+
+
+
+/* B25: preserve original mobile dock dimensions; move secondary tabs into More. */
+@media (max-width: 760px) {
+  .nav-dock {
+    box-sizing: border-box;
+    left: max(8px, env(safe-area-inset-left)) !important;
+    right: max(8px, env(safe-area-inset-right)) !important;
+    width: auto !important;
+    max-width: none !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    transform: none !important;
+  }
+  .nav-dock > nav {
+    box-sizing: border-box;
+    flex: 0 0 auto !important;
+    width: max-content !important;
+    min-width: max-content !important;
+    max-width: none !important;
+    height: 64px !important;
+    padding: 8px !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+  }
+  .nav-dock > nav .nav-btn {
+    box-sizing: border-box;
+    flex: 0 0 48px !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 48px !important;
+  }
+  .nav-dock > .mobile-more-trigger {
+    box-sizing: border-box;
+    flex: 0 0 53px !important;
+    width: 53px !important;
+    min-width: 53px !important;
+    height: 53px !important;
+    min-height: 53px !important;
+  }
+  body.more-subview-open .nav-dock {
+    transform: translateY(calc(100% + 24px)) !important;
+  }
+}
+@media (max-width: 520px) {
+  .nav-dock > nav .nav-btn[data-tab="tab-notes"],
+  .nav-dock > nav .nav-btn[data-tab="tab-calendar"],
+  .nav-dock > nav .nav-btn[data-tab="tab-lessons"] {
+    display: none !important;
+  }
+}

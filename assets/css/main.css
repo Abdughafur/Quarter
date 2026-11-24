@@ -1,10 +1,10 @@
-/* main.css - Чоряк v4.5.3B18 (Beta)
+/* main.css - Чоряк v4.5.3B21 (Beta)
  Copyright (c) 2026 Abdughafur. All rights reserved.
 */
 @import url("./core/reset.css");
-@import url("./core/variables.css?v=4.5.3B18");
-@import url("./themes/light.css?v=4.5.3B18");
-@import url("./themes/dark.css?v=4.5.3B18");
+@import url("./core/variables.css?v=4.5.3B21");
+@import url("./themes/light.css?v=4.5.3B21");
+@import url("./themes/dark.css?v=4.5.3B21");
 @import url("./themes/glass.css");
 @import url("./core/base.css");
 @import url("./core/typography.css");
@@ -13,23 +13,23 @@
 @import url("./layout/container.css");
 @import url("./layout/header.css");
 @import url("./layout/footer.css");
-@import url("./layout/navigation.css?v=4.5.3B18");
+@import url("./layout/navigation.css?v=4.5.3B25");
 @import url("./components/buttons.css");
 @import url("./components/cards.css");
 @import url("./components/inputs.css");
 @import url("./components/switches.css");
-@import url("./components/modal.css?v=4.5.3B18");
+@import url("./components/modal.css?v=4.5.3B21");
 @import url("./components/toast.css");
-@import url("./components/charts.css?v=4.5.3B18");
+@import url("./components/charts.css?v=4.5.3B21");
 @import url("./components/keypad.css");
-@import url("./components/loader.css?v=4.5.3B18");
+@import url("./components/loader.css?v=4.5.3B21");
 @import url("./components/badges.css");
-@import url("./pages/home.css?v=4.5.3B18");
-@import url("./pages/calendar.css?v=4.5.3B18");
+@import url("./pages/home.css?v=4.5.3B21");
+@import url("./pages/calendar.css?v=4.5.3B21");
 @import url("./pages/lessons.css");
 @import url("./pages/percent.css");
-@import url("./pages/ai.css?v=4.5.3B18");
-@import url("./pages/settings.css?v=4.5.3B18");
+@import url("./pages/ai.css?v=4.5.3B21");
+@import url("./pages/settings.css?v=4.5.3B21");
 @import url("./pages/login.css");
 @import url("./pages/landing.css");
 @import url("./utilities/spacing.css");
@@ -139,3 +139,119 @@
   cursor: default;
 }
 .dev-avatar-large .dev-avatar-photo { cursor: zoom-in; }
+
+
+/* v4.6B: flat brand-blue controls; preserve keypad styling */
+.btn:not(.secondary):not(.danger):not(.key),
+.contact-btn,
+.nav-btn.active,
+.nav-btn.drag-target,
+[data-ui-kit="perfect"] nav .nav-active-indicator,
+.avatar-gallery-btn {
+  background: #0284c7 !important;
+  box-shadow: none !important;
+}
+
+/* Red action controls keep their red color; remove only their shadow. */
+#logoutFinalModal .logout-swipe-thumb {
+  box-shadow: none !important;
+}
+
+/* Created by Abdughafur - Believe GOD */
+
+/* v4.6B polish: theme-aware action controls */
+body[data-theme="light"] #tab-home .hero .export-action,
+body[data-theme="light"] #tab-home .hero .export-action svg {
+  color: #ffffff !important;
+}
+
+/* Keep the MinAI calculation action visibly on-brand in both themes. */
+#tab-home .minai-status-card .result-details-toggle:not(:disabled) {
+  background: #0284c7 !important;
+  border-color: rgba(2, 132, 199, 0.28) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+/* The percentage clear action stays red, without a drop shadow. */
+#tab-prosent .clear-percent-btn {
+  box-shadow: none !important;
+}
+
+/* Opening the More menu must not turn its trigger into a dark-blue active tab. */
+.nav-dock > .mobile-more-trigger.active,
+.nav-dock > .mobile-more-trigger[aria-expanded="true"],
+body.mobile-more-menu-open .nav-dock > .mobile-more-trigger {
+  background: var(--card) !important;
+  color: var(--primary) !important;
+}
+
+/* v4.6B: restore the red clear action after the global blue button rule. */
+#tab-prosent .clear-percent-btn {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+
+
+/* v4.6B correction: restore percentage inputs; style the main grade blocks instead. */
+#tab-prosent .percent-row .input-field {
+  background: var(--card2) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+  caret-color: var(--text);
+}
+
+#tab-home .blocks .block {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+#tab-home .blocks .block.exam {
+  background: #f59e0b !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+
+/* Mobile More trigger matches the navigation capsule instead of brand blue. */
+@media (max-width: 760px) {
+  .nav-dock > .mobile-more-trigger,
+  .nav-dock > .mobile-more-trigger.active,
+  .nav-dock > .mobile-more-trigger[aria-expanded="true"],
+  body.mobile-more-menu-open .nav-dock > .mobile-more-trigger {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: var(--text) !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 8px 32px rgba(0, 0, 0, 0.18) !important;
+  }
+
+  body[data-theme="light"] .nav-dock > .mobile-more-trigger,
+  body[data-theme="light"] .nav-dock > .mobile-more-trigger.active,
+  body[data-theme="light"] .nav-dock > .mobile-more-trigger[aria-expanded="true"],
+  body[data-theme="light"].mobile-more-menu-open .nav-dock > .mobile-more-trigger {
+    background: rgba(255, 255, 255, 0.96) !important;
+    border-color: rgba(0, 0, 0, 0.06) !important;
+    color: var(--text) !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+      0 10px 30px rgba(2, 6, 23, 0.04) !important;
+  }
+
+  body[data-theme="dark"] .nav-dock > .mobile-more-trigger,
+  body[data-theme="dark"] .nav-dock > .mobile-more-trigger.active,
+  body[data-theme="dark"] .nav-dock > .mobile-more-trigger[aria-expanded="true"],
+  body[data-theme="dark"].mobile-more-menu-open .nav-dock > .mobile-more-trigger {
+    background: rgba(6, 8, 10, 0.9) !important;
+    border-color: rgba(0, 0, 0, 0.6) !important;
+    color: var(--text) !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+      0 10px 30px rgba(0, 0, 0, 0.6) !important;
+  }
+}

@@ -25,9 +25,9 @@
   line-height: 1;
   font-weight: 1000;
   letter-spacing: -1.4px;
-  background: linear-gradient(90deg, var(--accent), var(--primary), var(--cyan));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #0284c7;
+  background: none;
+  -webkit-text-fill-color: currentColor;
 }
 
 .small {

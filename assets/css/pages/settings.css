@@ -608,7 +608,7 @@ body.more-subview-open::after {
   border-radius: 16px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   color: white;
 }
 
@@ -684,7 +684,7 @@ body.more-subview-open::after {
   place-items: center;
   overflow: hidden;
   border-radius: 14px;
-  background: linear-gradient(145deg, var(--primary), var(--accent));
+  background: #0284c7;
   color: white;
   font-size: 1.25rem;
   font-weight: 950;
@@ -789,7 +789,7 @@ body.more-subview-open::after {
   height: 34px;
   min-width: 34px;
   border-radius: 10px;
-  background: linear-gradient(145deg, var(--primary), var(--accent));
+  background: #0284c7;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
@@ -822,7 +822,7 @@ body.more-subview-open::after {
 }
 
 #more-home-view .option-item:nth-child(6) .option-icon {
-  background: linear-gradient(145deg, #06b6d4, #0ea5e9);
+  background: #0284c7;
 }
 
 #more-home-view .option-icon svg {
@@ -1283,7 +1283,7 @@ body.more-subview-open::after {
   border-radius: 50%;
   overflow: hidden;
   font-size: 4.5rem;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   color: white;
   display: flex;
   align-items: center;
@@ -1446,7 +1446,7 @@ body.more-subview-open::after {
 
 #more-home-view .circle-action-icon {
   border-color: transparent;
-  background: linear-gradient(145deg, var(--primary), var(--accent));
+  background: #0284c7;
   color: #fff;
 }
 

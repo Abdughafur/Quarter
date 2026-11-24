@@ -3,7 +3,7 @@
   min-height: 46px;
   border-radius: 999px;
   padding: 0 14px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   color: white;
   font-weight: 1000;
   box-shadow: 0 12px 28px rgba(14, 165, 233, 0.24);
@@ -30,7 +30,7 @@
   border-radius: 999px;
   text-decoration: none;
   color: white;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   display: grid;
   place-items: center;
   font-size: 0.78rem;

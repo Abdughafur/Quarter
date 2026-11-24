@@ -19,7 +19,7 @@
   <link rel="icon" href="assets/images/pics/logo.png" type="image/png" />
   <link rel="apple-touch-icon" href="assets/images/pics/logo.png" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="assets/css/main.css?v=4.5.3B18">
+  <link rel="stylesheet" href="assets/css/main.css?v=4.5.3B25">
 
 </head>
 
@@ -51,7 +51,7 @@
       </div>
     </div>
     <div class="splash-developer">
-      <img src="https://avatars.githubusercontent.com/u/215494004?v=4"
+      <img src="assets/images/pics/abdughafur.webp"
         alt="Абдуғафур Хуҷзода" />
       <span>Абдуғафур Хуҷзода</span>
     </div>
@@ -687,7 +687,7 @@
           <div class="dev-profile-header">
             <div class="dev-avatar-large">
               <span>A</span>
-              <img class="dev-avatar-photo" src="https://avatars.githubusercontent.com/u/215494004?v=4" alt="Абдуғафур Хуҷзода"
+              <img class="dev-avatar-photo" src="assets/images/pics/abdughafur.webp" alt="Абдуғафур Хуҷзода"
                 role="button" tabindex="0" aria-label="Калон кардани акси таҳиягар"
                 onclick="document.getElementById('developerPhotoLightbox').classList.add('open')"
                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('developerPhotoLightbox').classList.add('open')}"
@@ -933,7 +933,7 @@
             </div>
             <div class="about">
               <p class="about-app-name"><strong>Чоряк</strong></p>
-              <p><strong>Нусха:</strong> v4.5.3B18 (Бета)</p>
+              <p><strong>Нусха:</strong> v4.5.3B21 (Бета)</p>
               <p><strong>Таҳиягар:</strong> Abdughafur (Абдуғафур)</p>
             </div>
           </div>
@@ -944,7 +944,7 @@
               сохта шудааст. Барнома барои ҳамаи омӯзгорон ройгон пешниҳод мегардад.
             </p>
             <p>
-              Айни замон барнома дар нусхаи v4.5.3B18 (Бета) қарор дорад. Дар ин нусха ба устуворӣ, функсияҳои нав ва кори барнома
+              Айни замон барнома дар нусхаи v4.5.3B21 (Бета) қарор дорад. Дар ин нусха ба устуворӣ, функсияҳои нав ва кори барнома
               диққати махсус дода шудааст. Системаи барнома аз ҷониби мутахассисон ва корбарон санҷида шудааст.
               Фунскияҳои асосии барнома дуруст кор мекунад ва функсяҳои нав дар ҳоли санҷиш ҳастанд.
             </p>
@@ -1064,7 +1064,7 @@
     <div class="ios-modal share-modal">
       <button class="share-modal-close" type="button" data-action="closeShareModal"
         aria-label="Пӯшидан">&times;</button>
-      <span class="share-modal-kicker">Чоряк · v4.5.3B18 (Бета)</span>
+      <span class="share-modal-kicker">Чоряк · v4.5.3B21 (Бета)</span>
       <h3 id="shareModalTitle">Мубодилаи барнома</h3>
       <p>Рамзи QR-ро скан кунед ё пайвандро фиристед.</p>
       <div class="share-qr-frame">
@@ -1496,6 +1496,15 @@
   </button>
     <div id="mobileMoreMenu" class="mobile-more-menu" role="group" aria-label="Бештар" hidden>
       <button type="button" class="mobile-more-menu-option" data-action="navigateMobileMore"
+        data-target-tab="tab-notes">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 3.75h8l4 4v12.5H6a2 2 0 0 1-2-2v-12.5a2 2 0 0 1 2-2Z"
+            stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+          <path d="M14 3.75v4h4M8 12h8M8 15.5h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+        <span>Ёддоштҳо</span>
+      </button>
+      <button type="button" class="mobile-more-menu-option" data-action="navigateMobileMore"
         data-target-tab="tab-calendar">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <rect x="3.5" y="5" width="17" height="16" rx="3" stroke="currentColor" stroke-width="1.8" />
@@ -1528,11 +1537,11 @@
 
   <script type="module" src="assets/js/core/entry.js"></script>
   <script type="module" src="assets/js/core/pwa.js"></script>
-  <script type="module" src="assets/js/core/app.js?v=4.5.3B18"></script>
+  <script type="module" src="assets/js/core/app.js?v=4.5.3B25"></script>
   <div id="developerPhotoLightbox" class="developer-photo-lightbox" role="dialog"
     aria-modal="true" aria-label="Акси таҳиягар"
     onclick="if(event.target===this)this.classList.remove('open')">
-    <img src="https://avatars.githubusercontent.com/u/215494004?v=4" alt="Абдуғафур Хуҷзода"
+    <img src="assets/images/pics/abdughafur.webp" alt="Абдуғафур Хуҷзода"
       onclick="event.stopPropagation()" />
   </div>
 </body>
@@ -1541,3 +1550,5 @@
 
 <!-- BELIEVE IN GOD -->
 <!-- Created by Abdughafur - Believe GOD -->
+
+<!-- GitHub Pages redeploy trigger: v4.5.3B25 -->

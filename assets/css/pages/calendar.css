@@ -341,7 +341,7 @@
 
 .calendar-picker-option[aria-pressed="true"] {
   border-color: transparent;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   color: #fff;
 }
 
@@ -458,7 +458,7 @@
 
 .calendar-day-button.is-selected {
   border-color: transparent;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   color: #fff;
 }
 

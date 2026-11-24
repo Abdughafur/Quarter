@@ -35,7 +35,7 @@ input[type="checkbox"]::before {
 
 input[type="checkbox"]:checked {
   --switch-thumb-x: 26px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
 }
 
 input[type="checkbox"]:active::before {
@@ -62,6 +62,6 @@ input[type="checkbox"].switch-accent {
 
 input[type="checkbox"].switch-accent:checked {
   --switch-thumb-x: 26px;
-  background: linear-gradient(135deg, var(--accent), var(--primary));
+  background: #0284c7;
 }
 /* Created by Abdughafur - Believe GOD */

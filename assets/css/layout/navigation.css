@@ -56,7 +56,7 @@ nav {
   display: block;
   width: var(--nav-indicator-width, 48px);
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   box-shadow: 0 8px 18px rgba(14, 165, 233, 0.2);
   pointer-events: none;
   transform: translate3d(var(--nav-indicator-x, 0px), 0, 0)
@@ -125,7 +125,7 @@ nav .nav-btn > svg {
 
 .nav-btn.active {
   color: white;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   transform: none;
 }
 
@@ -136,7 +136,7 @@ nav .nav-btn > svg {
 
 .nav-btn.drag-target {
   color: white;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: #0284c7;
   transform: scaleX(1.06);
   transform-origin: var(--drag-origin, center);
   box-shadow: 0 8px 18px rgba(14, 165, 233, 0.2);
@@ -424,3 +424,61 @@ body::-webkit-scrollbar,
   height: 0;
 }
 /* Created by Abdughafur - Believe GOD */
+
+
+
+/* Mobile navigation — refined sizing */
+@media (max-width: 760px) {
+  .nav-dock > nav {
+    height: 68px;
+    padding: 7px;
+    gap: 6px;
+  }
+
+  .nav-dock > nav .nav-btn {
+    flex: 0 0 clamp(42px, 11vw, 48px);
+    width: clamp(42px, 11vw, 48px);
+    min-width: 42px;
+    height: clamp(42px, 11vw, 48px);
+  }
+
+  .nav-dock > nav .nav-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .nav-dock > .mobile-more-trigger {
+    flex: 0 0 52px;
+    width: 52px;
+    min-width: 52px;
+    height: 52px;
+    min-height: 52px;
+  }
+
+  .mobile-more-trigger svg {
+    width: 25px;
+    height: 25px;
+  }
+}
+
+@media (max-width: 360px) {
+  .nav-dock > nav {
+    gap: 3px;
+    padding: 5px;
+  }
+
+  .nav-dock > nav .nav-btn {
+    flex-basis: 40px;
+    width: 40px;
+    min-width: 40px;
+    height: 42px;
+  }
+
+  .nav-dock > .mobile-more-trigger {
+    flex-basis: 46px;
+    width: 46px;
+    min-width: 46px;
+    height: 46px;
+    min-height: 46px;
+  }
+}
