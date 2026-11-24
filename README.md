@@ -1,111 +1,80 @@
-# ✨ Чоряк v4.5.3B18 (Beta)
+# Quarter
 
-### Quarterly Grade Calculator
+<p align="center">
+  <img src="assets/images/pics/logo.png" alt="Quarter Logo" width="100" />
+</p>
 
-Modern web application for quarterly grade calculation and percentage analytics.
+<h3 align="center">A smarter way to manage quarterly results.</h3>
 
----
+<p align="center">
+  An open-source companion application designed to simplify quarterly grade calculations, manage academic records, and keep essential information organized in one place.
+</p>
 
-# 🇹🇯 Тоҷикӣ
-
-## 📖 Дар бораи лоиҳа
-
-**Чоряк** — веб-барномаи муосир барои ҳисоб кардани натиҷаи чоряк ва фоиз.
-
-### ✨ Имкониятҳо
-
-- 📊 Ҳисоби автоматии чоряк
-- 📋 Таҳлили фоизҳои синф ва экспорти натиҷа
-- 📈 Диаграммаҳо
-- 📝 Ёддоштҳо
-- 🌙 Dark / Light Mode
-- 🖼 PNG Export
-- 📤 Share Image
-- 📱 Мубодилаи барнома бо QR-код
-- ⚡ Реҷаи сабук барои дастгоҳҳои камқувват
-- 💾 LocalStorage
-- 🔐 Нусхабардорӣ ва барқарорсозии маҳаллии маълумот дар JSON
-- 🔒 Санҷиши якпорчагии нусха ва дурусти ҳар бахш
-- 🧹 Ҳангоми баромадан маълумоти маҳаллӣ аз IndexedDB ва хотира пок мешавад
-- 🔄 Илова кардан ё иваз кардани маълумот ҳангоми барқарорсозӣ
-- 📱 Responsive Design
-
-### ⚠ Литсензия
-
-Лоиҳа таҳти иҷозатномаи MIT нашр шудааст. Тафсилоти пурра дар [LICENSE.md](LICENSE.md) мавҷуд аст.
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Active-success?style=flat-square" />
+  <img src="https://img.shields.io/badge/Open%20Source-Yes-blue?style=flat-square" />
+  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" />
+</p>
 
 ---
 
-# 🇬🇧 English
+## About
 
-## 📖 About
+Quarter is an academic companion application built to make quarterly result calculations and academic information management simpler, faster, and more organized.
 
-**Чоряк** is a modern web application for quarterly grade calculation and percentage analytics.
+### Features
 
-### ✨ Features
+- **Calculator** — Calculate and track quarterly academic results.
+- **Calendar** — Organize schedules and important dates.
+- **My Lessons** — Manage subjects and lesson-related information.
+- **Notes** — Capture and manage important information.
+- **AI Assistance** — Get intelligent support when needed.
 
-- 📊 Automatic grade calculation
-- 📋 Class percentage analysis and report export
-- 📈 Charts
-- 📝 Notes
-- 🌙 Dark / Light Mode
-- 🖼 PNG Export
-- 📤 Share Image
-- 📱 QR code app sharing
-- ⚡ Low-effects mode for low-end devices
-- 💾 LocalStorage
-- 🔐 Offline JSON backup and restore
-- 🔒 SHA-256 integrity and data-shape validation for new backups
-- 🧹 Logout removes app data from IndexedDB and browser storage
-- 🔄 Merge or replace saved data during restore
-- 📱 Responsive Design
+## Open Source
 
-### App architecture
+Quarter is an open-source project. Its source code is publicly available for developers to explore, learn from, and contribute to.
 
-`assets/js/core/app.js` is the startup and shared-state composition root. Calculator,
-calendar/navigation, profile, settings, notes, and recovery behavior live in
-`assets/js/core/app/features/`; reusable app constants and UI helpers live in
-`assets/js/core/app/shared.js`.
+Contributions, suggestions, and constructive feedback are welcome.
 
-### ⚠ License
+## Project Structure
 
-This project is licensed under the MIT License. See [LICENSE.md](LICENSE.md) for details.
+| Branch | Purpose |
+|---|---|
+| `main` | Stable version of Quarter |
+| `Developers` | Development and upcoming changes |
 
----
+The `main` branch is intended to contain stable code. New features and improvements are developed separately before being considered for release.
 
-# 🇷🇺 Русский
+## Built By
 
-## 📖 О проекте
+<p align="center">
+  <img src="assets/images/pics/abdughafur.webp" alt="Abdughafur Khujzoda" width="130" />
+  <br />
+  <strong>Abdughafur Khujzoda</strong>
+  <br />
+  Founder & Developer
+</p>
 
-**Чоряк** — современное веб-приложение для расчёта четвертных оценок и анализа процентов.
+## AI & Technology
 
-### ✨ Возможности
+<p align="center">
+  <img src="assets/images/minai/ai.webp" alt="Quarter AI" width="130" />
+  <br />
+  <strong>AI-assisted development</strong>
+</p>
 
-- 📊 Автоматический расчёт
-- 📋 Анализ процентов класса и экспорт отчёта
-- 📈 Графики
-- 📝 Заметки
-- 🌙 Тёмная / светлая тема
-- 🖼 Экспорт PNG
-- 📤 Поделиться изображением
-- 📱 QR-код для ссылки на приложение
-- ⚡ Облегчённый режим для слабых устройств
-- 💾 LocalStorage
-- 🔐 Локальное резервное копирование и восстановление JSON
-- 🔒 Проверка целостности и структуры резервной копии
-- 🧹 При выходе данные приложения удаляются из IndexedDB и хранилища браузера
-- 🔄 Объединение или замена данных при восстановлении
-- 📱 Адаптивный дизайн
+AI tools may assist with development and improvements. Quarter remains an independently developed project.
 
-### ⚠ Лицензия
+## License
 
-Этот проект распространяется по лицензии MIT. Полные условия доступны в [LICENSE.md](LICENSE.md).
+Quarter is licensed under the **MIT License**.
+
+You are free to use, modify, and distribute the software under the terms of the license.
+
+See the [LICENSE](LICENSE) file for details.
 
 ---
 
-<div align="center">
-
-**Made with ❤️ in Tajikistan**  
-**By Abdughafur Khujzoda**
-
-</div>
+<p align="center">
+  Made with care by <strong>Abdughafur Khujzoda</strong>.
+</p>
