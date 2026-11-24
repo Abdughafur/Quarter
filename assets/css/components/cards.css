@@ -71,7 +71,7 @@
 .stats-stack {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .result-stat-cards {
@@ -82,14 +82,10 @@
 
 .stat-row {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) auto;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-}
-
-/* Make each stat row look like a small card */
-.stat-row {
-  padding: 10px 12px;
+  padding: 10px;
   border-radius: 12px;
   background: linear-gradient(
     180deg,
@@ -98,6 +94,12 @@
   );
   border: 1px solid rgba(255, 255, 255, 0.04);
   box-shadow: 0 6px 14px rgba(14, 43, 77, 0.04);
+}
+
+.stat-text {
+  font-size: 0.92rem;
+  color: var(--muted);
+  font-weight: 800;
 }
 
 .stat-icon {
@@ -419,10 +421,6 @@
     background: rgba(255, 255, 255, 0.035);
     border-color: rgba(255, 255, 255, 0.09);
   }
-}
-
-.notes-card {
-  padding: 18px;
 }
 
 .notes-kicker {
@@ -773,21 +771,20 @@
   #tab-notes .note-detail-panel {
     height: 100%;
     min-height: 0;
+  }
+
+  #tab-notes .notes-sidebar {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  #tab-notes .note-detail-panel {
     padding: 20px;
     border: 1px solid var(--border);
     border-radius: 22px;
     box-shadow: 0 14px 34px rgba(14, 43, 77, 0.07);
-  }
-
-  #tab-notes .notes-sidebar.notes-card {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    padding: 20px;
-    border: 0;
-    background: transparent;
-    box-shadow: none;
-    overflow: hidden;
   }
 
   #tab-notes .notes-sidebar .notes-header {
@@ -810,7 +807,7 @@
   #tab-notes .note-item {
     align-self: start;
     height: auto;
-    min-height: 0;
+    min-height: 88px;
   }
 
   #tab-notes .note-detail-panel {
@@ -855,7 +852,8 @@
 
   #tab-notes .note-item.selected {
     background: var(--soft);
-    box-shadow: inset 3px 0 0 var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--brand-soft);
   }
 
   #tab-notes .floating-add-note {
@@ -912,15 +910,6 @@
   align-self: stretch;
 }
 
-#tab-home .hero .large {
-  min-height: 154px;
-  padding: 20px 14px;
-  border: 1px solid rgba(117, 211, 252, 0.16);
-  border-radius: 19px;
-  background: #122c3f;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
 #tab-home .hero #avgLarge[hidden],
 #tab-home .hero .result-empty-illustration[hidden] {
   display: none !important;
@@ -932,20 +921,6 @@
   height: 96px;
   object-fit: contain;
   opacity: 0.9;
-}
-
-#tab-home .hero .large-number {
-  color: #f8fdff;
-  font-size: clamp(3.5rem, 8vw, 5rem);
-  letter-spacing: -3px;
-}
-
-#tab-home .hero .large .label-small {
-  color: #8edbf0;
-  font-size: 0.76rem;
-  font-weight: 800;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
 }
 
 #tab-home .hero .stats-stack {
@@ -1038,13 +1013,6 @@
   align-items: flex-end;
   gap: 8px;
   justify-content: flex-end;
-}
-
-#tab-home .diagram-card,
-#tab-home .diagram-card .chart {
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
 }
 
 #tab-home .hero .actions .result-details-toggle {
@@ -1179,20 +1147,6 @@
   color: #5b7280;
 }
 
-[data-theme="light"] #tab-home .hero .large {
-  border-color: #cfe3eb;
-  background: #e8f5f9;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-[data-theme="light"] #tab-home .hero .large-number {
-  color: #123044;
-}
-
-[data-theme="light"] #tab-home .hero .large .label-small {
-  color: #16839d;
-}
-
 [data-theme="light"] #tab-home .hero .stat-row + .stat-row {
   border-top-color: #e1edf2;
 }
@@ -1266,17 +1220,6 @@
   color: inherit;
 }
 
-#tab-notes .notes-card {
-  padding: 18px;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-#tab-notes .notes-card::before {
-  display: none;
-}
-
 #tab-notes .notes-page-title,
 #tab-notes .notes-header,
 #tab-notes .notes-list {
@@ -1294,6 +1237,16 @@
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease;
+}
+
+#tab-notes .note-label-row,
+#tab-notes .note-label-row > div:first-child {
+  min-width: 0;
+}
+
+#tab-notes .note-item-title,
+#tab-notes .note-item-body {
+  overflow-wrap: anywhere;
 }
 
 #tab-notes .notes-search:focus-within {
@@ -1456,12 +1409,13 @@
 }
 
 #tab-notes .notes-list {
-  gap: 0;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: var(--card);
-  box-shadow: 0 12px 30px rgba(14, 43, 77, 0.06);
+  min-width: 0;
+  gap: 12px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .note-empty {
@@ -1512,23 +1466,32 @@
 }
 
 #tab-notes .note-item {
-  gap: 8px;
-  padding: 15px 14px;
-  border: 0;
-  border-bottom: 1px solid var(--soft);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  transition: background 160ms ease;
+  min-width: 0;
+  gap: 10px;
+  min-height: 88px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: linear-gradient(180deg, var(--card), var(--card2));
+  box-shadow: 0 10px 24px rgba(14, 43, 77, 0.055);
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 #tab-notes .note-item:last-child {
-  border-bottom: 0;
+  border-bottom: 1px solid var(--border);
 }
 
 #tab-notes .note-item:active,
 #tab-notes .note-item:focus-within {
   background: var(--soft);
+}
+
+#tab-notes .note-item:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
 }
 
 #tab-notes .note-item-title {
@@ -1610,12 +1573,14 @@
   position: fixed;
   inset: 0;
   display: none;
+  overflow-y: auto;
   z-index: 2500;
   align-items: center;
   justify-content: center;
   background: rgba(3, 9, 28, 0.62);
   backdrop-filter: blur(20px) saturate(160%);
   padding: 20px;
+  overscroll-behavior: contain;
 }
 
 .note-modal-backdrop.open {
@@ -1670,6 +1635,8 @@
 .note-modal {
   width: min(620px, 100%);
   max-height: min(92vh, 860px);
+  max-height: min(92dvh, 860px);
+  min-width: 0;
   overflow: hidden;
   display: grid;
   grid-template-rows: auto 1fr auto;
@@ -1710,8 +1677,10 @@
 }
 
 .note-modal-body {
+  min-width: 0;
   padding: 18px 22px;
   overflow: auto;
+  overscroll-behavior: contain;
   display: grid;
   gap: 16px;
 }
@@ -1726,16 +1695,6 @@
   background: #0b1722;
   color: #f3f8fb;
   box-shadow: none;
-}
-
-[data-theme="dark"] #tab-home .hero .large {
-  background: #122c3f;
-  box-shadow: none;
-}
-
-[data-theme="dark"] #tab-home .hero .large-number,
-[data-theme="dark"] #tab-home .hero .large .label-small {
-  color: #ffffff;
 }
 
 .note-important-row {
@@ -1996,44 +1955,6 @@
   }
 }
 
-.large-number {
-  font-size: clamp(2.4rem, 9vw, 3.6rem);
-}
-
-.large .label-small {
-  font-size: 0.95rem;
-  margin-top: 8px;
-  opacity: 0.95;
-}
-
-.stats-stack {
-  gap: 8px;
-}
-
-.stat-row {
-  grid-template-columns: 40px 1fr auto;
-  padding: 10px;
-  border-radius: 12px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.02),
-    rgba(255, 255, 255, 0.01)
-  );
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  box-shadow: 0 6px 14px rgba(14, 43, 77, 0.04);
-}
-
-.stat-text {
-  font-size: 0.92rem;
-  color: var(--muted);
-  font-weight: 800;
-}
-
-.stat-value {
-  min-width: 64px;
-  text-align: right;
-}
-
 .shortcut-card {
   display: flex;
   align-items: center;
@@ -2191,21 +2112,6 @@
   height: 100%;
   object-fit: cover;
   display: none;
-}
-
-
-/* Disabled result details — preserve original colors */
-#tab-home .hero .actions .result-details-toggle:disabled {
-    opacity: 1 !important;
-    filter: none !important;
-    box-shadow: none !important;
-
-    transform: none !important;
-    transition: none !important;
-    animation: none !important;
-
-    pointer-events: none !important;
-    cursor: not-allowed !important;
 }
 
 

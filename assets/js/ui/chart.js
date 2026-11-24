@@ -109,7 +109,9 @@ export function renderGradeChart(container, grades) {
   const viewportWidth = Math.max(0, container.clientWidth);
   state.renderedWidth = viewportWidth;
   container.dataset.gradeCount = String(grades.length);
-  container.textContent = "";
+  container
+    .querySelectorAll(":scope > .chart-empty, :scope > .chart-viewport")
+    .forEach((chartContent) => chartContent.remove());
 
   if (!grades.length) {
     const empty = document.createElement("div");

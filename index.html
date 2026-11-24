@@ -19,7 +19,7 @@
   <link rel="icon" href="assets/images/pics/logo.png" type="image/png" />
   <link rel="apple-touch-icon" href="assets/images/pics/logo.png" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="assets/css/main.css?v=4.5.3B25">
+  <link rel="stylesheet" href="assets/css/main.css?v=4.5.4B">
 
 </head>
 
@@ -169,19 +169,18 @@
         </div>
 
         <div class="calculator-insights-column">
-          <div class="card compact-card diagram-card">
+          <div class="card compact-card diagram-card" id="gradeChart">
             <div class="top">
               <span class="small">Диаграмма</span>
             </div>
-            <div class="chart" id="gradeChart"></div>
           </div>
 
-          <div class="card minai-card minai-coming-soon minai-status-card" aria-label="MinAI: маълумоти хонанда">
+          <div class="card minai-card minai-status-card" aria-label="MinAI: маълумоти хонанда">
             <div class="minai-card-heading">
               <img src="assets/images/minai/ai.webp" alt="" aria-hidden="true" />
               <span>MinAI</span>
             </div>
-            <h3 class="minai-coming-soon-title">Маълумоти воридшуда оиди хонанда</h3>
+            <h3 class="minai-status-title">Таҳлили пешравӣ</h3>
             <div class="minai-status-list" aria-live="polite">
               <div class="minai-status-item">
                 <span>Натиҷаи чоряк</span>
@@ -192,8 +191,7 @@
                 <strong id="minaiStudentLevel">—</strong>
               </div>
               <div class="minai-status-item minai-status-progress">
-                <span>Пешравӣ</span>
-                <strong id="minaiProgress">Барои муайян кардани сатҳи пешравии хонанда баллҳоро ворид кунед.</strong>
+                <strong id="minaiProgress">Барои таҳлили пешравӣ ҳадди ақал 6 балл ворид кунед.</strong>
               </div>
             </div>
             <button class="result-details-toggle" type="button" data-action="toggleResultDetails"
@@ -207,10 +205,10 @@
     </section>
 
 
-    <section id="tab-prosent" class="tab">
+    <section id="tab-prosent" class="tab" aria-labelledby="percentTitle">
       <div class="percent-layout">
-        <div class="card percent-board-card">
-          <h3 class="settings-title">Фоизҳо</h3>
+        <div class="percent-board-card">
+          <h3 id="percentTitle" class="settings-title">Фоизҳо</h3>
           <div class="input-row pupil-total-row" style="grid-template-columns:1fr; position:relative;">
             <span class="pupil-field-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none">
@@ -266,12 +264,12 @@
       </div>
     </section>
 
-    <section id="tab-notes" class="tab">
+    <section id="tab-notes" class="tab" aria-labelledby="notesHeading">
       <div id="notesWorkspaceView" class="notes-workspace-view">
         <div class="notes-workspace">
-          <div class="card notes-card notes-sidebar">
+          <div class="notes-sidebar">
             <div class="notes-header">
-              <h2 class="notes-page-title">Ёддоштҳо</h2>
+              <h2 id="notesHeading" class="notes-page-title">Ёддоштҳо</h2>
               <div class="notes-search">
                 <span class="notes-search-glyph" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none">
@@ -279,15 +277,18 @@
                     <path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                   </svg>
                 </span>
-                <input id="noteSearchInput" class="input-field" type="search" placeholder="Ҷустуҷӯ..." />
-                <kbd>/</kbd>
+                <input id="noteSearchInput" class="input-field" type="search" placeholder="Ҷустуҷӯ..."
+                  aria-label="Ҷустуҷӯи ёддоштҳо" />
+                <kbd aria-hidden="true">/</kbd>
               </div>
             </div>
 
-            <div id="notesList" class="notes-list"></div>
+            <div id="notesList" class="notes-list" role="listbox" aria-labelledby="notesHeading"
+              aria-orientation="vertical"></div>
           </div>
 
-          <aside id="noteDetailPanel" class="card note-detail-panel" aria-live="polite">
+          <aside id="noteDetailPanel" class="card note-detail-panel" role="region"
+            aria-label="Тафсилоти ёддошт" aria-live="polite">
             <div class="note-detail-empty">
               <span class="note-detail-empty-icon" aria-hidden="true">✦</span>
               <h3>Ёддоштро интихоб кунед</h3>
@@ -297,7 +298,8 @@
         </div>
 
         <button class="btn add-note-btn floating-add-note" type="button" data-action="openNoteModal"
-          aria-label="Ёддошти нав илова кардан">
+          aria-label="Ёддошти нав илова кардан" title="Ёддошти нав илова кардан"
+          aria-controls="noteModal" aria-haspopup="dialog">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
           </svg>
@@ -367,16 +369,20 @@
             <h2 id="lessonsTitle">Ҷадвали дарсҳо</h2>
             <p>Ҷадвали ҳафтаина барои ҳар як мактаб</p>
           </div>
-          <button class="btn lessons-add-button" type="button" data-action="openLessonsEditor"
-            aria-label="Илова кардани дарс">
-            <span aria-hidden="true">+</span>
-            <span>Дарси нав</span>
-          </button>
         </div>
         <div id="lessonsSchoolTabs" class="lessons-school-tabs" role="tablist"
-          aria-label="Интихоби мактаб"></div>
-        <div id="lessonsWeekGrid" class="lessons-week-grid" aria-live="polite"></div>
+          aria-label="Интихоби мактаб" aria-orientation="horizontal"></div>
+        <div id="lessonsWeekGrid" class="lessons-week-grid" role="tabpanel" tabindex="0"
+          aria-labelledby="lessonsTitle" aria-live="polite"></div>
       </div>
+      <button class="btn floating-add-lesson" type="button" data-action="openLessonsEditor"
+        aria-label="Дарси нав илова кардан" title="Дарси нав илова кардан" aria-controls="lessonsModal"
+        aria-haspopup="dialog" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" />
+        </svg>
+      </button>
     </section>
 
     <section id="tab-more" class="tab" aria-labelledby="moreTitle">
@@ -799,22 +805,30 @@
             </span>
             <input type="checkbox" id="diagramToggle" data-action="toggleDiagram" />
           </label>
-          <div class="ui-kit-control">
-            <div class="ui-kit-heading">
-              <span class="setting-text">
-                <strong>Сатҳи интерфейс</strong>
-                <span>Барои мутобиқ кардани барнома ба суръати дастгоҳ</span>
-              </span>
-              <strong id="uiKitValue" class="ui-kit-value">Миёна</strong>
+        </div>
+
+        <div class="card settings-card ui-kit-settings-card">
+          <fieldset class="ui-kit-control">
+            <legend class="settings-card-title">Сатҳи интерфейс</legend>
+            <p id="uiKitDescription" class="ui-kit-description">
+              Барои мутобиқ кардани барнома ба суръати дастгоҳ
+            </p>
+            <div class="ui-kit-options">
+              <label class="ui-kit-option">
+                <input type="radio" name="uiKitLevel" value="low" />
+                <span>Сабук</span>
+              </label>
+              <label class="ui-kit-option">
+                <input type="radio" name="uiKitLevel" value="medium" />
+                <span>Миёна</span>
+              </label>
+              <label class="ui-kit-option">
+                <input type="radio" name="uiKitLevel" value="perfect" />
+                <span>Олӣ</span>
+              </label>
             </div>
-            <input id="uiKitRange" class="ui-kit-range" type="range" min="0" max="100" step="1" value="50"
-              aria-label="Сатҳи интерфейс" aria-valuetext="Миёна" />
-            <div class="ui-kit-labels" aria-hidden="true">
-              <span>Сабук</span>
-              <span>Миёна</span>
-              <span>Олӣ</span>
-            </div>
-          </div>
+            <output id="uiKitValue" class="ui-kit-value" aria-live="polite">Миёна</output>
+          </fieldset>
         </div>
 
         <div class="card settings-card">
@@ -933,7 +947,7 @@
             </div>
             <div class="about">
               <p class="about-app-name"><strong>Чоряк</strong></p>
-              <p><strong>Нусха:</strong> v4.5.3B21 (Бета)</p>
+              <p><strong>Нусха:</strong> v4.5.4B (Бета)</p>
               <p><strong>Таҳиягар:</strong> Abdughafur (Абдуғафур)</p>
             </div>
           </div>
@@ -944,7 +958,7 @@
               сохта шудааст. Барнома барои ҳамаи омӯзгорон ройгон пешниҳод мегардад.
             </p>
             <p>
-              Айни замон барнома дар нусхаи v4.5.3B21 (Бета) қарор дорад. Дар ин нусха ба устуворӣ, функсияҳои нав ва кори барнома
+              Айни замон барнома дар нусхаи v4.5.4B (Бета) қарор дорад. Дар ин нусха ба устуворӣ, функсияҳои нав ва кори барнома
               диққати махсус дода шудааст. Системаи барнома аз ҷониби мутахассисон ва корбарон санҷида шудааст.
               Фунскияҳои асосии барнома дуруст кор мекунад ва функсяҳои нав дар ҳоли санҷиш ҳастанд.
             </p>
@@ -1064,7 +1078,7 @@
     <div class="ios-modal share-modal">
       <button class="share-modal-close" type="button" data-action="closeShareModal"
         aria-label="Пӯшидан">&times;</button>
-      <span class="share-modal-kicker">Чоряк · v4.5.3B21 (Бета)</span>
+      <span class="share-modal-kicker">Чоряк · v4.5.4B (Бета)</span>
       <h3 id="shareModalTitle">Мубодилаи барнома</h3>
       <p>Рамзи QR-ро скан кунед ё пайвандро фиристед.</p>
       <div class="share-qr-frame">
@@ -1541,7 +1555,7 @@
 
   <script type="module" src="assets/js/core/entry.js"></script>
   <script type="module" src="assets/js/core/pwa.js"></script>
-  <script type="module" src="assets/js/core/app.js?v=4.5.3B25"></script>
+  <script type="module" src="assets/js/core/app.js?v=4.5.4B"></script>
   <div id="developerPhotoLightbox" class="developer-photo-lightbox" role="dialog"
     aria-modal="true" aria-label="Акси таҳиягар"
     onclick="if(event.target===this)this.classList.remove('open')">

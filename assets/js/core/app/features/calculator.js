@@ -1,6 +1,11 @@
-import { calculateStats, getTrend, gradeLabel, GRADE_LABELS } from "../../stats.js";
-import { buildKeypad, buildPercentRows, renderGradeBlocks, renderGradeChart } from "../../../ui/chart.js";
-import { closeInfoModal, openInfoModal } from "../../../ui/modal.js";
+import {
+  calculateStats,
+  getPerformanceInsights,
+  gradeLabel,
+  GRADE_LABELS,
+} from "../../stats.js?v=4.5.4B";
+import { buildKeypad, buildPercentRows, renderGradeBlocks, renderGradeChart } from "../../../ui/chart.js?v=4.5.4B";
+import { closeInfoModal, openInfoModal } from "../../../ui/modal.js?v=4.5.4B";
 import { clean, clamp, escapeHtml, qs, roundRect, setChecked, setInputValue, setText, toInt, uid } from "../../../utils/helpers.js";
 import { canvasToPngBlob } from "../shared.js";
 
@@ -474,14 +479,22 @@ export const calculatorFeature = {
       "minaiStudentLevel",
       this.grades.length ? gradeLabel(stats.final) : "—",
     );
-    const trend = getTrend(this.grades);
-    const progressMessage = this.grades.length
-      ? trend === "беҳтар шуда истодааст"
-        ? "Аз рӯйи баллҳои воридшуда хонанда пешравӣ карда истодааст."
-        : trend === "паст шуда истодааст"
-          ? "Аз рӯйи баллҳои воридшуда сатҳи таҳсили хонанда паст шуда истодааст."
-          : "Аз рӯйи баллҳои воридшуда дар хонанда ягон тағйирот дида нашудааст."
-      : "Барои муайян кардани сатҳи пешравии хонанда баллҳоро ворид кунед.";
+    const insights = getPerformanceInsights(this.grades);
+    let progressMessage = "Барои таҳлили пешравӣ ҳадди ақал 6 балл ворид кунед.";
+    if (insights.count) {
+      const trend = insights.trend;
+      if (trend.direction === "insufficient") {
+        progressMessage = `Барои таҳлили пешравӣ ҳадди ақал ${trend.required} балл зарур аст; ҳоло ${trend.count} балл ворид шудааст.`;
+      } else {
+        const trendLabels = {
+          improving: "болоравӣ",
+          declining: "пастравӣ",
+          stable: "тағйири назаррас нест",
+        };
+        const change = `${trend.change > 0 ? "+" : ""}${trend.change.toFixed(1)}`;
+        progressMessage = `Ҳоло: ${trendLabels[trend.direction]} (${change} балл).`;
+      }
+    }
     setText("minaiProgress", progressMessage);
 
     const blocksContainer = qs("blocksContainer");

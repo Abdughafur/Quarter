@@ -1,4 +1,4 @@
-import { closeInfoModal, openInfoModal } from "../../../ui/modal.js";
+import { closeInfoModal, openInfoModal } from "../../../ui/modal.js?v=4.5.4B";
 import { clean, escapeHtml, qs, setInputValue, setText, uid } from "../../../utils/helpers.js";
 
 export const notesFeature = {
@@ -95,6 +95,11 @@ export const notesFeature = {
     this.editingNoteId = null;
     this.creatingNoteInline = false;
     this.renderNotes();
+    if (window.matchMedia("(max-width: 899px)").matches) {
+      qs("noteDetailPanel")
+        ?.querySelector(".note-detail-back")
+        ?.focus({ preventScroll: true });
+    }
   },
 
   openNoteEntry(noteId = null) {
@@ -184,6 +189,11 @@ export const notesFeature = {
     this.editingNoteId = null;
     this.creatingNoteInline = false;
     this.renderNotes();
+    if (window.matchMedia("(max-width: 899px)").matches) {
+      qs("notesList")
+        ?.querySelector(".note-item[tabindex='0']")
+        ?.focus({ preventScroll: true });
+    }
   },
 
   recordNoteChange() {
@@ -233,6 +243,8 @@ export const notesFeature = {
   renderNotes() {
     const list = qs("notesList");
     if (!list) return;
+    const focusedNoteId =
+      document.activeElement?.closest?.(".note-item")?.dataset.noteId || "";
 
     const queryRaw = String(qs("noteSearchInput")?.value || "").trim();
     const query = queryRaw.toLowerCase();
@@ -252,6 +264,11 @@ export const notesFeature = {
     if (!filtered.length) {
       const empty = document.createElement("div");
       empty.className = "note-empty";
+      empty.setAttribute("role", "option");
+      empty.setAttribute("aria-disabled", "true");
+      empty.setAttribute("aria-selected", "false");
+      empty.setAttribute("aria-live", "polite");
+      empty.tabIndex = 0;
       const image = document.createElement("img");
       image.className = "note-empty-image";
       image.alt = "";
@@ -272,10 +289,23 @@ export const notesFeature = {
       return;
     }
 
+    const selectedNoteVisible = filtered.some(
+      (note) => note.id === this.selectedNoteId,
+    );
+    const tabStopId = selectedNoteVisible
+      ? this.selectedNoteId
+      : filtered[0]?.id;
     filtered.forEach((note) => {
       const item = document.createElement("article");
       item.className = "note-item";
       item.dataset.noteId = note.id;
+      item.setAttribute("role", "option");
+      item.setAttribute("aria-selected", String(note.id === this.selectedNoteId));
+      item.setAttribute(
+        "aria-label",
+        `Ёддошт: ${escapeHtml(note.title || "Ёддошт")}`,
+      );
+      item.tabIndex = note.id === tabStopId ? 0 : -1;
       if (note.id === this.selectedNoteId) item.classList.add("selected");
       item.innerHTML = `
         <div class="note-label-row">
@@ -293,6 +323,11 @@ export const notesFeature = {
       `;
       list.appendChild(item);
     });
+    if (focusedNoteId) {
+      [...list.querySelectorAll(".note-item")]
+        .find((item) => item.dataset.noteId === focusedNoteId)
+        ?.focus({ preventScroll: true });
+    }
     this.renderNoteDetail();
   },
 

@@ -30,23 +30,39 @@
   font-weight: 750;
 }
 
-.lessons-add-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 42px;
-  padding-inline: 14px;
-  white-space: nowrap;
-}
-
-.lessons-add-button > span:first-child {
-  font-size: 1.2rem;
-  line-height: 1;
-}
-
-.lessons-add-button[hidden],
 #lessonDeleteButton[hidden] {
   display: none;
+}
+
+#tab-lessons .floating-add-lesson {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 1101;
+  display: grid;
+  width: 64px;
+  height: 64px;
+  min-width: 64px;
+  min-height: 64px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 50%;
+  box-shadow: 0 18px 40px rgba(14, 43, 77, 0.22);
+}
+
+#tab-lessons .floating-add-lesson[hidden] {
+  display: none !important;
+}
+
+#tab-lessons .floating-add-lesson svg {
+  width: 26px;
+  height: 26px;
+}
+
+#tab-lessons .floating-add-lesson:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 4px;
 }
 
 .lessons-school-tabs {
@@ -80,6 +96,12 @@
   background: var(--brand-soft);
 }
 
+.lessons-school-tab:focus-visible,
+.lesson-edit-button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .lessons-week-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -98,7 +120,7 @@
 .lessons-day-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 10px;
   margin-bottom: 10px;
 }
@@ -110,7 +132,6 @@
   font-weight: 900;
 }
 
-.lesson-add-day-button,
 .lessons-close-button {
   display: inline-grid;
   flex: 0 0 auto;
@@ -334,15 +355,20 @@ body[data-theme="dark"] .lessons-field input[type="time"] {
   }
 }
 
+@media (max-width: 899px) {
+  #tab-lessons .floating-add-lesson {
+    right: 18px;
+    bottom: calc(var(--nav) + 22px);
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    min-height: 56px;
+  }
+}
+
 @media (max-width: 420px) {
   .lessons-page-header {
     align-items: flex-start;
-  }
-
-  .lessons-add-button {
-    min-height: 38px;
-    padding-inline: 10px;
-    font-size: 0.78rem;
   }
 
   .lessons-form-row {
