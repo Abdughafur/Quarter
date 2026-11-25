@@ -850,7 +850,7 @@ export async function createBackupData() {
   const backup = {
     format: BACKUP_FORMAT,
     formatVersion: BACKUP_FORMAT_VERSION,
-    appVersion: "4.5.4B",
+    appVersion: "4.5.4B2",
     exportedAt: new Date().toISOString(),
     data: await loadState(),
   };

@@ -766,16 +766,8 @@ body.more-subview-open::after {
   background: linear-gradient(145deg, #f59e0b, #f97316);
 }
 
-#more-home-view .option-item[data-action="showDeveloper"] {
-  order: 8;
-}
-
 #more-home-view .option-item[data-action="showMoreAbout"] {
   order: 6;
-}
-
-#more-home-view .option-item[data-action="showInstallPwa"] {
-  order: 7;
 }
 
 #more-home-view .option-item:nth-child(3) .option-icon {
@@ -1308,6 +1300,87 @@ body.more-subview-open::after {
 
 .about-overview p + p {
   margin-top: 10px;
+}
+
+#more-about-view .about-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+#more-about-view .about-action {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 76px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: linear-gradient(180deg, var(--card), var(--card2));
+  box-shadow: 0 8px 22px rgba(14, 43, 77, 0.06);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    transform 180ms var(--ease),
+    box-shadow 180ms ease;
+}
+
+#more-about-view .about-action:hover,
+#more-about-view .about-action:focus-visible,
+#more-about-view .about-action:active {
+  background: var(--soft);
+  box-shadow: 0 10px 24px rgba(14, 43, 77, 0.1);
+  transform: scale(0.99);
+}
+
+#more-about-view .about-action-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #0284c7, #38bdf8);
+  color: #fff;
+}
+
+#more-about-view .about-action-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+#more-about-view .about-action-copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+#more-about-view .about-action-copy strong {
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+#more-about-view .about-action-copy span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+#more-about-view .about-action-arrow {
+  color: var(--muted);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+@media (max-width: 520px) {
+  #more-about-view .about-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 [data-ui-kit="low"] #more-home-view .more-profile-summary,

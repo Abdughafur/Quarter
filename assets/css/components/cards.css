@@ -57,10 +57,6 @@
   border: 0;
 }
 
-.stats-stack .result-details-toggle {
-  margin: 0 auto;
-}
-
 .score-label {
   margin-top: 6px;
   color: var(--muted);
@@ -863,23 +859,10 @@
   }
 }
 
-/* Distinct result scoreboard: a single dark stage with quiet data rows. */
+/* Keep the result summary on the same surface system as other app cards. */
 #tab-home .hero {
   min-height: 224px;
   padding: 0;
-  border: 1px solid #1d3546;
-  border-radius: 24px;
-  background: #0b1722;
-  color: #f3f8fb;
-  box-shadow: 0 18px 34px rgba(2, 12, 22, 0.2);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-#tab-home .hero::before {
-  background:
-    linear-gradient(90deg, rgba(34, 211, 238, 0.1), transparent 34%),
-    radial-gradient(circle at 88% 0, rgba(125, 211, 252, 0.1), transparent 30%);
 }
 
 #tab-home .hero > .top {
@@ -892,7 +875,7 @@
 }
 
 #tab-home .hero > .top .small {
-  color: #9db8c8;
+  color: var(--muted);
   font-size: 0.68rem;
   letter-spacing: 1.1px;
 }
@@ -928,32 +911,17 @@
 }
 
 #tab-home .hero .result-stat-cards {
-  gap: 0;
+  gap: 8px;
 }
 
 #tab-home .hero .stat-row,
 #tab-home .hero.result-details-open .stat-row {
   min-height: 56px;
-  padding: 9px 0 9px 11px;
-  border: 0;
-  border-left: 3px solid #2c4555;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-#tab-home .hero .stat-row + .stat-row {
-  border-top: 1px solid rgba(148, 196, 219, 0.1);
-}
-
-#tab-home .hero .stat-row:nth-child(1) {
-  border-left-color: #fb7185;
-}
-#tab-home .hero .stat-row:nth-child(2) {
-  border-left-color: #34d399;
-}
-#tab-home .hero .stat-row:nth-child(3) {
-  border-left-color: #60a5fa;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--card), var(--card2));
+  box-shadow: 0 6px 14px rgba(14, 43, 77, 0.04);
 }
 
 #tab-home .hero .stat-icon,
@@ -980,7 +948,7 @@
 }
 
 #tab-home .hero .stat-text {
-  color: #a9c0cd;
+  color: var(--muted);
   font-size: 0.73rem;
   font-weight: 800;
   line-height: 1.25;
@@ -988,115 +956,13 @@
 
 #tab-home .hero .stat-value {
   min-width: 52px;
-  color: #f3f8fb;
+  color: var(--text);
 }
 
 #tab-home .hero .stat-value strong {
-  color: #f3f8fb;
+  color: var(--text);
   font-size: 0.82rem;
   font-weight: 950;
-}
-
-#tab-home .hero .result-details-toggle {
-  display: none;
-  border-color: rgba(148, 196, 219, 0.16);
-  background: #122c3f;
-  color: #8edbf0;
-  box-shadow: none;
-  border-radius: 999px;
-}
-
-#tab-home .hero .actions {
-  margin-top: 3px;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-#tab-home .hero .actions .result-details-toggle {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  width: 38px;
-  height: 38px;
-  min-width: 38px;
-  min-height: 38px;
-  align-self: flex-start;
-}
-
-#tab-home .hero.result-details-open .actions .result-details-toggle,
-#tab-home .hero .actions .result-details-toggle[aria-expanded="true"] {
-  display: inline-flex;
-}
-
-#tab-home .hero .export-action {
-  align-self: flex-end;
-  width: auto;
-  min-width: 112px;
-  flex: 0 0 auto;
-  margin: 0;
-  min-height: 42px;
-  border: 1px solid rgba(142, 219, 240, 0.22);
-  border-radius: 999px;
-  background: #16384d;
-  box-shadow: none;
-  color: #c7f4ff;
-  font-size: 0.75rem;
-}
-
-#tab-home .hero .actions .result-details-toggle:disabled,
-#tab-home .hero .actions .export-action:disabled {
-  opacity: 0.42;
-  filter: saturate(0.55);
-  box-shadow: none;
-  cursor: not-allowed;
-}
-
-@media (max-width: 520px) {
-  #tab-home .hero .actions {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-  }
-
-  #tab-home .hero .actions .result-details-toggle,
-  #tab-home .hero.result-details-open .actions .result-details-toggle,
-  #tab-home .hero .actions .result-details-toggle[aria-expanded="true"] {
-    order: 1;
-    display: inline-flex;
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    min-height: 36px;
-    border-radius: 999px;
-  }
-
-  #tab-home .hero .export-action {
-    order: 2;
-    width: auto;
-    flex: 0 0 auto;
-    min-width: 132px;
-    min-height: 36px;
-    padding: 0 14px;
-    border-radius: 999px;
-    font-size: 0.72rem;
-  }
-}
-
-@media (max-width: 430px) {
-  #tab-home .hero .actions .result-details-toggle,
-  #tab-home .hero.result-details-open .actions .result-details-toggle,
-  #tab-home .hero .actions .result-details-toggle[aria-expanded="true"] {
-    width: 34px;
-    height: 34px;
-    min-width: 34px;
-    min-height: 34px;
-  }
 }
 
 @media (max-width: 520px) {
@@ -1119,57 +985,10 @@
   #tab-home .hero .stat-text {
     font-size: 0.7rem;
   }
-  #tab-home .hero .result-details-toggle {
-    width: 34px;
-    height: 34px;
-  }
-}
-
-/* Light scoreboard: the same structure with a calm, paper-like surface. */
-[data-theme="light"] #tab-home .hero {
-  border-color: #d7e5ec;
-  background: #f7fbfd;
-  color: #163044;
-  box-shadow: 0 18px 34px rgba(35, 76, 99, 0.1);
-}
-
-[data-theme="light"] #tab-home .hero::before {
-  background:
-    linear-gradient(90deg, rgba(14, 165, 233, 0.08), transparent 36%),
-    radial-gradient(circle at 88% 0, rgba(34, 211, 238, 0.1), transparent 30%);
 }
 
 [data-theme="light"] #tab-home .hero > .top {
   border-bottom: 0;
-}
-
-[data-theme="light"] #tab-home .hero > .top .small {
-  color: #5b7280;
-}
-
-[data-theme="light"] #tab-home .hero .stat-row + .stat-row {
-  border-top-color: #e1edf2;
-}
-
-[data-theme="light"] #tab-home .hero .stat-text {
-  color: #607887;
-}
-
-[data-theme="light"] #tab-home .hero .stat-value,
-[data-theme="light"] #tab-home .hero .stat-value strong {
-  color: #163044;
-}
-
-[data-theme="light"] #tab-home .hero .result-details-toggle {
-  border-color: #cfe3eb;
-  background: #ffffff;
-  color: #16839d;
-}
-
-[data-theme="light"] #tab-home .hero .export-action {
-  border-color: #c2e0e9;
-  background: #dff2f7;
-  color: #12647a;
 }
 
 .notes-page-title {
@@ -1187,7 +1006,7 @@
 }
 
 #tab-notes .notes-header .notes-page-title {
-  margin: 0;
+  margin: 8px 0 0;
 }
 
 .notes-search {
@@ -1688,13 +1507,6 @@
 .note-body-input {
   min-height: 160px;
   resize: vertical;
-}
-
-[data-theme="dark"] #tab-home .hero {
-  border-color: #1d3546;
-  background: #0b1722;
-  color: #f3f8fb;
-  box-shadow: none;
 }
 
 .note-important-row {

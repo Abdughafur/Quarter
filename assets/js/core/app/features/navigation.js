@@ -2,6 +2,8 @@ import { promptInstallPwa } from "../../pwa.js";
 import { clean, escapeHtml, qs, setText } from "../../../utils/helpers.js";
 import { CALENDAR_MONTHS, CALENDAR_WEEKDAYS, CALENDAR_MIN_YEAR, CALENDAR_MAX_YEAR, SHARE_URL } from "../shared.js";
 
+const tabAnimationTimers = new WeakMap();
+
 export const navigationFeature = {
   isPhoneLayout() {
     return window.matchMedia("(max-width: 520px)").matches;
@@ -91,6 +93,91 @@ export const navigationFeature = {
     this.nav(tabId, tabButton);
   },
 
+  animateTabContent(tabId) {
+    const tab = document.getElementById(tabId);
+    if (!tab) return;
+
+    const selector = [
+      ".card",
+      ".hero",
+      ".percent-board-card",
+      ".percent-row",
+      ".stat-row",
+      ".note-item",
+      ".notes-header",
+      ".notes-list",
+      ".mobile-subview-header",
+      ".floating-add-note",
+      ".floating-add-lesson",
+    ].join(", ");
+    const nestedContent = [
+      ".percent-row",
+      ".stat-row",
+      ".note-item",
+      ".notes-header",
+      ".notes-list",
+      ".mobile-subview-header",
+      ".floating-add-note",
+      ".floating-add-lesson",
+    ].join(", ");
+    const previousTimer = tabAnimationTimers.get(tab);
+    if (previousTimer) {
+      clearTimeout(previousTimer);
+      tabAnimationTimers.delete(tab);
+    }
+
+    tab.classList.remove("tab-entering");
+    tab.querySelectorAll(".tab-enter-item").forEach((item) => {
+      item.classList.remove("tab-enter-item");
+      item.style.removeProperty("--tab-enter-delay");
+    });
+    tab.style.removeProperty("--tab-enter-duration");
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    void tab.offsetWidth;
+
+    const candidates = Array.from(tab.querySelectorAll(selector)).filter(
+      (item) =>
+        item.getClientRects().length > 0 &&
+        (item.matches(nestedContent) || !item.parentElement?.closest(selector)),
+    );
+    const items = candidates.length
+      ? candidates
+      : [tab.firstElementChild].filter(Boolean);
+    if (!items.length) return;
+
+    items.sort((a, b) => {
+      const aRect = a.getBoundingClientRect();
+      const bRect = b.getBoundingClientRect();
+      return Math.abs(aRect.top - bRect.top) > 8
+        ? aRect.top - bRect.top
+        : aRect.left - bRect.left;
+    });
+
+    const maxDelay = items.length > 1 ? 350 : 0;
+    tab.style.setProperty("--tab-enter-duration", `${1000 - maxDelay}ms`);
+    items.forEach((item, index) => {
+      const delay =
+        items.length > 1
+          ? Math.round((maxDelay * index) / (items.length - 1))
+          : 0;
+      item.style.setProperty("--tab-enter-delay", `${delay}ms`);
+      item.classList.add("tab-enter-item");
+    });
+    tab.classList.add("tab-entering");
+    tabAnimationTimers.set(
+      tab,
+      setTimeout(() => {
+        tab.classList.remove("tab-entering");
+        tab.querySelectorAll(".tab-enter-item").forEach((item) => {
+          item.classList.remove("tab-enter-item");
+          item.style.removeProperty("--tab-enter-delay");
+        });
+        tab.style.removeProperty("--tab-enter-duration");
+        tabAnimationTimers.delete(tab);
+      }, 1000),
+    );
+  },
+
   nav(id, button) {
     if (id !== "tab-notes") this.flushNoteAutosave();
     if (
@@ -111,6 +198,7 @@ export const navigationFeature = {
       .forEach((navButton) => navButton.classList.remove("active"));
 
     qs(id)?.classList.add("active");
+    this.animateTabContent(id);
     (button || document.querySelector(`[data-tab="${id}"]`))?.classList.add(
       "active",
     );

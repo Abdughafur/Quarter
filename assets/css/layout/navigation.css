@@ -154,6 +154,35 @@ nav .nav-btn > svg {
   fill: currentColor;
 }
 
+.nav-btn[data-tab="tab-lessons"] svg,
+.mobile-more-menu-option[data-target-tab="tab-lessons"] svg {
+  width: 24px;
+  height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  fill: none;
+  stroke: currentColor;
+}
+
+.nav-btn[data-tab="tab-lessons"] svg {
+  color: inherit;
+}
+
+.mobile-more-menu-option[data-target-tab="tab-lessons"] svg {
+  flex-basis: 24px;
+  width: 24px;
+  height: 24px;
+  color: var(--primary);
+}
+
+.nav-btn[data-tab="tab-lessons"] svg path,
+.mobile-more-menu-option[data-target-tab="tab-lessons"] svg path {
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .nav-btn.active {
   color: white;
   transform: none;
@@ -173,7 +202,7 @@ nav .nav-btn > svg {
   background: var(--card);
   color: var(--primary);
   box-shadow: 0 8px 24px rgba(2, 6, 23, 0.16);
-  touch-action: manipulation;
+  touch-action: none;
   position: relative;
   z-index: 6;
   filter: none;
@@ -283,6 +312,14 @@ nav .nav-btn > svg {
     display: block;
   }
 
+  .mobile-more-trigger .calendar-nav-icon path {
+    stroke-width: 3.2;
+  }
+
+  .mobile-more-trigger.is-long-pressing {
+    transform: scale(0.94);
+  }
+
   .mobile-more-menu {
     position: absolute;
     right: 0;
@@ -297,6 +334,8 @@ nav .nav-btn > svg {
     background: var(--card);
     box-shadow: 0 14px 36px rgba(2, 6, 23, 0.22);
     animation: mobile-more-menu-in 300ms var(--ease) both;
+    touch-action: none;
+    -webkit-touch-callout: none;
   }
 
   .mobile-more-menu[hidden] {
@@ -318,7 +357,7 @@ nav .nav-btn > svg {
     font-weight: 850;
     text-align: left;
     cursor: pointer;
-    touch-action: manipulation;
+    touch-action: none;
   }
 
   .mobile-more-menu-option:hover,
@@ -333,6 +372,31 @@ nav .nav-btn > svg {
     height: 21px;
     flex: 0 0 21px;
     color: var(--primary);
+  }
+
+  .mobile-more-menu.is-dragging {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .mobile-more-menu-option {
+    transform: scale(1);
+    transition:
+      transform 120ms cubic-bezier(0.22, 1, 0.36, 1),
+      background 120ms ease,
+      box-shadow 120ms ease;
+  }
+
+  .mobile-more-menu-option.is-drag-selected {
+    background: var(--soft);
+    box-shadow:
+      inset 0 0 0 1px rgba(14, 165, 233, 0.12),
+      0 8px 18px rgba(14, 165, 233, 0.10);
+    transform: scale(1.035) translateX(-2px);
+  }
+
+  .mobile-more-menu-option.is-drag-near {
+    transform: scale(1.012);
   }
 }
 

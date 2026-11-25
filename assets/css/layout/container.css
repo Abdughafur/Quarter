@@ -13,6 +13,28 @@
   display: block;
 }
 
+.tab-entering .tab-enter-item {
+  animation: tab-content-enter var(--tab-enter-duration, 1000ms) var(--ease)
+    var(--tab-enter-delay, 0ms) both;
+}
+
+@keyframes tab-content-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-entering .tab-enter-item {
+    animation: none;
+  }
+}
+
 /* Responsive workspace widths for phones, laptops, and large desktop displays. */
 @media (min-width: 761px) {
   .container {
@@ -32,21 +54,6 @@
 @media (min-width: 1600px) {
   .container {
     width: min(100% - 120px, 1480px);
-  }
-
-  .tab.active {
-    animation: workspace-in 260ms var(--ease) both;
-  }
-}
-
-@keyframes workspace-in {
-  from {
-    opacity: 0.7;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 /* Created by Abdughafur - Believe GOD */
