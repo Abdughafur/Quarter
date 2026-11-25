@@ -1,5 +1,5 @@
 /* login.js */
-/* Created by Abdughafur - ЧОРЯК v4.5.4B (Beta) */
+/* Created by Abdughafur - ЧОРЯК v4.5.4B2 (Beta) */
 import { clean, qs, setInputValue } from "../utils/helpers.js";
 import {
   saveState,
@@ -9,7 +9,7 @@ import {
 } from "./storage.js";
 import { readBackupFile } from "./backup.js";
 import { bindAvatarPicker } from "../ui/avatar-picker.js";
-import { bindModalInteractionLock } from "../ui/modal.js?v=4.5.4B";
+import { bindModalInteractionLock } from "../ui/modal.js?v=4.5.4B2";
 import { Toast } from "../ui/toast.js";
 
 const SCHOOL_INPUT_IDS = [
@@ -325,5 +325,5 @@ void init().catch((error) => {
   );
 });
 
-/* Created by Abdughafur - ЧОРЯК v4.5.4B (Beta) */
+/* Created by Abdughafur - ЧОРЯК v4.5.4B2 (Beta) */
 // Created by Abdughafur - Believe GOD

@@ -1,4 +1,4 @@
-import { closeInfoModal, openInfoModal } from "../../../ui/modal.js?v=4.5.4B";
+import { closeInfoModal, openInfoModal } from "../../../ui/modal.js?v=4.5.4B2";
 import { clean, escapeHtml, qs, setInputValue, setText, uid } from "../../../utils/helpers.js";
 
 export const notesFeature = {

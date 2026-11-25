@@ -3,9 +3,9 @@ import {
   getPerformanceInsights,
   gradeLabel,
   GRADE_LABELS,
-} from "../../stats.js?v=4.5.4B";
-import { buildKeypad, buildPercentRows, renderGradeBlocks, renderGradeChart } from "../../../ui/chart.js?v=4.5.4B";
-import { closeInfoModal, openInfoModal } from "../../../ui/modal.js?v=4.5.4B";
+} from "../../stats.js?v=4.5.4B2";
+import { buildKeypad, buildPercentRows, renderGradeBlocks, renderGradeChart } from "../../../ui/chart.js?v=4.5.4B2";
+import { closeInfoModal, openInfoModal } from "../../../ui/modal.js?v=4.5.4B2";
 import { clean, clamp, escapeHtml, qs, roundRect, setChecked, setInputValue, setText, toInt, uid } from "../../../utils/helpers.js";
 import { canvasToPngBlob } from "../shared.js";
 

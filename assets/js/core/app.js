@@ -1,19 +1,19 @@
 /* app.js */
-import { loadState, saveState } from "./storage.js?v=4.5.4B";
+import { loadState, saveState } from "./storage.js?v=4.5.4B2";
 import { Toast } from "../ui/toast.js";
 import {
   bindModalInteractionLock,
   hasOpenModal,
   isInsideOpenModal,
-} from "../ui/modal.js?v=4.5.4B";
+} from "../ui/modal.js?v=4.5.4B2";
 import { clamp, clean, qs, setInputValue, whenReady } from "../utils/helpers.js";
 import { recoveryFeature } from "./app/features/recovery.js";
-import { profileFeature } from "./app/features/profile.js?v=4.5.4B";
-import { calculatorFeature } from "./app/features/calculator.js?v=4.5.4B";
-import { navigationFeature } from "./app/features/navigation.js?v=4.5.4B";
-import { settingsFeature } from "./app/features/settings.js?v=4.5.4B";
-import { notesFeature } from "./app/features/notes.js?v=4.5.4B";
-import { lessonsFeature } from "./app/features/lessons.js?v=4.5.4B";
+import { profileFeature } from "./app/features/profile.js?v=4.5.4B2";
+import { calculatorFeature } from "./app/features/calculator.js?v=4.5.4B2";
+import { navigationFeature } from "./app/features/navigation.js?v=4.5.4B2";
+import { settingsFeature } from "./app/features/settings.js?v=4.5.4B2";
+import { notesFeature } from "./app/features/notes.js?v=4.5.4B2";
+import { lessonsFeature } from "./app/features/lessons.js?v=4.5.4B2";
 
 export const app = {
   ...recoveryFeature,
@@ -90,7 +90,7 @@ export const app = {
         if (
           this.settings.uiKit !== "perfect" &&
           !event.target.closest(
-            ".theme-options, .ui-kit-options, #profileMenu, .block, .nav-btn, .logout-swipe-track",
+            ".theme-options, .ui-kit-options, #profileMenu, .block, .nav-btn, .mobile-more-menu, .logout-swipe-track",
           ) &&
           !isInsideOpenModal(event.target)
         ) {
@@ -264,6 +264,279 @@ export const app = {
     let navRect = null;
     let buttonCenters = [];
     let suppressNextClick = false;
+    let moreLongPressTimer = null;
+    let moreLongPressFired = false;
+    let morePressPointerId = null;
+    let morePressStartX = 0;
+    let morePressStartY = 0;
+    let suppressMoreGestureClick = false;
+    let suppressMoreGestureClickTimer = null;
+    let highlightMoreMenuOption = null;
+    let clearMoreMenuHighlight = null;
+
+    if (moreTrigger && moreTrigger.dataset.longPressBound !== "true") {
+      moreTrigger.dataset.longPressBound = "true";
+
+      moreTrigger.addEventListener("pointerdown", (event) => {
+        if (!this.isPhoneLayout() || event.pointerType === "mouse" && event.button !== 0) {
+          return;
+        }
+
+        morePressPointerId = event.pointerId;
+        morePressStartX = event.clientX;
+        morePressStartY = event.clientY;
+        moreLongPressFired = false;
+        moreTrigger.classList.add("is-long-pressing");
+        clearTimeout(moreLongPressTimer);
+        moreLongPressTimer = setTimeout(() => {
+          if (morePressPointerId !== event.pointerId) return;
+          moreLongPressFired = true;
+          moreTrigger.classList.remove("is-long-pressing");
+          this.openMobileMoreMenu();
+          navigator.vibrate?.(10);
+        }, 550);
+      });
+
+      moreTrigger.addEventListener("contextmenu", (event) => {
+        if (!this.isPhoneLayout()) return;
+        event.preventDefault();
+        moreLongPressFired = true;
+        this.openMobileMoreMenu();
+      });
+    }
+
+    const moreMenu = qs("mobileMoreMenu");
+    const moreMenuOptionAtPoint = (clientX, clientY) => {
+      const option = document
+        .elementFromPoint(clientX, clientY)
+        ?.closest(".mobile-more-menu-option");
+      return moreMenu?.contains(option) ? option : null;
+    };
+
+    if (moreMenu && moreMenu.dataset.dragBound !== "true") {
+      moreMenu.dataset.dragBound = "true";
+      const menuOptions = () =>
+        Array.from(moreMenu.querySelectorAll(".mobile-more-menu-option"));
+      let menuDragPointerId = null;
+      let menuDragTimer = null;
+      let menuDragActive = false;
+      let menuDragStartY = 0;
+      let menuDragStartX = 0;
+      let menuDragLastVibrated = null;
+
+      const clearMenuDragStyles = () => {
+        menuOptions().forEach((option) => {
+          option.classList.remove("is-drag-selected", "is-drag-near");
+        });
+        moreMenu.classList.remove("is-dragging");
+      };
+
+      const nearestMenuOption = (clientX, clientY) =>
+        menuOptions().reduce((nearest, option) => {
+          const rect = option.getBoundingClientRect();
+          if (
+            clientX >= rect.left &&
+            clientX <= rect.right &&
+            clientY >= rect.top &&
+            clientY <= rect.bottom
+          ) {
+            return option;
+          }
+          if (!nearest) return option;
+          const nearestRect = nearest.getBoundingClientRect();
+          const nearestY =
+            Math.min(
+              Math.abs(clientY - nearestRect.top),
+              Math.abs(clientY - nearestRect.bottom),
+            );
+          const optionY =
+            Math.min(
+              Math.abs(clientY - rect.top),
+              Math.abs(clientY - rect.bottom),
+            );
+          return optionY < nearestY ? option : nearest;
+        }, null);
+
+      const highlightMenuDragTarget = (option) => {
+        if (!option) return;
+        const options = menuOptions();
+        const selectedIndex = options.indexOf(option);
+        options.forEach((item, index) => {
+          item.classList.toggle("is-drag-selected", item === option);
+          item.classList.toggle(
+            "is-drag-near",
+            item !== option && Math.abs(index - selectedIndex) === 1,
+          );
+        });
+        if (menuDragLastVibrated !== option) {
+          menuDragLastVibrated = option;
+          navigator.vibrate?.(5);
+        }
+      };
+      highlightMoreMenuOption = highlightMenuDragTarget;
+      clearMoreMenuHighlight = () => {
+        menuOptions().forEach((option) => {
+          option.classList.remove("is-drag-selected", "is-drag-near");
+        });
+      };
+
+      moreMenu.addEventListener("pointerdown", (event) => {
+        if (
+          !this.isPhoneLayout() ||
+          (event.pointerType === "mouse" && event.button !== 0)
+        ) {
+          return;
+        }
+        const option = event.target.closest(".mobile-more-menu-option");
+        if (!option) return;
+        menuDragPointerId = event.pointerId;
+        menuDragStartX = event.clientX;
+        menuDragStartY = event.clientY;
+        menuDragActive = false;
+        menuDragLastVibrated = null;
+        clearTimeout(menuDragTimer);
+        menuDragTimer = setTimeout(() => {
+          if (menuDragPointerId !== event.pointerId) return;
+          menuDragActive = true;
+          moreMenu.classList.add("is-dragging");
+          highlightMenuDragTarget(option);
+        }, 220);
+      });
+
+      window.addEventListener(
+        "pointermove",
+        (event) => {
+          if (event.pointerId !== menuDragPointerId) return;
+          const distance =
+            Math.abs(event.clientX - menuDragStartX) +
+            Math.abs(event.clientY - menuDragStartY);
+          if (!menuDragActive && distance > 7) {
+            menuDragActive = true;
+            moreMenu.classList.add("is-dragging");
+            clearTimeout(menuDragTimer);
+          }
+          if (!menuDragActive) return;
+          event.preventDefault();
+          const target = nearestMenuOption(event.clientX, event.clientY);
+          if (target) highlightMenuDragTarget(target);
+        },
+        { passive: false },
+      );
+
+      window.addEventListener("pointerup", (event) => {
+        if (event.pointerId !== menuDragPointerId) return;
+        clearTimeout(menuDragTimer);
+        const wasActive = menuDragActive;
+        const selected = wasActive
+          ? moreMenuOptionAtPoint(event.clientX, event.clientY)
+          : null;
+        menuDragPointerId = null;
+        menuDragActive = false;
+        clearMenuDragStyles();
+        if (!wasActive) return;
+
+        event.preventDefault();
+        moreMenu.dataset.suppressClick = "true";
+        setTimeout(() => {
+          delete moreMenu.dataset.suppressClick;
+        }, 0);
+        if (selected) this.navigateFromMobileMore(selected.dataset.targetTab);
+      });
+
+      window.addEventListener("pointercancel", (event) => {
+        if (event.pointerId !== menuDragPointerId) return;
+        clearTimeout(menuDragTimer);
+        menuDragPointerId = null;
+        menuDragActive = false;
+        clearMenuDragStyles();
+      });
+
+      moreMenu.addEventListener(
+        "click",
+        (event) => {
+          if (moreMenu.dataset.suppressClick !== "true") return;
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        },
+        true,
+      );
+    }
+
+    if (moreTrigger) {
+      window.addEventListener(
+        "pointermove",
+        (event) => {
+          if (event.pointerId !== morePressPointerId) return;
+
+          if (!moreLongPressFired) {
+            if (
+              Math.abs(event.clientX - morePressStartX) > 10 ||
+              Math.abs(event.clientY - morePressStartY) > 10
+            ) {
+              clearTimeout(moreLongPressTimer);
+              morePressPointerId = null;
+              moreTrigger.classList.remove("is-long-pressing");
+            }
+            return;
+          }
+
+          event.preventDefault();
+          moreMenu?.classList.add("is-dragging");
+          const option = moreMenuOptionAtPoint(event.clientX, event.clientY);
+          if (option) highlightMoreMenuOption?.(option);
+          else clearMoreMenuHighlight?.();
+        },
+        { passive: false },
+      );
+
+      window.addEventListener("pointerup", (event) => {
+        if (event.pointerId !== morePressPointerId) return;
+
+        const didLongPress = moreLongPressFired;
+        const selectedOption = didLongPress
+          ? moreMenuOptionAtPoint(event.clientX, event.clientY)
+          : null;
+        clearTimeout(moreLongPressTimer);
+        morePressPointerId = null;
+        moreLongPressFired = false;
+        moreTrigger.classList.remove("is-long-pressing");
+        moreMenu?.classList.remove("is-dragging");
+        clearMoreMenuHighlight?.();
+
+        if (!didLongPress) return;
+
+        event.preventDefault();
+        if (selectedOption) selectedOption.click();
+        suppressMoreGestureClick = true;
+        clearTimeout(suppressMoreGestureClickTimer);
+        suppressMoreGestureClickTimer = setTimeout(() => {
+          suppressMoreGestureClick = false;
+        }, 0);
+
+        if (!selectedOption) this.openMobileMoreMenu();
+      });
+
+      window.addEventListener("pointercancel", (event) => {
+        if (event.pointerId !== morePressPointerId) return;
+        clearTimeout(moreLongPressTimer);
+        morePressPointerId = null;
+        moreLongPressFired = false;
+        moreTrigger.classList.remove("is-long-pressing");
+        moreMenu?.classList.remove("is-dragging");
+        clearMoreMenuHighlight?.();
+      });
+
+      document.addEventListener(
+        "click",
+        (event) => {
+          if (!suppressMoreGestureClick) return;
+          suppressMoreGestureClick = false;
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        },
+        true,
+      );
+    }
 
     const refreshButtonData = () => {
       navRect = nav.getBoundingClientRect();

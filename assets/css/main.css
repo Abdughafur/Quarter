@@ -1,35 +1,35 @@
-/* main.css - Чоряк v4.5.4B (Beta)
+/* main.css - Чоряк v4.5.4B2 (Beta)
  Copyright (c) 2026 Abdughafur. All rights reserved.
 */
 @import url("./core/reset.css");
-@import url("./core/variables.css?v=4.5.4B");
-@import url("./themes/light.css?v=4.5.4B");
-@import url("./themes/dark.css?v=4.5.4B");
+@import url("./core/variables.css?v=4.5.4B2");
+@import url("./themes/light.css?v=4.5.4B2");
+@import url("./themes/dark.css?v=4.5.4B2");
 @import url("./themes/glass.css");
 @import url("./core/base.css");
 @import url("./core/typography.css");
 @import url("./core/animations.css");
 @import url("./layout/grid.css");
-@import url("./layout/container.css");
+@import url("./layout/container.css?v=4.5.4B2");
 @import url("./layout/header.css");
 @import url("./layout/footer.css");
-@import url("./layout/navigation.css?v=4.5.4B");
+@import url("./layout/navigation.css?v=4.5.4B2");
 @import url("./components/buttons.css");
-@import url("./components/cards.css?v=4.5.4B");
+@import url("./components/cards.css?v=4.5.4B2");
 @import url("./components/inputs.css");
 @import url("./components/switches.css");
-@import url("./components/modal.css?v=4.5.4B");
+@import url("./components/modal.css?v=4.5.4B2");
 @import url("./components/toast.css");
-@import url("./components/charts.css?v=4.5.4B");
+@import url("./components/charts.css?v=4.5.4B2");
 @import url("./components/keypad.css");
-@import url("./components/loader.css?v=4.5.4B");
+@import url("./components/loader.css?v=4.5.4B2");
 @import url("./components/badges.css");
-@import url("./pages/home.css?v=4.5.4B");
-@import url("./pages/calendar.css?v=4.5.4B");
-@import url("./pages/lessons.css?v=4.5.4B");
-@import url("./pages/percent.css?v=4.5.4B");
-@import url("./pages/ai.css?v=4.5.4B");
-@import url("./pages/settings.css?v=4.5.4B");
+@import url("./pages/home.css?v=4.5.4B2");
+@import url("./pages/calendar.css?v=4.5.4B2");
+@import url("./pages/lessons.css?v=4.5.4B2");
+@import url("./pages/percent.css?v=4.5.4B2");
+@import url("./pages/ai.css?v=4.5.4B2");
+@import url("./pages/settings.css?v=4.5.4B2");
 @import url("./pages/login.css");
 @import url("./pages/landing.css");
 @import url("./utilities/spacing.css");
@@ -66,21 +66,6 @@
 
   body[data-active-tab="tab-more"] main.container {
     max-width: 1440px;
-  }
-
-  main.container > .tab.active {
-    animation: workspace-in 260ms var(--ease) both;
-  }
-}
-
-@keyframes workspace-in {
-  from {
-    opacity: 0.7;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 /* Created by Abdughafur - Believe GOD */
