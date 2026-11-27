@@ -525,7 +525,8 @@
   justify-self: stretch;
   width: auto;
   min-width: 0;
-  min-height: 40px;
+  height: 44px;
+  min-height: 44px;
   margin: 0 14px 14px;
   padding: 0 16px;
   border: 1px solid var(--primary);
@@ -533,7 +534,8 @@
   background: var(--primary) !important;
   box-shadow: 0 6px 16px rgba(2, 132, 199, 0.18);
   color: var(--brand-contrast) !important;
-  font-size: 0.84rem;
+  font-size: 0.8rem;
+  font-weight: 900;
 }
 
 #tab-home .hero > .export-action:disabled {

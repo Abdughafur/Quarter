@@ -234,6 +234,15 @@ export const navigationFeature = {
     const monthName = CALENDAR_MONTHS[month];
     monthLabel.textContent = `${monthName[0].toUpperCase()}${monthName.slice(1)}`;
     setText("calendarYearLabel", String(year));
+    setText("calendarTodayDay", String(today.getDate()));
+    const todayButton = qs("calendarTodayButton");
+    if (todayButton) {
+      todayButton.setAttribute(
+        "aria-label",
+        `Гузариш ба рӯзи ҷорӣ: ${this.formatCalendarDate(today)}`,
+      );
+      todayButton.title = this.formatCalendarDate(today);
+    }
     selectedDateLabel.textContent = this.formatCalendarDate(selected, false);
     const previousButton = qs("calendarPreviousMonth");
     const nextButton = qs("calendarNextMonth");

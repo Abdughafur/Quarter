@@ -79,12 +79,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 62px;
+  min-width: 0;
   min-height: 36px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: linear-gradient(145deg, var(--card), rgba(14, 165, 233, 0.1));
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--primary);
   font-size: 0.92rem;
   font-weight: 950;
@@ -93,7 +93,7 @@
 }
 
 .calendar-year-label:hover {
-  background: var(--soft);
+  background: transparent;
   color: var(--primary);
 }
 
@@ -125,7 +125,6 @@
   cursor: not-allowed;
 }
 
-.calendar-today-button,
 .calendar-go-to-date {
   min-height: 38px;
   padding: 0 12px;
@@ -138,8 +137,42 @@
   cursor: pointer;
 }
 
+.calendar-today-button {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 1101;
+  display: grid;
+  width: 64px;
+  height: 64px;
+  min-width: 64px;
+  min-height: 64px;
+  place-content: center;
+  gap: 1px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 18px 40px rgba(14, 43, 77, 0.22);
+  color: var(--brand-contrast);
+  text-align: center;
+  cursor: pointer;
+}
+
+.calendar-today-day {
+  font-size: 1.75rem;
+  font-weight: 950;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
 .calendar-go-to-date {
-  color: var(--primary);
+  min-height: 44px;
+  border: 1px solid var(--primary);
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--brand-contrast);
+  box-shadow: 0 8px 18px rgba(14, 165, 233, 0.16);
 }
 
 .calendar-footer-actions {
@@ -606,6 +639,15 @@
 }
 
 @media (max-width: 520px) {
+  #tab-calendar .calendar-today-button {
+    right: 18px;
+    bottom: calc(var(--nav) + 22px);
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    min-height: 56px;
+  }
+
   #tab-calendar .calendar-shell {
     padding: 16px 12px;
   }
@@ -633,9 +675,9 @@
   }
 
   .calendar-year-label {
-    min-width: 56px;
+    min-width: 0;
     min-height: 34px;
-    padding-inline: 8px;
+    padding: 0;
   }
 
   .calendar-month-list {

@@ -1,7 +1,6 @@
-#tab-lessons .lessons-shell {
+#tab-lessons {
   width: min(100%, 1080px);
   margin-inline: auto;
-  padding: 22px;
 }
 
 .lessons-page-header,
@@ -89,11 +88,22 @@
   transition: color 140ms ease, background 140ms ease, border-color 140ms ease;
 }
 
-.lessons-school-tab:hover,
-.lessons-school-tab.is-active {
+.lessons-school-tab:hover {
   color: var(--primary);
   border-color: var(--brand-border);
   background: var(--brand-soft);
+}
+
+.lessons-school-tab.is-active {
+  color: var(--brand-contrast);
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+[data-theme="light"] .lessons-school-tab.is-active {
+  color: #ffffff;
+  border-color: var(--brand);
+  background: var(--brand);
 }
 
 .lessons-school-tab:focus-visible,
@@ -346,10 +356,6 @@ body[data-theme="dark"] .lessons-field input[type="time"] {
 }
 
 @media (max-width: 640px) {
-  #tab-lessons .lessons-shell {
-    padding: 16px;
-  }
-
   .lessons-week-grid {
     grid-template-columns: minmax(0, 1fr);
   }

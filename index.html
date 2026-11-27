@@ -619,16 +619,9 @@
           ></div>
           <div class="calendar-footer-actions">
             <button
-              class="calendar-today-button"
-              type="button"
-              data-action="showCalendarToday"
-            >
-              Имрӯз
-            </button>
-            <button
+              id="calendarGoToDate"
               class="calendar-go-to-date"
               type="button"
-              data-action="openCalendarDatePicker"
               aria-controls="calendarPickerModal"
               aria-haspopup="dialog"
               aria-expanded="false"
@@ -664,32 +657,40 @@
             aria-live="polite"
           ></div>
         </div>
+        <button
+          id="calendarTodayButton"
+          class="calendar-today-button"
+          type="button"
+          data-action="showCalendarToday"
+          aria-label="Гузариш ба рӯзи ҷорӣ"
+          title="Гузариш ба рӯзи ҷорӣ"
+        >
+          <span id="calendarTodayDay" class="calendar-today-day"></span>
+        </button>
       </section>
 
       <section id="tab-lessons" class="tab" aria-labelledby="lessonsTitle">
-        <div class="card lessons-shell">
-          <div class="lessons-page-header">
-            <div>
-              <h2 id="lessonsTitle">Ҷадвали дарсҳо</h2>
-              <p>Ҷадвали ҳафтаина барои ҳар як мактаб</p>
-            </div>
+        <div class="lessons-page-header">
+          <div>
+            <h2 id="lessonsTitle">Ҷадвали дарсҳо</h2>
+            <p>Ҷадвали ҳафтаина барои ҳар як мактаб</p>
           </div>
-          <div
-            id="lessonsSchoolTabs"
-            class="lessons-school-tabs"
-            role="tablist"
-            aria-label="Интихоби мактаб"
-            aria-orientation="horizontal"
-          ></div>
-          <div
-            id="lessonsWeekGrid"
-            class="lessons-week-grid"
-            role="tabpanel"
-            tabindex="0"
-            aria-labelledby="lessonsTitle"
-            aria-live="polite"
-          ></div>
         </div>
+        <div
+          id="lessonsSchoolTabs"
+          class="lessons-school-tabs"
+          role="tablist"
+          aria-label="Интихоби мактаб"
+          aria-orientation="horizontal"
+        ></div>
+        <div
+          id="lessonsWeekGrid"
+          class="lessons-week-grid"
+          role="tabpanel"
+          tabindex="0"
+          aria-labelledby="lessonsTitle"
+          aria-live="polite"
+        ></div>
         <button
           class="btn floating-add-lesson"
           type="button"
@@ -1070,7 +1071,7 @@
               aria-label="Нусхабардории маълумот"
             >
               <button class="btn" type="button" data-action="showBackupModal">
-                Нусхаи эҳтиёти
+                Нусхаи эҳтиётӣ
               </button>
               <button
                 class="btn secondary"
