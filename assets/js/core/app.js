@@ -693,6 +693,10 @@ export const app = {
     setInputValue("modalSubjectInput", info.subject || "");
     setInputValue("modalGradeInput", info.grade || "");
 
+    qs("calendarGoToDate")?.addEventListener("click", () => {
+      this.openCalendarPicker("date", "Гузариш ба сана");
+    });
+
     ["modalPupilInput", "modalSubjectInput"].forEach((fieldId) => {
       qs(fieldId)?.addEventListener("input", (event) =>
         this.sanitizeTextInput(event),
